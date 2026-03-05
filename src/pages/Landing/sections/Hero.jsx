@@ -1,4 +1,5 @@
 import { User } from "lucide-react";
+import { Link } from "react-router-dom";
 import C from "../../../theme/colors";
 import useInView from "../../../hooks/useInView";
 import DashboardMockup from "../../../components/ui/DashboardMockup";
@@ -56,18 +57,19 @@ const Hero = () => {
             </p>
 
             <div className={`fade-up d3 ${visible ? "visible" : ""}`} style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
-              <a href="#preços" style={{
+              <Link to="/cadastro" style={{
                 background: `linear-gradient(135deg, ${C.blue}, ${C.blueLight})`,
                 color: "white", padding: "15px 32px", borderRadius: 12,
                 fontSize: 16, fontWeight: 700,
                 boxShadow: `0 8px 24px ${C.blue}33`,
                 transition: "transform 0.2s, box-shadow 0.2s",
                 display: "inline-block",
+                textDecoration: "none",
               }}
                 onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; }}
                 onMouseLeave={e => { e.currentTarget.style.transform = "none"; }}>
                 Começar grátis →
-              </a>
+              </Link>
               <a href="#funcionalidades" style={{
                 background: "white", color: C.graphite, padding: "15px 32px", borderRadius: 12,
                 fontSize: 16, fontWeight: 600, border: `1.5px solid ${C.border}`,

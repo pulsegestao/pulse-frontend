@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import C from "../../theme/colors";
 
-const links = ["Funcionalidades", "IA", "Preços", "Depoimentos"];
+const links = ["Funcionalidades", "IA", "Depoimentos", "Preços"];
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
-  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 20);
@@ -53,19 +53,20 @@ const Navbar = () => {
 
         {/* CTA */}
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <a href="#preços" style={{ fontSize: 14, fontWeight: 600, color: C.blue }}>Entrar</a>
-          <a href="#preços" style={{
+          <Link to="/cadastro" style={{ fontSize: 14, fontWeight: 600, color: C.blue, textDecoration: "none" }}>Entrar</Link>
+          <Link to="/cadastro" style={{
             background: C.blue, color: "white",
             padding: "10px 22px", borderRadius: 10,
             fontSize: 14, fontWeight: 600,
             boxShadow: `0 4px 14px ${C.blue}33`,
             transition: "transform 0.2s, box-shadow 0.2s",
             display: "block",
+            textDecoration: "none",
           }}
             onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-1px)"; e.currentTarget.style.boxShadow = `0 8px 20px ${C.blue}44`; }}
             onMouseLeave={e => { e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = `0 4px 14px ${C.blue}33`; }}>
             Teste grátis
-          </a>
+          </Link>
         </div>
       </div>
 
