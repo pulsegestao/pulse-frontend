@@ -9,45 +9,65 @@ const INITIAL = {
   negocio: "", tipoNegocio: "", temCnpj: null, cnpj: "",
 };
 
+const STEPS = [
+  { n: 1, label: "Sua conta" },
+  { n: 2, label: "Seu negócio" },
+];
+
 const StepIndicator = ({ current }) => (
-  <div style={{ display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 36 }}>
-    {[
-      { n: 1, label: "Sua conta" },
-      { n: 2, label: "Seu negócio" },
-    ].map(({ n, label }, i) => (
-      <div key={n} style={{ display: "flex", alignItems: "center" }}>
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
-          <div style={{
-            width: 34, height: 34, borderRadius: "50%",
-            background: n <= current ? C.blue : C.border,
-            color: n <= current ? "white" : C.mid,
-            display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: 13, fontWeight: 700,
-            transition: "background 0.3s",
+  <div style={{ marginBottom: 36 }}>
+    {/* Progress bar track */}
+    <div style={{ position: "relative", height: 4, background: C.border, borderRadius: 4, marginBottom: 14 }}>
+      <div style={{
+        position: "absolute", left: 0, top: 0, height: "100%",
+        width: current >= 2 ? "100%" : "50%",
+        background: `linear-gradient(90deg, ${C.blue}, ${C.blueLight})`,
+        borderRadius: 4,
+        transition: "width 0.45s cubic-bezier(0.4, 0, 0.2, 1)",
+        boxShadow: `0 0 8px ${C.blue}44`,
+      }} />
+      {/* Step dots on the bar */}
+      {STEPS.map(({ n }) => (
+        <div key={n} style={{
+          position: "absolute",
+          top: "50%",
+          left: n === 1 ? "25%" : "75%",
+          transform: "translate(-50%, -50%)",
+          width: n < current ? 14 : 10,
+          height: n < current ? 14 : 10,
+          borderRadius: "50%",
+          background: n <= current ? (n < current ? C.green : C.blue) : "white",
+          border: `2px solid ${n <= current ? (n < current ? C.green : C.blue) : C.border}`,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          transition: "all 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
+          zIndex: 1,
+          boxShadow: n <= current ? `0 0 0 3px ${n < current ? C.green : C.blue}22` : "none",
+        }}>
+          {n < current && (
+            <svg width="7" height="7" viewBox="0 0 24 24" fill="none">
+              <path d="M5 13l4 4L19 7" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          )}
+        </div>
+      ))}
+    </div>
+
+    {/* Labels row */}
+    <div style={{ display: "flex", justifyContent: "space-between" }}>
+      {STEPS.map(({ n, label }) => {
+        const active = n === current;
+        const done = n < current;
+        return (
+          <span key={n} style={{
+            fontSize: 13, fontWeight: 600,
+            color: active ? C.graphite : done ? C.green : C.mid,
+            transition: "color 0.3s",
           }}>
-            {n < current ? (
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                <path d="M5 13l4 4L19 7" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            ) : n}
-          </div>
-          <span style={{ fontSize: 11, fontWeight: 600, color: n <= current ? C.blue : C.mid, transition: "color 0.3s" }}>
             {label}
           </span>
-        </div>
-
-        {i < 1 && (
-          <div style={{
-            width: 64, height: 2,
-            background: current >= 2 ? C.blue : C.border,
-            margin: "0 10px",
-            marginBottom: 18,
-            transition: "background 0.4s",
-            borderRadius: 2,
-          }} />
-        )}
-      </div>
-    ))}
+        );
+      })}
+    </div>
   </div>
 );
 
