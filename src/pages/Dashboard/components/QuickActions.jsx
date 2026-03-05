@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import { ShoppingCart, Package, PackagePlus, BarChart2 } from "lucide-react";
 import C from "../../../theme/colors";
 
@@ -25,6 +26,7 @@ const ACTIONS = [
     color: "#7C3AED",
     bg: "#F5F3FF",
     hoverBg: "#7C3AED18",
+    href: "/estoque/entrada",
   },
   {
     label: "Ver relatórios",
@@ -36,8 +38,9 @@ const ACTIONS = [
   },
 ];
 
-const ActionCard = ({ label, description, icon: Icon, color, bg, hoverBg }) => (
+const ActionCard = ({ label, description, icon: Icon, color, bg, hoverBg, onClick }) => (
   <button
+    onClick={onClick}
     style={{
       display: "flex",
       alignItems: "center",
@@ -80,23 +83,33 @@ const ActionCard = ({ label, description, icon: Icon, color, bg, hoverBg }) => (
   </button>
 );
 
-const QuickActions = () => (
-  <div style={{
-    background: "white",
-    borderRadius: 16,
-    padding: "24px",
-    boxShadow: "0 1px 12px rgba(0,0,0,0.06)",
-    border: `1px solid ${C.border}`,
-  }}>
-    <div style={{ marginBottom: 20 }}>
-      <p style={{ fontSize: 13, fontWeight: 600, color: C.mid, margin: "0 0 4px" }}>Navegação rápida</p>
-      <p style={{ fontSize: 18, fontWeight: 800, color: C.graphite, margin: 0 }}>Ações rápidas</p>
-    </div>
+const QuickActions = () => {
+  const navigate = useNavigate();
 
-    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-      {ACTIONS.map(a => <ActionCard key={a.label} {...a} />)}
+  return (
+    <div style={{
+      background: "white",
+      borderRadius: 16,
+      padding: "24px",
+      boxShadow: "0 1px 12px rgba(0,0,0,0.06)",
+      border: `1px solid ${C.border}`,
+    }}>
+      <div style={{ marginBottom: 20 }}>
+        <p style={{ fontSize: 13, fontWeight: 600, color: C.mid, margin: "0 0 4px" }}>Navegação rápida</p>
+        <p style={{ fontSize: 18, fontWeight: 800, color: C.graphite, margin: 0 }}>Ações rápidas</p>
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+        {ACTIONS.map(a => (
+          <ActionCard
+            key={a.label}
+            {...a}
+            onClick={a.href ? () => navigate(a.href) : undefined}
+          />
+        ))}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 export default QuickActions;
