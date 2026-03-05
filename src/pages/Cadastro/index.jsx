@@ -185,7 +185,7 @@ const CadastroPage = () => {
 
       <p style={{ marginTop: 20, fontSize: 13, color: C.mid }}>
         Já tem conta?{" "}
-        <Link to="/" style={{ color: C.blue, fontWeight: 600, textDecoration: "none" }}>
+        <Link to="/login" style={{ color: C.blue, fontWeight: 600, textDecoration: "none" }}>
           Entrar
         </Link>
       </p>
