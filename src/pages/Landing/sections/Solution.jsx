@@ -1,11 +1,12 @@
+import { Package, Receipt, Bell, Sparkles } from "lucide-react";
 import C from "../../../theme/colors";
 import useInView from "../../../hooks/useInView";
 
 const steps = [
-  { n: "01", title: "Cadastre seus produtos", desc: "Rápido e simples. Importe por planilha ou cadastre um por um.", badge: "📦 Estoque atualizado" },
-  { n: "02", title: "Registre suas vendas no PDV", desc: "Toque e venda. Integrado ao estoque em tempo real.", badge: "🧾 Venda registrada" },
-  { n: "03", title: "Receba alertas automáticos", desc: "Produto baixo? O Pulse avisa antes de acabar.", badge: "🔔 Alerta enviado" },
-  { n: "04", title: "A IA analisa e sugere", desc: "Sugestões de compra baseadas no seu histórico de vendas.", badge: "✨ Sugestão gerada" },
+  { n: "01", title: "Cadastre seus produtos", desc: "Rápido e simples. Importe por planilha ou cadastre um por um.", badgeIcon: <Package size={14} strokeWidth={2} />, badgeText: "Estoque atualizado" },
+  { n: "02", title: "Registre suas vendas no PDV", desc: "Toque e venda. Integrado ao estoque em tempo real.", badgeIcon: <Receipt size={14} strokeWidth={2} />, badgeText: "Venda registrada" },
+  { n: "03", title: "Receba alertas automáticos", desc: "Produto baixo? O Pulse avisa antes de acabar.", badgeIcon: <Bell size={14} strokeWidth={2} />, badgeText: "Alerta enviado" },
+  { n: "04", title: "A IA analisa e sugere", desc: "Sugestões de compra baseadas no seu histórico de vendas.", badgeIcon: <Sparkles size={14} strokeWidth={2} />, badgeText: "Sugestão gerada" },
 ];
 
 const Solution = () => {
@@ -49,10 +50,11 @@ const Solution = () => {
               </div>
               <div style={{
                 flex: 1, height: 56, background: C.gray, borderRadius: 12, maxWidth: 400,
-                display: "flex", alignItems: "center", justifyContent: "center",
+                display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
                 color: C.mid, fontSize: 13, border: `1px solid ${C.border}`,
               }}>
-                {s.badge}
+                {s.badgeIcon}
+                {s.badgeText}
               </div>
             </div>
           ))}

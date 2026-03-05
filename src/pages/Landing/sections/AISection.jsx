@@ -1,11 +1,12 @@
+import { TrendingUp, AlertTriangle, Lightbulb, RefreshCw } from "lucide-react";
 import C from "../../../theme/colors";
 import useInView from "../../../hooks/useInView";
 
 const insights = [
-  { emoji: "📈", text: "Refrigerante 2L: aumento de 42% nas vendas nesta semana. Reabasteça antes do fim de semana." },
-  { emoji: "⚠️", text: "Arroz 5kg está a 2 dias de esgotar com o ritmo atual de vendas." },
-  { emoji: "💡", text: "Biscoito Recheado vende 3x mais às sextas. Considere promoção no início da semana." },
-  { emoji: "🔁", text: "Cerveja Long Neck tem ciclo de reposição de 8 dias. Próximo pedido: em 3 dias." },
+  { icon: <TrendingUp size={22} color={C.green} strokeWidth={2} />, bg: C.greenPale, text: "Refrigerante 2L: aumento de 42% nas vendas nesta semana. Reabasteça antes do fim de semana." },
+  { icon: <AlertTriangle size={22} color="#D97706" strokeWidth={2} />, bg: "#FFFBEB", text: "Arroz 5kg está a 2 dias de esgotar com o ritmo atual de vendas." },
+  { icon: <Lightbulb size={22} color={C.blue} strokeWidth={2} />, bg: C.bluePale, text: "Biscoito Recheado vende 3x mais às sextas. Considere promoção no início da semana." },
+  { icon: <RefreshCw size={22} color="#7C3AED" strokeWidth={2} />, bg: "#F5F3FF", text: "Cerveja Long Neck tem ciclo de reposição de 8 dias. Próximo pedido: em 3 dias." },
 ];
 
 const checkItems = [
@@ -37,7 +38,9 @@ const AISection = () => {
               {insights.map((ins, i) => (
                 <div key={i} className={`fade-up d${i + 1} ${visible ? "visible" : ""}`}
                   style={{ background: "white", border: `1px solid ${C.border}`, borderRadius: 16, padding: "18px 20px", display: "flex", gap: 16, alignItems: "flex-start", boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
-                  <span style={{ fontSize: 24, flexShrink: 0 }}>{ins.emoji}</span>
+                  <div style={{ width: 38, height: 38, borderRadius: 10, background: ins.bg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    {ins.icon}
+                  </div>
                   <p style={{ fontSize: 14, color: C.graphite, lineHeight: 1.6, fontWeight: 500 }}>{ins.text}</p>
                 </div>
               ))}

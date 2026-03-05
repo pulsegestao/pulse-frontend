@@ -1,13 +1,14 @@
+import { PackageX, FileX, BarChart2, Banknote, Clock, TrendingDown } from "lucide-react";
 import C from "../../../theme/colors";
 import useInView from "../../../hooks/useInView";
 
 const pains = [
-  { emoji: "😰", title: "Produto em falta na hora errada", desc: "Cliente pede, você não tem. Venda perdida, cliente insatisfeito." },
-  { emoji: "📒", title: "Caderno e planilha não bastam", desc: "Anotar tudo na mão é lento, impreciso e impossível de acompanhar." },
-  { emoji: "🤷", title: "Sem saber o que está vendendo", desc: "Você não sabe quais produtos giram e quais ficam parados na prateleira." },
-  { emoji: "💸", title: "Dinheiro parado em estoque errado", desc: "Compra muito do que não vende e deixa de comprar o que esgota rápido." },
-  { emoji: "⏰", title: "Tempo desperdiçado em tarefas manuais", desc: "Fazer inventário, calcular, conferir. Isso consome horas que você não tem." },
-  { emoji: "📉", title: "Falta de controle nas vendas do dia", desc: "Não tem um caixa organizado. Fica difícil saber se o dia foi bom ou ruim." },
+  { icon: <PackageX size={28} color="#FCA5A5" strokeWidth={1.5} />, title: "Produto em falta na hora errada", desc: "Cliente pede, você não tem. Venda perdida, cliente insatisfeito." },
+  { icon: <FileX size={28} color="#FCA5A5" strokeWidth={1.5} />, title: "Caderno e planilha não bastam", desc: "Anotar tudo na mão é lento, impreciso e impossível de acompanhar." },
+  { icon: <BarChart2 size={28} color="#FCA5A5" strokeWidth={1.5} />, title: "Sem saber o que está vendendo", desc: "Você não sabe quais produtos giram e quais ficam parados na prateleira." },
+  { icon: <Banknote size={28} color="#FCA5A5" strokeWidth={1.5} />, title: "Dinheiro parado em estoque errado", desc: "Compra muito do que não vende e deixa de comprar o que esgota rápido." },
+  { icon: <Clock size={28} color="#FCA5A5" strokeWidth={1.5} />, title: "Tempo desperdiçado em tarefas manuais", desc: "Fazer inventário, calcular, conferir. Isso consome horas que você não tem." },
+  { icon: <TrendingDown size={28} color="#FCA5A5" strokeWidth={1.5} />, title: "Falta de controle nas vendas do dia", desc: "Não tem um caixa organizado. Fica difícil saber se o dia foi bom ou ruim." },
 ];
 
 const Problem = () => {
@@ -35,7 +36,7 @@ const Problem = () => {
               style={{ background: "#FFFFFF08", border: "1px solid #FFFFFF12", borderRadius: 16, padding: 28, transition: "background 0.2s, border-color 0.2s", cursor: "default" }}
               onMouseEnter={e => { e.currentTarget.style.background = "#FFFFFF12"; e.currentTarget.style.borderColor = "#FFFFFF25"; }}
               onMouseLeave={e => { e.currentTarget.style.background = "#FFFFFF08"; e.currentTarget.style.borderColor = "#FFFFFF12"; }}>
-              <div style={{ fontSize: 32, marginBottom: 14 }}>{p.emoji}</div>
+              <div style={{ marginBottom: 14, display: "flex" }}>{p.icon}</div>
               <h3 style={{ color: "white", fontSize: 16, fontWeight: 700, marginBottom: 8 }}>{p.title}</h3>
               <p style={{ color: "#9CA3AF", fontSize: 14, lineHeight: 1.65 }}>{p.desc}</p>
             </div>

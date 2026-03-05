@@ -1,9 +1,16 @@
+import { MessageCircle, MessageSquare, Mail, Lock, Globe, Heart } from "lucide-react";
 import C from "../../theme/colors";
 
 const footerColumns = [
   { title: "Produto", links: ["Funcionalidades", "Planos e Preços", "IA do Pulse", "Roadmap", "Novidades"] },
   { title: "Suporte", links: ["Central de Ajuda", "Tutoriais em Vídeo", "WhatsApp", "Status do Sistema"] },
   { title: "Empresa", links: ["Sobre nós", "Blog", "Parceiros", "Termos de Uso", "Privacidade"] },
+];
+
+const contacts = [
+  { icon: <MessageCircle size={13} strokeWidth={2} />, label: "WhatsApp" },
+  { icon: <MessageSquare size={13} strokeWidth={2} />, label: "Chat" },
+  { icon: <Mail size={13} strokeWidth={2} />, label: "E-mail" },
 ];
 
 const Footer = () => (
@@ -23,9 +30,12 @@ const Footer = () => (
           <p style={{ color: "#9CA3AF", fontSize: 14, lineHeight: 1.7, maxWidth: 220 }}>
             Estoque inteligente para pequenos negócios brasileiros.
           </p>
-          <div style={{ display: "flex", gap: 12, marginTop: 20 }}>
-            {["📱 WhatsApp", "💬 Chat", "📧 E-mail"].map(c => (
-              <div key={c} style={{ background: "rgba(255,255,255,0.07)", borderRadius: 8, padding: "6px 12px", fontSize: 12, color: "#9CA3AF", cursor: "pointer" }}>{c}</div>
+          <div style={{ display: "flex", gap: 8, marginTop: 20, flexWrap: "wrap" }}>
+            {contacts.map(c => (
+              <div key={c.label} style={{ background: "rgba(255,255,255,0.07)", borderRadius: 8, padding: "6px 12px", fontSize: 12, color: "#9CA3AF", cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}>
+                {c.icon}
+                {c.label}
+              </div>
             ))}
           </div>
         </div>
@@ -46,12 +56,16 @@ const Footer = () => (
       </div>
 
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 16 }}>
-        <p style={{ color: "#6B7280", fontSize: 13 }}>
-          © 2026 Pulse Gestão. Feito com ❤️ para o pequeno negócio brasileiro.
+        <p style={{ color: "#6B7280", fontSize: 13, display: "flex", alignItems: "center", gap: 6 }}>
+          © 2026 Pulse Gestão. Feito com <Heart size={13} color="#EF4444" fill="#EF4444" /> para o pequeno negócio brasileiro.
         </p>
         <div style={{ display: "flex", gap: 8 }}>
-          <div style={{ background: "rgba(255,255,255,0.06)", borderRadius: 8, padding: "6px 14px", fontSize: 12, color: "#9CA3AF" }}>🔒 SSL Seguro</div>
-          <div style={{ background: "rgba(255,255,255,0.06)", borderRadius: 8, padding: "6px 14px", fontSize: 12, color: "#9CA3AF" }}>🇧🇷 Dados no Brasil</div>
+          <div style={{ background: "rgba(255,255,255,0.06)", borderRadius: 8, padding: "6px 14px", fontSize: 12, color: "#9CA3AF", display: "flex", alignItems: "center", gap: 6 }}>
+            <Lock size={12} strokeWidth={2} /> SSL Seguro
+          </div>
+          <div style={{ background: "rgba(255,255,255,0.06)", borderRadius: 8, padding: "6px 14px", fontSize: 12, color: "#9CA3AF", display: "flex", alignItems: "center", gap: 6 }}>
+            <Globe size={12} strokeWidth={2} /> Dados no Brasil
+          </div>
         </div>
       </div>
     </div>

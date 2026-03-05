@@ -1,3 +1,4 @@
+import { User } from "lucide-react";
 import C from "../../../theme/colors";
 import useInView from "../../../hooks/useInView";
 import DashboardMockup from "../../../components/ui/DashboardMockup";
@@ -81,13 +82,15 @@ const Hero = () => {
             {/* Social proof */}
             <div className={`fade-up d4 ${visible ? "visible" : ""}`} style={{ display: "flex", alignItems: "center", gap: 20, marginTop: 40 }}>
               <div style={{ display: "flex" }}>
-                {["🧑‍💼", "👩‍🦱", "👨‍🍳", "👩‍💼", "🧑‍🏪"].map((e, i) => (
+                {[C.blue, C.green, "#7C3AED", "#DB2777", "#D97706"].map((color, i) => (
                   <div key={i} style={{
                     width: 34, height: 34, borderRadius: "50%",
-                    background: [C.blue, C.green, "#7C3AED", "#DB2777", "#D97706"][i],
+                    background: color,
                     border: "2px solid white", marginLeft: i > 0 ? -10 : 0,
-                    display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16,
-                  }}>{e}</div>
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                  }}>
+                    <User size={16} color="white" strokeWidth={2} />
+                  </div>
                 ))}
               </div>
               <div>
