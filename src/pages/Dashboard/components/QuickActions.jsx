@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { ShoppingCart, Package, PackagePlus, BarChart2 } from "lucide-react";
 import C from "../../../theme/colors";
-
+//a
 const ACTIONS = [
   {
     label: "Registrar venda",
