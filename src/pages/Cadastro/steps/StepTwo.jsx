@@ -50,7 +50,7 @@ const TIPOS = [
   "Outro",
 ];
 
-const StepTwo = ({ data, onChange, onBack, onFinish }) => {
+const StepTwo = ({ data, onChange, onBack, onFinish, loading = false, apiError = "" }) => {
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
 
@@ -193,9 +193,16 @@ const StepTwo = ({ data, onChange, onBack, onFinish }) => {
         </div>
       )}
 
+      {apiError && (
+        <p style={{ fontSize: 13, color: "#EF4444", marginBottom: 12, textAlign: "center" }}>
+          {apiError}
+        </p>
+      )}
+
       <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
         <button
           onClick={onBack}
+          disabled={loading}
           style={{
             flex: 1,
             padding: "14px",
@@ -205,44 +212,66 @@ const StepTwo = ({ data, onChange, onBack, onFinish }) => {
             borderRadius: 12,
             fontSize: 15,
             fontWeight: 600,
-            cursor: "pointer",
+            cursor: loading ? "not-allowed" : "pointer",
             fontFamily: "inherit",
             transition: "border-color 0.15s",
+            opacity: loading ? 0.6 : 1,
           }}
-          onMouseEnter={(e) => (e.currentTarget.style.borderColor = C.blue)}
-          onMouseLeave={(e) => (e.currentTarget.style.borderColor = C.border)}
+          onMouseEnter={(e) => { if (!loading) e.currentTarget.style.borderColor = C.blue; }}
+          onMouseLeave={(e) => { if (!loading) e.currentTarget.style.borderColor = C.border; }}
         >
           ← Voltar
         </button>
 
         <button
           onClick={handleSubmit}
+          disabled={loading}
           style={{
             flex: 2,
             padding: "14px",
-            background: `linear-gradient(135deg, ${C.green}, ${C.greenLight})`,
+            background: loading ? C.mid : `linear-gradient(135deg, ${C.green}, ${C.greenLight})`,
             color: "white",
             border: "none",
             borderRadius: 12,
             fontSize: 15,
             fontWeight: 700,
-            cursor: "pointer",
-            boxShadow: `0 6px 20px ${C.green}33`,
+            cursor: loading ? "not-allowed" : "pointer",
+            boxShadow: loading ? "none" : `0 6px 20px ${C.green}33`,
             fontFamily: "inherit",
             transition: "transform 0.15s, box-shadow 0.15s",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 8,
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.transform = "translateY(-1px)";
-            e.currentTarget.style.boxShadow = `0 10px 28px ${C.green}44`;
+            if (!loading) {
+              e.currentTarget.style.transform = "translateY(-1px)";
+              e.currentTarget.style.boxShadow = `0 10px 28px ${C.green}44`;
+            }
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.transform = "none";
-            e.currentTarget.style.boxShadow = `0 6px 20px ${C.green}33`;
+            if (!loading) {
+              e.currentTarget.style.transform = "none";
+              e.currentTarget.style.boxShadow = `0 6px 20px ${C.green}33`;
+            }
           }}
         >
-          Finalizar cadastro ✓
+          {loading ? (
+            <>
+              <div style={{
+                width: 16, height: 16, borderRadius: "50%",
+                border: "2px solid rgba(255,255,255,0.4)",
+                borderTopColor: "white",
+                animation: "spin 0.7s linear infinite",
+              }} />
+              Criando conta...
+            </>
+          ) : "Finalizar cadastro ✓"}
         </button>
       </div>
+
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 };

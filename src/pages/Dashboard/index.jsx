@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import C from "../../theme/colors";
 import DashboardHeader from "./components/DashboardHeader";
 import MetricsCards from "./components/MetricsCards";
@@ -5,6 +7,7 @@ import SalesChart from "./components/SalesChart";
 import LowStockTable from "./components/LowStockTable";
 import TopProducts from "./components/TopProducts";
 import QuickActions from "./components/QuickActions";
+import { isAuthenticated } from "../../hooks/useAuth";
 
 const getGreeting = () => {
   const h = new Date().getHours();
@@ -20,7 +23,14 @@ const formatDate = () => {
   return d.charAt(0).toUpperCase() + d.slice(1);
 };
 
-const DashboardPage = () => (
+const DashboardPage = () => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!isAuthenticated()) navigate("/", { replace: true });
+  }, []);
+
+  return (
   <div style={{ minHeight: "100vh", background: "#F8F9FB" }}>
     <DashboardHeader />
 
@@ -78,6 +88,7 @@ const DashboardPage = () => (
       }
     `}</style>
   </div>
-);
+  );
+};
 
 export default DashboardPage;

@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import C from "../../theme/colors";
 import StepOne from "./steps/StepOne";
 import StepTwo from "./steps/StepTwo";
+import { registerUser } from "../../services/api";
 
 const INITIAL = {
   nome: "", email: "", senha: "", confirmarSenha: "", cpf: "",
@@ -16,7 +17,6 @@ const STEPS = [
 
 const StepIndicator = ({ current }) => (
   <div style={{ marginBottom: 36 }}>
-    {/* Progress bar track */}
     <div style={{ position: "relative", height: 4, background: C.border, borderRadius: 4, marginBottom: 14 }}>
       <div style={{
         position: "absolute", left: 0, top: 0, height: "100%",
@@ -26,7 +26,6 @@ const StepIndicator = ({ current }) => (
         transition: "width 0.45s cubic-bezier(0.4, 0, 0.2, 1)",
         boxShadow: `0 0 8px ${C.blue}44`,
       }} />
-      {/* Step dots on the bar */}
       {STEPS.map(({ n }) => (
         <div key={n} style={{
           position: "absolute",
@@ -52,7 +51,6 @@ const StepIndicator = ({ current }) => (
       ))}
     </div>
 
-    {/* Labels row */}
     <div style={{ display: "flex", justifyContent: "space-between" }}>
       {STEPS.map(({ n, label }) => {
         const active = n === current;
@@ -71,16 +69,62 @@ const StepIndicator = ({ current }) => (
   </div>
 );
 
+const EmailSentState = ({ email }) => (
+  <div style={{ textAlign: "center", padding: "16px 0 8px" }}>
+    <div style={{
+      width: 64, height: 64, borderRadius: "50%",
+      background: C.bluePale,
+      display: "flex", alignItems: "center", justifyContent: "center",
+      margin: "0 auto 20px",
+    }}>
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+        <path d="M3 8l9 6 9-6M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+          stroke={C.blue} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    </div>
+    <h2 style={{ fontSize: 22, fontWeight: 800, color: C.graphite, marginBottom: 8 }}>
+      Verifique seu email
+    </h2>
+    <p style={{ fontSize: 14, color: C.mid, lineHeight: 1.6, marginBottom: 4 }}>
+      Enviamos um link de ativação para
+    </p>
+    <p style={{ fontSize: 15, fontWeight: 700, color: C.graphite, marginBottom: 16 }}>
+      {email}
+    </p>
+    <p style={{ fontSize: 13, color: C.mid, lineHeight: 1.6 }}>
+      Clique no botão do email para ativar sua conta e acessar o dashboard.
+      Verifique também a pasta de spam.
+    </p>
+  </div>
+);
+
 const CadastroPage = () => {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState(INITIAL);
-  const [done, setDone] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [apiError, setApiError] = useState("");
 
   const update = (fields) => setFormData((prev) => ({ ...prev, ...fields }));
 
-  const handleFinish = () => {
-    console.log("Dados do cadastro:", formData);
-    setDone(true);
+  const handleFinish = async () => {
+    setLoading(true);
+    setApiError("");
+    try {
+      await registerUser(
+        formData.nome,
+        formData.email,
+        formData.senha,
+        formData.negocio,
+        formData.tipoNegocio,
+        formData.temCnpj === "sim" ? formData.cnpj : "",
+      );
+      setEmailSent(true);
+    } catch (err) {
+      setApiError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -93,7 +137,6 @@ const CadastroPage = () => {
       justifyContent: "center",
       padding: "40px 16px",
     }}>
-      {/* Logo */}
       <Link to="/" style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 36, textDecoration: "none" }}>
         <div style={{
           width: 38, height: 38, borderRadius: 11,
@@ -110,7 +153,6 @@ const CadastroPage = () => {
         </span>
       </Link>
 
-      {/* Card */}
       <div style={{
         background: "white",
         borderRadius: 22,
@@ -119,14 +161,23 @@ const CadastroPage = () => {
         width: "100%",
         maxWidth: 460,
       }}>
-        {done ? (
-          <SuccessState />
+        {emailSent ? (
+          <EmailSentState email={formData.email} />
         ) : (
           <>
             <StepIndicator current={step} />
             <div key={step} style={{ animation: "fadeSlideIn 0.25s ease" }}>
               {step === 1 && <StepOne data={formData} onChange={update} onNext={() => setStep(2)} />}
-              {step === 2 && <StepTwo data={formData} onChange={update} onBack={() => setStep(1)} onFinish={handleFinish} />}
+              {step === 2 && (
+                <StepTwo
+                  data={formData}
+                  onChange={update}
+                  onBack={() => setStep(1)}
+                  onFinish={handleFinish}
+                  loading={loading}
+                  apiError={apiError}
+                />
+              )}
             </div>
           </>
         )}
@@ -151,27 +202,5 @@ const CadastroPage = () => {
     </div>
   );
 };
-
-const SuccessState = () => (
-  <div style={{ textAlign: "center", padding: "16px 0 8px" }}>
-    <div style={{
-      width: 64, height: 64, borderRadius: "50%",
-      background: C.greenPale,
-      display: "flex", alignItems: "center", justifyContent: "center",
-      margin: "0 auto 20px",
-    }}>
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-        <path d="M5 13l4 4L19 7" stroke={C.green} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    </div>
-    <h2 style={{ fontSize: 22, fontWeight: 800, color: C.graphite, marginBottom: 8 }}>
-      Cadastro realizado!
-    </h2>
-    <p style={{ fontSize: 14, color: C.mid, lineHeight: 1.6 }}>
-      Seus dados foram registrados com sucesso.<br />
-      Em breve você receberá mais informações por email.
-    </p>
-  </div>
-);
 
 export default CadastroPage;
