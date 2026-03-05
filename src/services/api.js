@@ -30,3 +30,54 @@ export function loginUser(email, password) {
     body: JSON.stringify({ email, password }),
   });
 }
+
+function getToken() {
+  return localStorage.getItem("pulse_token");
+}
+
+function authRequest(path, options = {}) {
+  return request(path, {
+    ...options,
+    headers: {
+      ...options.headers,
+      Authorization: `Bearer ${getToken()}`,
+    },
+  });
+}
+
+export function getProducts() {
+  return authRequest("/api/v1/products/");
+}
+
+export function updateStock(productId, input) {
+  return authRequest(`/api/v1/products/${productId}/stock`, {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+export function previewNFe(formData) {
+  return fetch(`${BASE_URL}/api/v1/inventory/nfe/preview`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${getToken()}` },
+    body: formData,
+  }).then(async (res) => {
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.error || "Erro desconhecido");
+    return json.data;
+  });
+}
+
+export function confirmNFe(items) {
+  return authRequest("/api/v1/inventory/nfe/confirm", {
+    method: "POST",
+    body: JSON.stringify(items),
+  });
+}
+
+export function createProduct(input) {
+  return authRequest("/api/v1/products/", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
