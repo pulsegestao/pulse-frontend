@@ -37,6 +37,7 @@ const GerirEstoquePage = () => {
           </div>
 
           <button
+            onClick={() => navigate("/estoque/entrada")}
             style={{
               display: "flex", alignItems: "center", gap: 8,
               padding: "11px 20px",
@@ -57,8 +58,9 @@ const GerirEstoquePage = () => {
             }}
           >
             <Plus size={16} strokeWidth={2.5} />
-            Novo produto
+            Adicionar ao estoque
           </button>
+
         </div>
 
         {/* Metric cards */}
