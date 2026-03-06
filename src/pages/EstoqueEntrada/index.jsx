@@ -200,7 +200,7 @@ export default function EstoqueEntradaPage() {
 
             {/* ── Tab Manual ── */}
             {tab === TAB_MANUAL && (
-              <ManualEntry products={products} />
+              <ManualEntry products={products} onProductCreated={(p) => setProducts(prev => [...prev, p])} />
             )}
           </div>
         </div>

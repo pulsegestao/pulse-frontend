@@ -26,7 +26,7 @@ const Label = ({ children, required }) => (
 
 const EMPTY_NEW = { name: "", unit: "UN", sale_price: "", cost_price: "", barcode: "", quantity: "", min_quantity: "" };
 
-const ManualEntry = ({ products }) => {
+const ManualEntry = ({ products, onProductCreated }) => {
   const [search, setSearch] = useState("");
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -119,6 +119,7 @@ const ManualEntry = ({ products }) => {
         unit_cost: parseFloat(newProduct.cost_price) || 0,
         isNew: true,
       }]);
+      if (onProductCreated) onProductCreated(created);
       cancelCreate();
     } catch (err) {
       setCreateApiError(err.message || "Erro ao criar produto.");
