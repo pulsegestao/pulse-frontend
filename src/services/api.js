@@ -82,6 +82,13 @@ export function createProduct(input) {
   });
 }
 
+export function updateProduct(productId, input) {
+  return authRequest(`/api/v1/products/${productId}`, {
+    method: "PUT",
+    body: JSON.stringify(input),
+  });
+}
+
 export function checkEmail(email) {
   return request(`/api/v1/auth/check-email?email=${encodeURIComponent(email)}`);
 }

@@ -2,15 +2,17 @@ import { Pencil, PlusCircle, SlidersHorizontal } from "lucide-react";
 import C from "../../../theme/colors";
 
 const getStatus = (produto) => {
-  const { estoque_atual, estoque_minimo } = produto;
-  if (estoque_atual <= estoque_minimo / 2) return { label: "Crítico", color: "#DC2626", bg: "#FEF2F2", dot: "#DC2626" };
-  if (estoque_atual <= estoque_minimo)     return { label: "Baixo",   color: "#D97706", bg: "#FFFBEB", dot: "#D97706" };
-  return                                          { label: "OK",      color: C.green,   bg: C.greenPale, dot: C.green };
+  const qty = produto.inventory?.quantity ?? 0;
+  const min = produto.inventory?.min_quantity ?? 0;
+  if (qty <= min / 2) return { label: "Crítico", color: "#DC2626", bg: "#FEF2F2", dot: "#DC2626" };
+  if (qty <= min)     return { label: "Baixo",   color: "#D97706", bg: "#FFFBEB", dot: "#D97706" };
+  return                     { label: "OK",      color: C.green,   bg: C.greenPale, dot: C.green };
 };
 
-const ActionBtn = ({ icon: Icon, title, color }) => (
+const ActionBtn = ({ icon: Icon, title, color, onClick }) => (
   <button
     title={title}
+    onClick={onClick}
     style={{
       width: 32, height: 32, borderRadius: 8,
       border: `1px solid ${C.border}`,
@@ -48,7 +50,7 @@ const TH = ({ children, align = "left" }) => (
   </th>
 );
 
-const ProductTable = ({ products }) => {
+const ProductTable = ({ products, onAction }) => {
   if (products.length === 0) {
     return (
       <div style={{
@@ -93,26 +95,26 @@ const ProductTable = ({ products }) => {
                   onMouseLeave={e => e.currentTarget.style.background = "transparent"}
                 >
                   <td style={{ padding: "14px 16px" }}>
-                    <p style={{ fontSize: 14, fontWeight: 700, color: C.graphite, margin: 0 }}>{p.nome}</p>
+                    <p style={{ fontSize: 14, fontWeight: 700, color: C.graphite, margin: 0 }}>{p.name}</p>
                   </td>
                   <td style={{ padding: "14px 16px" }}>
                     <span style={{
                       fontSize: 12, fontWeight: 600, color: C.mid,
                       background: C.gray, borderRadius: 6, padding: "3px 9px",
                     }}>
-                      {p.categoria}
+                      {p.category_id ?? "Sem categoria"}
                     </span>
                   </td>
                   <td style={{ padding: "14px 16px", textAlign: "center" }}>
                     <p style={{
                       fontSize: 15, fontWeight: 800, margin: 0,
-                      color: p.estoque_atual <= p.estoque_minimo ? status.color : C.graphite,
+                      color: p.inventory?.quantity <= p.inventory?.min_quantity ? status.color : C.graphite,
                     }}>
-                      {p.estoque_atual}
+                      {p.inventory?.quantity ?? 0}
                     </p>
                   </td>
                   <td style={{ padding: "14px 16px", textAlign: "center" }}>
-                    <p style={{ fontSize: 14, color: C.mid, margin: 0 }}>{p.estoque_minimo}</p>
+                    <p style={{ fontSize: 14, color: C.mid, margin: 0 }}>{p.inventory?.min_quantity ?? 0}</p>
                   </td>
                   <td style={{ padding: "14px 16px", textAlign: "center" }}>
                     <span style={{
@@ -129,14 +131,14 @@ const ProductTable = ({ products }) => {
                   </td>
                   <td style={{ padding: "14px 16px", textAlign: "right" }}>
                     <p style={{ fontSize: 14, fontWeight: 700, color: C.graphite, margin: 0 }}>
-                      {p.preco_venda.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+                      {(p.sale_price ?? 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
                     </p>
                   </td>
                   <td style={{ padding: "14px 16px" }}>
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
-                      <ActionBtn icon={Pencil} title="Editar produto" color={C.blue} />
-                      <ActionBtn icon={PlusCircle} title="Adicionar estoque" color={C.green} />
-                      <ActionBtn icon={SlidersHorizontal} title="Ajustar estoque" color="#7C3AED" />
+                      <ActionBtn icon={Pencil} title="Editar produto" color={C.blue} onClick={() => onAction("edit", p)} />
+                      <ActionBtn icon={PlusCircle} title="Adicionar estoque" color={C.green} onClick={() => onAction("add", p)} />
+                      <ActionBtn icon={SlidersHorizontal} title="Ajustar estoque" color="#7C3AED" onClick={() => onAction("adjust", p)} />
                     </div>
                   </td>
                 </tr>

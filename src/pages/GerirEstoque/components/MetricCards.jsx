@@ -36,9 +36,9 @@ const Card = ({ label, value, sub, icon: Icon, color, bg }) => (
 
 const MetricCards = ({ products }) => {
   const total = products.length;
-  const lowStock = products.filter(p => p.estoque_atual <= p.estoque_minimo && p.estoque_atual > p.estoque_minimo / 2).length;
-  const critical = products.filter(p => p.estoque_atual <= p.estoque_minimo / 2).length;
-  const totalValue = products.reduce((acc, p) => acc + p.preco_venda * p.estoque_atual, 0);
+  const lowStock = products.filter(p => p.inventory?.quantity <= p.inventory?.min_quantity && p.inventory?.quantity > p.inventory?.min_quantity / 2).length;
+  const critical = products.filter(p => p.inventory?.quantity <= p.inventory?.min_quantity / 2).length;
+  const totalValue = products.reduce((acc, p) => acc + (p.sale_price || 0) * (p.inventory?.quantity || 0), 0);
 
   return (
     <div style={{
