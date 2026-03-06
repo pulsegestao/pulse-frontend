@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { ShoppingCart, Package, PackagePlus, BarChart2 } from "lucide-react";
+import { ShoppingCart, Sparkles, PackagePlus, Package } from "lucide-react";
 import C from "../../../theme/colors";
 
 const ACTIONS = [
@@ -12,9 +12,9 @@ const ACTIONS = [
     hoverBg: `${C.blue}18`,
   },
   {
-    label: "Adicionar produto",
-    description: "Novo cadastro",
-    icon: Package,
+    label: "Pulse Insights",
+    description: "Análises com IA",
+    icon: Sparkles,
     color: C.green,
     bg: C.greenPale,
     hoverBg: `${C.green}18`,
@@ -29,9 +29,9 @@ const ACTIONS = [
     href: "/estoque/entrada",
   },
   {
-    label: "Ver relatórios",
-    description: "Análises e dados",
-    icon: BarChart2,
+    label: "Gerir produtos",
+    description: "Catálogo e estoque",
+    icon: Package,
     color: "#D97706",
     bg: "#FFFBEB",
     hoverBg: "#D9770618",

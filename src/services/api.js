@@ -81,3 +81,7 @@ export function createProduct(input) {
     body: JSON.stringify(input),
   });
 }
+
+export function checkEmail(email) {
+  return request(`/api/v1/auth/check-email?email=${encodeURIComponent(email)}`);
+}
