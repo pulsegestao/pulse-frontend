@@ -6,6 +6,7 @@ import LoginPage from "./pages/Login";
 import DashboardPage from "./pages/Dashboard";
 import VerifyEmailPage from "./pages/VerifyEmail";
 import EstoqueEntradaPage from "./pages/EstoqueEntrada";
+import GerirEstoquePage from "./pages/GerirEstoque";
 
 export default function App() {
   return (
@@ -18,6 +19,7 @@ export default function App() {
         <Route path="/verify-email" element={<VerifyEmailPage />} />
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/estoque/entrada" element={<EstoqueEntradaPage />} />
+        <Route path="/gerir-estoque" element={<GerirEstoquePage />} />
       </Routes>
     </BrowserRouter>
   );
