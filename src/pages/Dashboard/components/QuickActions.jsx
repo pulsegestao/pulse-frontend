@@ -35,6 +35,7 @@ const ACTIONS = [
     color: "#D97706",
     bg: "#FFFBEB",
     hoverBg: "#D9770618",
+    href: "/gerir-estoque",
   },
 ];
 

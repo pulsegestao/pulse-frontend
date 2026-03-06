@@ -1,4 +1,5 @@
 import { ArrowRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import C from "../../../theme/colors";
 
 const PRODUCTS = [
@@ -32,7 +33,10 @@ const Badge = ({ status }) => {
   );
 };
 
-const LowStockTable = () => (
+const LowStockTable = () => {
+  const navigate = useNavigate();
+
+  return (
   <div style={{
     background: "white",
     borderRadius: 16,
@@ -91,7 +95,9 @@ const LowStockTable = () => (
     ))}
 
     {/* Footer button */}
-    <button style={{
+    <button
+        onClick={() => navigate("/gerir-estoque")}
+        style={{
       marginTop: 16,
       display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
       padding: "10px",
@@ -112,6 +118,7 @@ const LowStockTable = () => (
       <ArrowRight size={14} strokeWidth={2.5} />
     </button>
   </div>
-);
+  );
+};
 
 export default LowStockTable;
