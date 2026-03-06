@@ -89,6 +89,10 @@ export function updateProduct(productId, input) {
   });
 }
 
+export function getLowStock() {
+  return authRequest("/api/v1/products/low-stock");
+}
+
 export function checkEmail(email) {
   return request(`/api/v1/auth/check-email?email=${encodeURIComponent(email)}`);
 }
