@@ -1,47 +1,7 @@
+import { useEffect, useState } from "react";
 import { DollarSign, ShoppingCart, Package, AlertTriangle } from "lucide-react";
 import C from "../../../theme/colors";
-
-const METRICS = [
-  {
-    label: "Faturamento hoje",
-    value: "R$ 3.840",
-    delta: "+12% vs ontem",
-    positive: true,
-    icon: DollarSign,
-    iconColor: C.blue,
-    iconBg: C.bluePale,
-  },
-  {
-    label: "Vendas hoje",
-    value: "24",
-    unit: "vendas",
-    delta: "+3 vs ontem",
-    positive: true,
-    icon: ShoppingCart,
-    iconColor: C.green,
-    iconBg: C.greenPale,
-  },
-  {
-    label: "Itens em estoque",
-    value: "1.247",
-    unit: "produtos",
-    delta: "cadastrados",
-    positive: null,
-    icon: Package,
-    iconColor: "#7C3AED",
-    iconBg: "#F5F3FF",
-  },
-  {
-    label: "Estoque baixo",
-    value: "8",
-    unit: "produtos",
-    delta: "precisam de reposição",
-    positive: false,
-    icon: AlertTriangle,
-    iconColor: "#D97706",
-    iconBg: "#FFFBEB",
-  },
-];
+import { getLowStock } from "../../../services/api";
 
 const deltaColor = (positive) => {
   if (positive === true) return C.green;
@@ -92,14 +52,66 @@ const MetricCard = ({ label, value, unit, delta, positive, icon: Icon, iconColor
   </div>
 );
 
-const MetricsCards = () => (
-  <div style={{
-    display: "grid",
-    gridTemplateColumns: "repeat(4, 1fr)",
-    gap: 16,
-  }} className="metrics-grid">
-    {METRICS.map(m => <MetricCard key={m.label} {...m} />)}
-  </div>
-);
+const MetricsCards = () => {
+  const [lowStockCount, setLowStockCount] = useState("–");
+
+  useEffect(() => {
+    getLowStock()
+      .then(data => setLowStockCount((data || []).length))
+      .catch(() => setLowStockCount("–"));
+  }, []);
+
+  const metrics = [
+    {
+      label: "Faturamento hoje",
+      value: "R$ 3.840",
+      delta: "+12% vs ontem",
+      positive: true,
+      icon: DollarSign,
+      iconColor: C.blue,
+      iconBg: C.bluePale,
+    },
+    {
+      label: "Vendas hoje",
+      value: "24",
+      unit: "vendas",
+      delta: "+3 vs ontem",
+      positive: true,
+      icon: ShoppingCart,
+      iconColor: C.green,
+      iconBg: C.greenPale,
+    },
+    {
+      label: "Itens em estoque",
+      value: "1.247",
+      unit: "produtos",
+      delta: "cadastrados",
+      positive: null,
+      icon: Package,
+      iconColor: "#7C3AED",
+      iconBg: "#F5F3FF",
+    },
+    {
+      label: "Atenção ao estoque",
+      value: String(lowStockCount),
+      unit: lowStockCount === 1 ? "produto" : "produtos",
+      delta: "baixo + crítico combinados",
+      positive: lowStockCount === 0 ? null : false,
+      icon: AlertTriangle,
+      iconColor: "#D97706",
+      iconBg: "#FFFBEB",
+    },
+  ];
+
+  return (
+    <div style={{
+      display: "grid",
+      gridTemplateColumns: "repeat(4, 1fr)",
+      gap: 16,
+    }} className="metrics-grid">
+      {metrics.map(m => <MetricCard key={m.label} {...m} />)}
+    </div>
+  );
+};
 
 export default MetricsCards;
