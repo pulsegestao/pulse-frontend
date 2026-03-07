@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Bell, ChevronDown, LogOut, Settings } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import C from "../../../theme/colors";
@@ -33,12 +34,15 @@ const DashboardHeader = () => {
   const companyName = profile?.companyName || "Minha Empresa";
   const role = profile?.role || "employee";
 
+  const [confirmingLogout, setConfirmingLogout] = useState(false);
+
   const handleLogout = () => {
     removeToken();
     navigate("/login", { replace: true });
   };
 
   return (
+    <>
     <header style={{
       position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
       background: "white",
@@ -125,7 +129,7 @@ const DashboardHeader = () => {
         </button>
 
         <button
-          onClick={handleLogout}
+          onClick={() => setConfirmingLogout(true)}
           title="Sair"
           style={{
             width: 36, height: 36, borderRadius: 9,
@@ -140,6 +144,70 @@ const DashboardHeader = () => {
         </button>
       </div>
     </header>
+
+      {confirmingLogout && (
+        <div
+          onClick={() => setConfirmingLogout(false)}
+          style={{
+            position: "fixed", inset: 0, zIndex: 200,
+            background: "rgba(0,0,0,0.35)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+          }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{
+              background: "white", borderRadius: 16, padding: "28px 28px 24px",
+              width: 320, boxShadow: "0 8px 40px rgba(0,0,0,0.14)",
+              border: `1px solid ${C.border}`,
+            }}
+          >
+            <div style={{
+              width: 44, height: 44, borderRadius: 12,
+              background: "#FEE2E2",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              marginBottom: 16,
+            }}>
+              <LogOut size={20} color="#EF4444" strokeWidth={2} />
+            </div>
+            <p style={{ fontSize: 16, fontWeight: 800, color: C.graphite, margin: "0 0 6px" }}>
+              Sair da conta?
+            </p>
+            <p style={{ fontSize: 13, color: C.mid, margin: "0 0 24px", lineHeight: 1.5 }}>
+              Você será redirecionado para a tela de login.
+            </p>
+            <div style={{ display: "flex", gap: 10 }}>
+              <button
+                onClick={() => setConfirmingLogout(false)}
+                style={{
+                  flex: 1, padding: "10px", borderRadius: 10,
+                  border: `1.5px solid ${C.border}`, background: "transparent",
+                  fontSize: 13, fontWeight: 700, color: C.graphite,
+                  cursor: "pointer", fontFamily: "inherit",
+                }}
+                onMouseEnter={e => e.currentTarget.style.background = C.gray}
+                onMouseLeave={e => e.currentTarget.style.background = "transparent"}
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleLogout}
+                style={{
+                  flex: 1, padding: "10px", borderRadius: 10,
+                  border: "none", background: "#EF4444",
+                  fontSize: 13, fontWeight: 700, color: "white",
+                  cursor: "pointer", fontFamily: "inherit",
+                }}
+                onMouseEnter={e => e.currentTarget.style.opacity = "0.9"}
+                onMouseLeave={e => e.currentTarget.style.opacity = "1"}
+              >
+                Sair
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 
