@@ -13,18 +13,16 @@ const WEEK_DATA = [
   { label: "Dom", value: 2400 },
 ];
 
-// SVG canvas
 const VW = 560, VH = 180;
 const PAD = { l: 48, r: 16, t: 16, b: 36 };
-const IW = VW - PAD.l - PAD.r; // 496
-const IH = VH - PAD.t - PAD.b; // 128
+const IW = VW - PAD.l - PAD.r;
+const IH = VH - PAD.t - PAD.b;
 const MAX = 5000;
-const BOTTOM = PAD.t + IH; // 144
+const BOTTOM = PAD.t + IH;
 
 const cx = (i, len) => PAD.l + (i / (len - 1)) * IW;
 const cy = (v) => PAD.t + IH - (v / MAX) * IH;
 
-// Smooth curve via cardinal spline
 const smoothPath = (pts) => {
   if (pts.length < 2) return "";
   let d = `M ${pts[0][0].toFixed(2)} ${pts[0][1].toFixed(2)}`;
@@ -53,7 +51,6 @@ const buildPaths = (data) => {
 
 const GRID_VALUES = [5000, 4000, 3000, 2000, 1000];
 
-const fmt = (v) => `R$ ${(v / 1000).toFixed(0)}K`;
 const total = WEEK_DATA.reduce((s, d) => s + d.value, 0);
 
 const SalesChart = () => {
@@ -64,7 +61,7 @@ const SalesChart = () => {
 
   return (
     <div style={{
-      background: "white",
+      background: C.surface,
       borderRadius: 16,
       padding: "24px",
       boxShadow: "0 1px 12px rgba(0,0,0,0.06)",
@@ -98,7 +95,7 @@ const SalesChart = () => {
                 padding: "5px 14px",
                 borderRadius: 8,
                 border: "none",
-                background: period === p ? "white" : "transparent",
+                background: period === p ? C.surface : "transparent",
                 color: period === p ? C.graphite : C.mid,
                 fontSize: 12,
                 fontWeight: period === p ? 700 : 500,
@@ -166,22 +163,18 @@ const SalesChart = () => {
               onMouseLeave={() => setHovered(null)}
               style={{ cursor: "default" }}
             >
-              {/* Hover vertical line */}
               {isHovered && (
                 <line x1={x} y1={PAD.t} x2={x} y2={BOTTOM} stroke={C.blue} strokeWidth="1" strokeDasharray="3 3" opacity="0.5" />
               )}
 
-              {/* Dot */}
               <circle
                 cx={x} cy={y}
                 r={isHovered ? 6 : 4}
-                fill={isHovered ? C.blue : "white"}
                 stroke={C.blue}
                 strokeWidth="2.5"
-                style={{ transition: "r 0.15s" }}
+                style={{ fill: isHovered ? C.blue : C.surface, transition: "r 0.15s" }}
               />
 
-              {/* Tooltip */}
               {isHovered && (
                 <g>
                   <rect
@@ -200,7 +193,6 @@ const SalesChart = () => {
                 </g>
               )}
 
-              {/* X label */}
               <text
                 x={x} y={VH - 6}
                 textAnchor="middle"

@@ -5,8 +5,8 @@ import C from "../../../theme/colors";
 import { getLowStock } from "../../../services/api";
 
 const getUrgency = (ratio) => {
-  if (ratio <= 0.5) return { label: "Crítico", color: "#DC2626", bg: "#FEE2E2" };
-  return { label: "Baixo", color: "#D97706", bg: "#FEF9C3" };
+  if (ratio <= 0.5) return { label: "Crítico", color: "#DC2626", bg: C.redPale };
+  return { label: "Baixo", color: "#D97706", bg: C.yellowPale };
 };
 
 const Badge = ({ label, color, bg }) => (
@@ -28,7 +28,7 @@ const Badge = ({ label, color, bg }) => (
 const UrgencyBar = ({ ratio, color }) => (
   <div style={{
     width: "100%", height: 5, borderRadius: 4,
-    background: "#F3F4F6", overflow: "hidden", marginTop: 4,
+    background: C.gray, overflow: "hidden", marginTop: 4,
   }}>
     <div style={{
       width: `${Math.min(Math.round(ratio * 100), 100)}%`,
@@ -60,7 +60,7 @@ const LowStockTable = () => {
 
   return (
     <div style={{
-      background: "white",
+      background: C.surface,
       borderRadius: 16,
       padding: "24px",
       boxShadow: "0 1px 12px rgba(0,0,0,0.06)",

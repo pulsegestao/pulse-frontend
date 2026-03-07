@@ -13,7 +13,7 @@ const UNITS = ["UN", "KG", "L", "CX", "PCT", "DZ", "M", "G"];
 const inputSt = {
   width: "100%", padding: "9px 12px", borderRadius: 8,
   border: `1.5px solid ${C.border}`, fontSize: 13,
-  color: C.graphite, background: "white",
+  color: C.graphite, background: C.surface,
   boxSizing: "border-box", outline: "none", fontFamily: "inherit",
 };
 
@@ -28,7 +28,7 @@ const ModalOverlay = ({ onClose, children }) => (
     }}
   >
     <div onClick={e => e.stopPropagation()} style={{
-      background: "white", borderRadius: 16,
+      background: C.surface, borderRadius: 16,
       width: "100%", maxWidth: 480,
       boxShadow: "0 20px 60px rgba(0,0,0,0.15)",
     }}>
@@ -124,7 +124,7 @@ const EditModal = ({ product, onClose, onSuccess }) => {
         </div>
         {error && <p style={{ fontSize: 12, color: "#EF4444", marginBottom: 12 }}>{error}</p>}
         <div style={{ display: "flex", gap: 10 }}>
-          <button onClick={onClose} style={{ flex: 1, padding: "10px", borderRadius: 8, border: `1.5px solid ${C.border}`, background: "white", fontSize: 13, fontWeight: 600, color: C.graphite, cursor: "pointer", fontFamily: "inherit" }}>
+          <button onClick={onClose} style={{ flex: 1, padding: "10px", borderRadius: 8, border: `1.5px solid ${C.border}`, background: "transparent", fontSize: 13, fontWeight: 600, color: C.graphite, cursor: "pointer", fontFamily: "inherit" }}>
             Cancelar
           </button>
           <button onClick={handleSubmit} disabled={saving} style={{ flex: 2, padding: "10px", borderRadius: 8, border: "none", background: saving ? C.border : `linear-gradient(135deg, ${C.blue}, ${C.blueLight})`, color: saving ? C.mid : "white", fontSize: 13, fontWeight: 700, cursor: saving ? "not-allowed" : "pointer", fontFamily: "inherit" }}>
@@ -176,7 +176,7 @@ const AddStockModal = ({ product, onClose, onSuccess }) => {
         </div>
         {error && <p style={{ fontSize: 12, color: "#EF4444", marginBottom: 12 }}>{error}</p>}
         <div style={{ display: "flex", gap: 10 }}>
-          <button onClick={onClose} style={{ flex: 1, padding: "10px", borderRadius: 8, border: `1.5px solid ${C.border}`, background: "white", fontSize: 13, fontWeight: 600, color: C.graphite, cursor: "pointer", fontFamily: "inherit" }}>
+          <button onClick={onClose} style={{ flex: 1, padding: "10px", borderRadius: 8, border: `1.5px solid ${C.border}`, background: "transparent", fontSize: 13, fontWeight: 600, color: C.graphite, cursor: "pointer", fontFamily: "inherit" }}>
             Cancelar
           </button>
           <button onClick={handleSubmit} disabled={saving} style={{ flex: 2, padding: "10px", borderRadius: 8, border: "none", background: saving ? C.border : C.green, color: saving ? C.mid : "white", fontSize: 13, fontWeight: 700, cursor: saving ? "not-allowed" : "pointer", fontFamily: "inherit" }}>
@@ -230,7 +230,7 @@ const AdjustStockModal = ({ product, onClose, onSuccess }) => {
         </div>
         {error && <p style={{ fontSize: 12, color: "#EF4444", marginBottom: 12 }}>{error}</p>}
         <div style={{ display: "flex", gap: 10 }}>
-          <button onClick={onClose} style={{ flex: 1, padding: "10px", borderRadius: 8, border: `1.5px solid ${C.border}`, background: "white", fontSize: 13, fontWeight: 600, color: C.graphite, cursor: "pointer", fontFamily: "inherit" }}>
+          <button onClick={onClose} style={{ flex: 1, padding: "10px", borderRadius: 8, border: `1.5px solid ${C.border}`, background: "transparent", fontSize: 13, fontWeight: 600, color: C.graphite, cursor: "pointer", fontFamily: "inherit" }}>
             Cancelar
           </button>
           <button onClick={handleSubmit} disabled={saving} style={{ flex: 2, padding: "10px", borderRadius: 8, border: "none", background: saving ? C.border : "#7C3AED", color: saving ? C.mid : "white", fontSize: 13, fontWeight: 700, cursor: saving ? "not-allowed" : "pointer", fontFamily: "inherit" }}>
@@ -272,7 +272,7 @@ const GerirEstoquePage = () => {
   );
 
   return (
-    <div style={{ minHeight: "100vh", background: "#F8F9FB" }}>
+    <div style={{ minHeight: "100vh", background: C.pageBg }}>
       <DashboardHeader />
 
       <main style={{ maxWidth: 1280, margin: "0 auto", padding: "80px 24px 48px" }}>
@@ -318,7 +318,7 @@ const GerirEstoquePage = () => {
 
         {/* Search bar */}
         <div style={{
-          background: "white", borderRadius: 14,
+          background: C.surface, borderRadius: 14,
           border: `1px solid ${C.border}`,
           boxShadow: "0 1px 8px rgba(0,0,0,0.05)",
           padding: "16px 20px", marginBottom: 16,

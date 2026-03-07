@@ -4,8 +4,8 @@ import C from "../../../theme/colors";
 const getStatus = (produto) => {
   const qty = produto.inventory?.quantity ?? 0;
   const min = produto.inventory?.min_quantity ?? 0;
-  if (qty <= min / 2) return { label: "Crítico", color: "#DC2626", bg: "#FEF2F2", dot: "#DC2626" };
-  if (qty <= min)     return { label: "Baixo",   color: "#D97706", bg: "#FFFBEB", dot: "#D97706" };
+  if (qty <= min / 2) return { label: "Crítico", color: "#DC2626", bg: C.redPale, dot: "#DC2626" };
+  if (qty <= min)     return { label: "Baixo",   color: "#D97706", bg: C.amberPale, dot: "#D97706" };
   return                     { label: "OK",      color: C.green,   bg: C.greenPale, dot: C.green };
 };
 
@@ -16,7 +16,7 @@ const ActionBtn = ({ icon: Icon, title, color, onClick }) => (
     style={{
       width: 32, height: 32, borderRadius: 8,
       border: `1px solid ${C.border}`,
-      background: "white", cursor: "pointer",
+      background: C.surface, cursor: "pointer",
       display: "flex", alignItems: "center", justifyContent: "center",
       transition: "all 0.15s",
     }}
@@ -25,7 +25,7 @@ const ActionBtn = ({ icon: Icon, title, color, onClick }) => (
       e.currentTarget.style.borderColor = color + "44";
     }}
     onMouseLeave={e => {
-      e.currentTarget.style.background = "white";
+      e.currentTarget.style.background = C.surface;
       e.currentTarget.style.borderColor = C.border;
     }}
   >
@@ -43,7 +43,7 @@ const TH = ({ children, align = "left" }) => (
     letterSpacing: "0.4px",
     textAlign: align,
     borderBottom: `1px solid ${C.border}`,
-    background: "#FAFAFA",
+    background: C.gray,
     whiteSpace: "nowrap",
   }}>
     {children}
@@ -54,7 +54,7 @@ const ProductTable = ({ products, onAction }) => {
   if (products.length === 0) {
     return (
       <div style={{
-        background: "white", borderRadius: 14, border: `1px solid ${C.border}`,
+        background: C.surface, borderRadius: 14, border: `1px solid ${C.border}`,
         padding: "60px 24px", textAlign: "center",
         boxShadow: "0 1px 8px rgba(0,0,0,0.05)",
       }}>
@@ -65,7 +65,7 @@ const ProductTable = ({ products, onAction }) => {
 
   return (
     <div style={{
-      background: "white",
+      background: C.surface,
       borderRadius: 14,
       border: `1px solid ${C.border}`,
       boxShadow: "0 1px 8px rgba(0,0,0,0.05)",
@@ -91,7 +91,7 @@ const ProductTable = ({ products, onAction }) => {
                 <tr
                   key={p.id}
                   style={{ borderBottom: i < products.length - 1 ? `1px solid ${C.border}` : "none" }}
-                  onMouseEnter={e => e.currentTarget.style.background = "#FAFBFC"}
+                  onMouseEnter={e => e.currentTarget.style.background = C.gray}
                   onMouseLeave={e => e.currentTarget.style.background = "transparent"}
                 >
                   <td style={{ padding: "14px 16px" }}>

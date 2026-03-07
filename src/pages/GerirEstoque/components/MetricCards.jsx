@@ -3,7 +3,7 @@ import C from "../../../theme/colors";
 
 const Card = ({ label, value, sub, icon: Icon, color, bg }) => (
   <div style={{
-    background: "white",
+    background: C.surface,
     borderRadius: 14,
     padding: "20px 22px",
     border: `1px solid ${C.border}`,
@@ -61,7 +61,7 @@ const MetricCards = ({ products }) => {
         sub="Abaixo do mínimo"
         icon={AlertTriangle}
         color="#D97706"
-        bg="#FFFBEB"
+        bg={C.amberPale}
       />
       <Card
         label="Críticos"
@@ -69,7 +69,7 @@ const MetricCards = ({ products }) => {
         sub="Risco de ruptura"
         icon={XCircle}
         color="#DC2626"
-        bg="#FEF2F2"
+        bg={C.redPale}
       />
       <Card
         label="Valor em estoque"

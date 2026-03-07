@@ -11,16 +11,16 @@ const PRODUCTS = [
 const MAX = PRODUCTS[0].sold;
 
 const RANK_COLORS = [
-  { bg: "#FFF7ED", color: "#D97706" },
-  { bg: "#F0FDF4", color: C.green   },
-  { bg: "#EFF4FF", color: C.blue    },
-  { bg: "#F5F3FF", color: "#7C3AED" },
-  { bg: "#FDF2F8", color: "#DB2777" },
+  { bg: C.orangePale, color: "#D97706" },
+  { bg: C.greenPale,  color: C.green   },
+  { bg: C.bluePale,   color: C.blue    },
+  { bg: C.purplePale, color: "#7C3AED" },
+  { bg: C.pinkPale,   color: "#DB2777" },
 ];
 
 const TopProducts = () => (
   <div style={{
-    background: "white",
+    background: C.surface,
     borderRadius: 16,
     padding: "24px",
     boxShadow: "0 1px 12px rgba(0,0,0,0.06)",
@@ -37,7 +37,6 @@ const TopProducts = () => (
         const pct = Math.round((p.sold / MAX) * 100);
         return (
           <div key={p.name} style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            {/* Rank badge */}
             <div style={{
               width: 28, height: 28, borderRadius: 8,
               background: rank.bg,
@@ -48,7 +47,6 @@ const TopProducts = () => (
               {i + 1}
             </div>
 
-            {/* Info + bar */}
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
                 <span style={{ fontSize: 13, fontWeight: 600, color: C.graphite, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
@@ -58,7 +56,6 @@ const TopProducts = () => (
                   {p.sold} un.
                 </span>
               </div>
-              {/* Progress bar */}
               <div style={{ height: 5, background: C.border, borderRadius: 4 }}>
                 <div style={{
                   height: "100%",

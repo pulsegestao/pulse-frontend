@@ -9,7 +9,6 @@ const ACTIONS = [
     icon: ShoppingCart,
     color: C.blue,
     bg: C.bluePale,
-    hoverBg: `${C.blue}18`,
   },
   {
     label: "Pulse Insights",
@@ -17,15 +16,13 @@ const ACTIONS = [
     icon: Sparkles,
     color: C.green,
     bg: C.greenPale,
-    hoverBg: `${C.green}18`,
   },
   {
     label: "Entrada de estoque",
     description: "Registrar entrada",
     icon: PackagePlus,
     color: "#7C3AED",
-    bg: "#F5F3FF",
-    hoverBg: "#7C3AED18",
+    bg: C.purplePale,
     href: "/estoque/entrada",
   },
   {
@@ -33,13 +30,12 @@ const ACTIONS = [
     description: "Catálogo e estoque",
     icon: Package,
     color: "#D97706",
-    bg: "#FFFBEB",
-    hoverBg: "#D9770618",
+    bg: C.amberPale,
     href: "/gerir-estoque",
   },
 ];
 
-const ActionCard = ({ label, description, icon: Icon, color, bg, hoverBg, onClick }) => (
+const ActionCard = ({ label, description, icon: Icon, color, bg, onClick }) => (
   <button
     onClick={onClick}
     style={{
@@ -49,7 +45,7 @@ const ActionCard = ({ label, description, icon: Icon, color, bg, hoverBg, onClic
       padding: "16px 18px",
       borderRadius: 14,
       border: `1.5px solid ${C.border}`,
-      background: "white",
+      background: C.surface,
       cursor: "pointer",
       textAlign: "left",
       fontFamily: "inherit",
@@ -63,7 +59,7 @@ const ActionCard = ({ label, description, icon: Icon, color, bg, hoverBg, onClic
       e.currentTarget.style.boxShadow = `0 4px 16px ${color}18`;
     }}
     onMouseLeave={e => {
-      e.currentTarget.style.background = "white";
+      e.currentTarget.style.background = C.surface;
       e.currentTarget.style.borderColor = C.border;
       e.currentTarget.style.transform = "none";
       e.currentTarget.style.boxShadow = "none";
@@ -89,7 +85,7 @@ const QuickActions = () => {
 
   return (
     <div style={{
-      background: "white",
+      background: C.surface,
       borderRadius: 16,
       padding: "24px",
       boxShadow: "0 1px 12px rgba(0,0,0,0.06)",

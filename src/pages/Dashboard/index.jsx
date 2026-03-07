@@ -32,7 +32,7 @@ const DashboardPage = () => {
   }, []);
 
   return (
-  <div style={{ minHeight: "100vh", background: "#F8F9FB" }}>
+  <div style={{ minHeight: "100vh", background: C.pageBg }}>
     <DashboardHeader />
 
     <main style={{

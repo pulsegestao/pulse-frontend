@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
 import GlobalStyles from "./styles/GlobalStyles";
 import LandingPage from "./pages/Landing";
@@ -20,6 +20,24 @@ function SessionGuard({ children }) {
   return children;
 }
 
+function AuthShell({ children }) {
+  const [dark, setDark] = useState(
+    () => localStorage.getItem("pulse_theme") === "dark"
+  );
+
+  useEffect(() => {
+    const handler = (e) => setDark(e.detail);
+    window.addEventListener("pulse:theme-changed", handler);
+    return () => window.removeEventListener("pulse:theme-changed", handler);
+  }, []);
+
+  return (
+    <div data-theme={dark ? "dark" : "light"}>
+      {children}
+    </div>
+  );
+}
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -30,10 +48,10 @@ export default function App() {
           <Route path="/cadastro" element={<CadastroPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/verify-email" element={<VerifyEmailPage />} />
-          <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/estoque/entrada" element={<EstoqueEntradaPage />} />
-          <Route path="/gerir-estoque" element={<GerirEstoquePage />} />
-          <Route path="/sessao-expirada" element={<SessionExpiredPage />} />
+          <Route path="/dashboard" element={<AuthShell><DashboardPage /></AuthShell>} />
+          <Route path="/estoque/entrada" element={<AuthShell><EstoqueEntradaPage /></AuthShell>} />
+          <Route path="/gerir-estoque" element={<AuthShell><GerirEstoquePage /></AuthShell>} />
+          <Route path="/sessao-expirada" element={<AuthShell><SessionExpiredPage /></AuthShell>} />
         </Routes>
       </SessionGuard>
     </BrowserRouter>

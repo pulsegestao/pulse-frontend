@@ -99,7 +99,7 @@ const NFePreviewTable = ({ preview, products, onItemsChange }) => {
           label={`${preview.matched_count} encontrados`}
           icon={<CheckCircle size={13} color={C.green} strokeWidth={2.5} />}
         />
-        <Chip color="#EF4444" bg="#FEF2F2"
+        <Chip color="#EF4444" bg={C.redPale}
           label={`${preview.total_items - preview.matched_count} não encontrados`}
           icon={<AlertCircle size={13} color="#EF4444" strokeWidth={2.5} />}
         />
@@ -133,7 +133,7 @@ const NFePreviewTable = ({ preview, products, onItemsChange }) => {
                 <tr key={idx} style={{
                   borderBottom: `1px solid ${C.border}`,
                   opacity: isIgnored ? 0.4 : 1,
-                  background: "white",
+                  background: C.surface,
                 }}>
                   <td style={{ padding: "12px 14px", color: C.graphite, fontWeight: 600 }}>
                     {item.name}
@@ -195,7 +195,7 @@ const NFePreviewTable = ({ preview, products, onItemsChange }) => {
                             style={{
                               fontSize: 12, padding: "4px 8px", borderRadius: 6,
                               border: `1px solid ${C.border}`, color: C.graphite,
-                              background: "white", cursor: "pointer", flex: 1,
+                              background: C.surface, cursor: "pointer", flex: 1,
                             }}
                           >
                             <option value="" disabled>Vincular produto...</option>
@@ -248,7 +248,7 @@ const NFePreviewTable = ({ preview, products, onItemsChange }) => {
 const inputStyle = {
   width: "100%", padding: "5px 8px", borderRadius: 6,
   border: `1px solid ${C.border}`, fontSize: 12,
-  color: C.graphite, background: "white", boxSizing: "border-box",
+  color: C.graphite, background: C.surface, boxSizing: "border-box",
 };
 
 const Chip = ({ color, bg, label, icon }) => (

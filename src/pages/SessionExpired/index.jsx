@@ -26,14 +26,14 @@ const SessionExpiredPage = () => {
   return (
     <div style={{
       minHeight: "100vh",
-      background: "#F8F9FB",
+      background: C.pageBg,
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
       padding: "24px",
     }}>
       <div style={{
-        background: "white",
+        background: C.surface,
         borderRadius: 20,
         padding: "48px 40px",
         maxWidth: 420,
@@ -48,7 +48,7 @@ const SessionExpiredPage = () => {
       }}>
         <div style={{
           width: 64, height: 64, borderRadius: 18,
-          background: "#FEF9C3",
+          background: C.yellowPale,
           display: "flex", alignItems: "center", justifyContent: "center",
           marginBottom: 24,
         }}>

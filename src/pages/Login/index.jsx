@@ -16,7 +16,7 @@ const inputStyle = (hasError) => ({
   boxSizing: "border-box",
   fontFamily: "inherit",
   transition: "border-color 0.2s",
-  background: "white",
+  background: C.surface,
 });
 
 const labelStyle = {
@@ -108,7 +108,7 @@ export default function LoginPage() {
       </Link>
 
       <div style={{
-        background: "white",
+        background: C.surface,
         borderRadius: 22,
         boxShadow: "0 10px 48px rgba(0,0,0,0.09)",
         padding: "40px 44px",
@@ -167,7 +167,7 @@ export default function LoginPage() {
 
           {apiError && (
             <div style={{
-              background: "#FEF2F2",
+              background: C.redPale,
               border: "1px solid #FECACA",
               borderRadius: 10,
               padding: "12px 14px",

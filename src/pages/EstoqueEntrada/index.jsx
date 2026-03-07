@@ -79,7 +79,7 @@ export default function EstoqueEntradaPage() {
   };
 
   return (
-    <div style={{ minHeight: "100vh", background: "#F8F9FB" }}>
+    <div style={{ minHeight: "100vh", background: C.pageBg }}>
       <DashboardHeader />
 
       <main style={{ maxWidth: 960, margin: "0 auto", padding: "80px 24px 48px" }}>
@@ -88,7 +88,7 @@ export default function EstoqueEntradaPage() {
           <Link to="/dashboard" style={{
             display: "flex", alignItems: "center", justifyContent: "center",
             width: 36, height: 36, borderRadius: 9,
-            background: "white", border: `1px solid ${C.border}`,
+            background: C.surface, border: `1px solid ${C.border}`,
             color: C.mid, textDecoration: "none",
             transition: "all 0.15s",
           }}>
@@ -106,7 +106,7 @@ export default function EstoqueEntradaPage() {
 
         {/* Card */}
         <div style={{
-          background: "white", borderRadius: 18,
+          background: C.surface, borderRadius: 18,
           border: `1px solid ${C.border}`,
           boxShadow: "0 2px 16px rgba(0,0,0,0.04)",
           overflow: "hidden",
@@ -241,7 +241,7 @@ const SuccessState = ({ count, onReset }) => (
       </Link>
       <button onClick={onReset} style={{
         padding: "11px 24px", borderRadius: 9,
-        background: "white", color: C.graphite,
+        background: C.surface, color: C.graphite,
         border: `1.5px solid ${C.border}`,
         fontSize: 14, fontWeight: 700, cursor: "pointer",
       }}>

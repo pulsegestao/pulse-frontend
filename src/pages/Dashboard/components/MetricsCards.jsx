@@ -11,7 +11,7 @@ const deltaColor = (positive) => {
 
 const MetricCard = ({ label, value, unit, delta, positive, icon: Icon, iconColor, iconBg }) => (
   <div style={{
-    background: "white",
+    background: C.surface,
     borderRadius: 16,
     padding: "22px 24px",
     boxShadow: "0 1px 12px rgba(0,0,0,0.06)",
@@ -89,7 +89,7 @@ const MetricsCards = () => {
       positive: null,
       icon: Package,
       iconColor: "#7C3AED",
-      iconBg: "#F5F3FF",
+      iconBg: C.purplePale,
     },
     {
       label: "Atenção ao estoque",
@@ -99,7 +99,7 @@ const MetricsCards = () => {
       positive: lowStockCount === 0 ? null : false,
       icon: AlertTriangle,
       iconColor: "#D97706",
-      iconBg: "#FFFBEB",
+      iconBg: C.amberPale,
     },
   ];
 

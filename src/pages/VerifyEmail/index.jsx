@@ -103,7 +103,7 @@ const ErrorState = ({ message }) => {
     <div style={{ textAlign: "center", padding: "16px 0 8px" }}>
       <div style={{
         width: 64, height: 64, borderRadius: "50%",
-        background: "#FEF2F2",
+        background: C.redPale,
         display: "flex", alignItems: "center", justifyContent: "center",
         margin: "0 auto 20px",
       }}>
@@ -167,7 +167,7 @@ const VerifyEmailPage = () => {
   return (
     <div style={{
       minHeight: "100vh",
-      background: `linear-gradient(160deg, ${C.bluePale} 0%, ${C.gray} 60%, white 100%)`,
+      background: `linear-gradient(160deg, ${C.bluePale} 0%, ${C.gray} 60%, ${C.surface} 100%)`,
       display: "flex",
       flexDirection: "column",
       alignItems: "center",
@@ -177,7 +177,7 @@ const VerifyEmailPage = () => {
       <Logo />
 
       <div style={{
-        background: "white",
+        background: C.surface,
         borderRadius: 22,
         boxShadow: "0 10px 48px rgba(0,0,0,0.09)",
         padding: "40px 44px",

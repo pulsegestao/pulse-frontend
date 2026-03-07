@@ -11,7 +11,7 @@ const inputSt = (error) => ({
   border: `1.5px solid ${error ? "#EF4444" : C.border}`,
   fontSize: 13,
   color: C.graphite,
-  background: "white",
+  background: C.surface,
   boxSizing: "border-box",
   outline: "none",
   fontFamily: "inherit",
@@ -200,14 +200,14 @@ const ManualEntry = ({ products, onProductCreated }) => {
             style={{
               width: "100%", padding: "11px 14px 11px 40px",
               borderRadius: 10, border: `1.5px solid ${C.border}`,
-              fontSize: 14, color: C.graphite, background: "white",
+              fontSize: 14, color: C.graphite, background: C.surface,
               boxSizing: "border-box", outline: "none",
             }}
           />
           {(filtered.length > 0 || showNoResults) && (
             <div style={{
               position: "absolute", top: "100%", left: 0, right: 0, zIndex: 10,
-              background: "white", border: `1px solid ${C.border}`, borderRadius: 10,
+              background: C.surface, border: `1px solid ${C.border}`, borderRadius: 10,
               boxShadow: "0 4px 16px rgba(0,0,0,0.08)", marginTop: 4,
               maxHeight: 260, overflowY: "auto",
             }}>
@@ -373,7 +373,7 @@ const ManualEntry = ({ products, onProductCreated }) => {
               onClick={cancelCreate}
               style={{
                 flex: 1, padding: "10px", borderRadius: 8,
-                border: `1.5px solid ${C.border}`, background: "white",
+                border: `1.5px solid ${C.border}`, background: C.surface,
                 fontSize: 13, fontWeight: 600, color: C.graphite,
                 cursor: "pointer", fontFamily: "inherit",
               }}
@@ -406,7 +406,7 @@ const ManualEntry = ({ products, onProductCreated }) => {
               display: "flex", alignItems: "center", gap: 12,
               padding: "12px 16px", borderRadius: 10,
               border: `1px solid ${item.isNew ? C.green + "44" : C.border}`,
-              background: item.isNew ? C.greenPale : "white",
+              background: item.isNew ? C.greenPale : C.surface,
             }}>
               <span style={{ flex: 1, fontSize: 14, fontWeight: 600, color: C.graphite }}>
                 {item.name}
@@ -414,7 +414,7 @@ const ManualEntry = ({ products, onProductCreated }) => {
               {item.isNew ? (
                 <span style={{
                   fontSize: 11, fontWeight: 700, color: C.green,
-                  background: "white", border: `1px solid ${C.green}44`,
+                  background: C.surface, border: `1px solid ${C.green}44`,
                   borderRadius: 20, padding: "3px 10px", flexShrink: 0,
                 }}>
                   Produto criado · {item.quantity} {item.quantity === 1 ? "un." : "uns."}

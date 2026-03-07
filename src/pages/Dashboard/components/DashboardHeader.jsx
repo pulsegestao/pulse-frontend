@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { Bell, ChevronDown, LogOut, Settings } from "lucide-react";
+import { Bell, ChevronDown, LogOut, Moon, Settings, Sun } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import C from "../../../theme/colors";
 import { getProfile, removeToken } from "../../../hooks/useAuth";
+import { useTheme } from "../../../hooks/useTheme";
 
 const getInitials = (name) =>
   name.split(" ").filter(Boolean).slice(0, 2).map(w => w[0].toUpperCase()).join("");
@@ -13,13 +14,16 @@ const roleLabel = (role) => {
   return "Colaborador";
 };
 
-const IconBtn = ({ children }) => (
-  <button style={{
-    width: 36, height: 36, borderRadius: 9,
-    background: "transparent", border: "none", cursor: "pointer",
-    display: "flex", alignItems: "center", justifyContent: "center",
-    transition: "background 0.15s",
-  }}
+const IconBtn = ({ children, onClick, title }) => (
+  <button
+    onClick={onClick}
+    title={title}
+    style={{
+      width: 36, height: 36, borderRadius: 9,
+      background: "transparent", border: "none", cursor: "pointer",
+      display: "flex", alignItems: "center", justifyContent: "center",
+      transition: "background 0.15s",
+    }}
     onMouseEnter={e => e.currentTarget.style.background = C.gray}
     onMouseLeave={e => e.currentTarget.style.background = "transparent"}
   >
@@ -33,6 +37,7 @@ const DashboardHeader = () => {
   const userName = profile?.userName || "Usuário";
   const companyName = profile?.companyName || "Minha Empresa";
   const role = profile?.role || "employee";
+  const { dark, toggle } = useTheme();
 
   const [confirmingLogout, setConfirmingLogout] = useState(false);
 
@@ -45,7 +50,7 @@ const DashboardHeader = () => {
     <>
     <header style={{
       position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
-      background: "white",
+      background: C.surface,
       borderBottom: `1px solid ${C.border}`,
       boxShadow: "0 1px 10px rgba(0,0,0,0.05)",
       height: 64,
@@ -90,6 +95,13 @@ const DashboardHeader = () => {
           <Settings size={17} color={C.mid} strokeWidth={2} />
         </IconBtn>
 
+        <IconBtn onClick={toggle} title={dark ? "Modo claro" : "Modo noturno"}>
+          {dark
+            ? <Sun  size={17} color={C.mid} strokeWidth={2} />
+            : <Moon size={17} color={C.mid} strokeWidth={2} />
+          }
+        </IconBtn>
+
         <div style={{ position: "relative" }}>
           <IconBtn>
             <Bell size={17} color={C.mid} strokeWidth={2} />
@@ -97,7 +109,7 @@ const DashboardHeader = () => {
           <span style={{
             position: "absolute", top: 6, right: 6,
             width: 8, height: 8, borderRadius: "50%",
-            background: "#EF4444", border: "2px solid white",
+            background: "#EF4444", border: `2px solid ${C.surface}`,
             display: "block",
           }} />
         </div>
@@ -137,7 +149,7 @@ const DashboardHeader = () => {
             display: "flex", alignItems: "center", justifyContent: "center",
             transition: "background 0.15s",
           }}
-          onMouseEnter={e => e.currentTarget.style.background = "#FEE2E2"}
+          onMouseEnter={e => e.currentTarget.style.background = C.redPale}
           onMouseLeave={e => e.currentTarget.style.background = "transparent"}
         >
           <LogOut size={16} color="#EF4444" strokeWidth={2} />
@@ -157,14 +169,14 @@ const DashboardHeader = () => {
           <div
             onClick={e => e.stopPropagation()}
             style={{
-              background: "white", borderRadius: 16, padding: "28px 28px 24px",
+              background: C.surface, borderRadius: 16, padding: "28px 28px 24px",
               width: 320, boxShadow: "0 8px 40px rgba(0,0,0,0.14)",
               border: `1px solid ${C.border}`,
             }}
           >
             <div style={{
               width: 44, height: 44, borderRadius: 12,
-              background: "#FEE2E2",
+              background: C.redPale,
               display: "flex", alignItems: "center", justifyContent: "center",
               marginBottom: 16,
             }}>
