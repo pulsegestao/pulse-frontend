@@ -1,10 +1,37 @@
 const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
 
+function notifySessionExpired() {
+  localStorage.removeItem("pulse_token");
+  window.dispatchEvent(new Event("pulse:session-expired"));
+}
+
 async function request(path, options = {}) {
   const res = await fetch(`${BASE_URL}${path}`, {
     ...options,
     headers: { "Content-Type": "application/json", ...options.headers },
   });
+  const json = await res.json();
+  if (!res.ok) throw new Error(json.error || "Erro desconhecido");
+  return json.data;
+}
+
+function getToken() {
+  return localStorage.getItem("pulse_token");
+}
+
+async function authRequest(path, options = {}) {
+  const res = await fetch(`${BASE_URL}${path}`, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+      Authorization: `Bearer ${getToken()}`,
+    },
+  });
+  if (res.status === 401) {
+    notifySessionExpired();
+    throw new Error("Sessão expirada.");
+  }
   const json = await res.json();
   if (!res.ok) throw new Error(json.error || "Erro desconhecido");
   return json.data;
@@ -31,20 +58,6 @@ export function loginUser(email, password) {
   });
 }
 
-function getToken() {
-  return localStorage.getItem("pulse_token");
-}
-
-function authRequest(path, options = {}) {
-  return request(path, {
-    ...options,
-    headers: {
-      ...options.headers,
-      Authorization: `Bearer ${getToken()}`,
-    },
-  });
-}
-
 export function getProducts() {
   return authRequest("/api/v1/products/");
 }
@@ -56,16 +69,19 @@ export function updateStock(productId, input) {
   });
 }
 
-export function previewNFe(formData) {
-  return fetch(`${BASE_URL}/api/v1/inventory/nfe/preview`, {
+export async function previewNFe(formData) {
+  const res = await fetch(`${BASE_URL}/api/v1/inventory/nfe/preview`, {
     method: "POST",
     headers: { Authorization: `Bearer ${getToken()}` },
     body: formData,
-  }).then(async (res) => {
-    const json = await res.json();
-    if (!res.ok) throw new Error(json.error || "Erro desconhecido");
-    return json.data;
   });
+  if (res.status === 401) {
+    notifySessionExpired();
+    throw new Error("Sessão expirada.");
+  }
+  const json = await res.json();
+  if (!res.ok) throw new Error(json.error || "Erro desconhecido");
+  return json.data;
 }
 
 export function confirmNFe(items) {
