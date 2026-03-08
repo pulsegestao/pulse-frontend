@@ -91,7 +91,7 @@ const DashboardHeader = () => {
 
       {/* Right: actions */}
       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-        <IconBtn>
+        <IconBtn onClick={() => navigate("/configuracoes")} title="Configurações">
           <Settings size={17} color={C.mid} strokeWidth={2} />
         </IconBtn>
 

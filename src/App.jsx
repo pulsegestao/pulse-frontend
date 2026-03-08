@@ -9,6 +9,7 @@ import VerifyEmailPage from "./pages/VerifyEmail";
 import EstoqueEntradaPage from "./pages/EstoqueEntrada";
 import GerirEstoquePage from "./pages/GerirEstoque";
 import SessionExpiredPage from "./pages/SessionExpired";
+import ConfiguracoesPage from "./pages/Configuracoes";
 
 function SessionGuard({ children }) {
   const navigate = useNavigate();
@@ -52,6 +53,7 @@ export default function App() {
           <Route path="/estoque/entrada" element={<AuthShell><EstoqueEntradaPage /></AuthShell>} />
           <Route path="/gerir-estoque" element={<AuthShell><GerirEstoquePage /></AuthShell>} />
           <Route path="/sessao-expirada" element={<AuthShell><SessionExpiredPage /></AuthShell>} />
+          <Route path="/configuracoes" element={<AuthShell><ConfiguracoesPage /></AuthShell>} />
         </Routes>
       </SessionGuard>
     </BrowserRouter>

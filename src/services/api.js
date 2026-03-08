@@ -112,3 +112,29 @@ export function getLowStock() {
 export function checkEmail(email) {
   return request(`/api/v1/auth/check-email?email=${encodeURIComponent(email)}`);
 }
+
+export function getMe() {
+  return authRequest("/api/v1/users/me");
+}
+
+export function updateMe(input) {
+  return authRequest("/api/v1/users/me", {
+    method: "PATCH",
+    body: JSON.stringify(input),
+  });
+}
+
+export function getCompanySettings() {
+  return authRequest("/api/v1/companies/me");
+}
+
+export function updateCompanySettings(input) {
+  return authRequest("/api/v1/companies/me", {
+    method: "PATCH",
+    body: JSON.stringify(input),
+  });
+}
+
+export function getCompanyMembers() {
+  return authRequest("/api/v1/companies/me/members");
+}
