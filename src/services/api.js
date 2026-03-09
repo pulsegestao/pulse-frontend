@@ -59,6 +59,20 @@ export function loginUser(email, password, rememberMe = false) {
   });
 }
 
+export function forgotPassword(email) {
+  return request("/api/v1/auth/forgot-password", {
+    method: "POST",
+    body: JSON.stringify({ email }),
+  });
+}
+
+export function resetPassword(token, password) {
+  return request("/api/v1/auth/reset-password", {
+    method: "POST",
+    body: JSON.stringify({ token, password }),
+  });
+}
+
 export function getProducts() {
   return authRequest("/api/v1/products/");
 }

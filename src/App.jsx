@@ -4,6 +4,8 @@ import GlobalStyles from "./styles/GlobalStyles";
 import LandingPage from "./pages/Landing";
 import CadastroPage from "./pages/Cadastro";
 import LoginPage from "./pages/Login";
+import EsqueciSenhaPage from "./pages/EsqueciSenha";
+import RedefinirSenhaPage from "./pages/RedefinirSenha";
 import DashboardPage from "./pages/Dashboard";
 import VerifyEmailPage from "./pages/VerifyEmail";
 import EstoqueEntradaPage from "./pages/EstoqueEntrada";
@@ -52,6 +54,8 @@ export default function App() {
           <Route path="/cadastro" element={<CadastroPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/verify-email" element={<VerifyEmailPage />} />
+          <Route path="/esqueci-senha" element={<EsqueciSenhaPage />} />
+          <Route path="/redefinir-senha" element={<RedefinirSenhaPage />} />
           <Route path="/dashboard" element={<AuthShell><ErrorBoundary><DashboardPage /></ErrorBoundary></AuthShell>} />
           <Route path="/estoque/entrada" element={<AuthShell><ErrorBoundary><EstoqueEntradaPage /></ErrorBoundary></AuthShell>} />
           <Route path="/gerir-estoque" element={<AuthShell><ErrorBoundary><GerirEstoquePage /></ErrorBoundary></AuthShell>} />
