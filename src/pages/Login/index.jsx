@@ -44,6 +44,7 @@ export default function LoginPage() {
   const [touched, setTouched] = useState({});
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
 
   useEffect(() => {
     if (isAuthenticated()) navigate("/dashboard", { replace: true });
@@ -71,8 +72,8 @@ export default function LoginPage() {
     setLoading(true);
     setApiError("");
     try {
-      const data = await loginUser(email, password);
-      saveToken(data.token);
+      const data = await loginUser(email, password, rememberMe);
+      saveToken(data.token, rememberMe);
       navigate("/dashboard", { replace: true });
     } catch (err) {
       setApiError(err.message);
@@ -164,6 +165,24 @@ export default function LoginPage() {
               </button>
             </div>
           </Field>
+
+          <div style={{ display: "flex", alignItems: "flex-start", gap: 10, marginBottom: 18 }}>
+            <input
+              id="remember-me"
+              type="checkbox"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+              style={{ width: 16, height: 16, marginTop: 2, cursor: "pointer", accentColor: C.blue, flexShrink: 0 }}
+            />
+            <label htmlFor="remember-me" style={{ cursor: "pointer" }}>
+              <span style={{ fontSize: 13, fontWeight: 600, color: C.graphite, display: "block", lineHeight: 1.3 }}>
+                Lembrar de mim
+              </span>
+              <span style={{ fontSize: 12, color: C.mid, display: "block", marginTop: 1 }}>
+                Mantém você conectado por 30 dias neste dispositivo
+              </span>
+            </label>
+          </div>
 
           {apiError && (
             <div style={{

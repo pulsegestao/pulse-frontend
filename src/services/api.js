@@ -2,6 +2,7 @@ const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
 
 function notifySessionExpired() {
   localStorage.removeItem("pulse_token");
+  sessionStorage.removeItem("pulse_token");
   window.dispatchEvent(new Event("pulse:session-expired"));
 }
 
@@ -16,7 +17,7 @@ async function request(path, options = {}) {
 }
 
 function getToken() {
-  return localStorage.getItem("pulse_token");
+  return localStorage.getItem("pulse_token") || sessionStorage.getItem("pulse_token") || null;
 }
 
 async function authRequest(path, options = {}) {
@@ -51,10 +52,10 @@ export function verifyEmail(token) {
   return request(`/api/v1/auth/verify-email?token=${encodeURIComponent(token)}`);
 }
 
-export function loginUser(email, password) {
+export function loginUser(email, password, rememberMe = false) {
   return request("/api/v1/auth/login", {
     method: "POST",
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify({ email, password, remember_me: rememberMe }),
   });
 }
 
