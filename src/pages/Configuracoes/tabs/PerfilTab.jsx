@@ -5,6 +5,14 @@ import { getMe, updateMe } from "../../../services/api";
 import { updateProfileCache } from "../../../hooks/useAuth";
 import { friendlyError } from "../../../utils/errorMessage";
 
+const PASSWORD_RULES = [
+  { key: "length",  label: "Mínimo 6 caracteres",              test: (p) => p.length >= 6 },
+  { key: "upper",   label: "Pelo menos uma letra maiúscula",   test: (p) => /[A-Z]/.test(p) },
+  { key: "lower",   label: "Pelo menos uma letra minúscula",   test: (p) => /[a-z]/.test(p) },
+  { key: "number",  label: "Pelo menos um número",             test: (p) => /[0-9]/.test(p) },
+  { key: "special", label: "Pelo menos um caractere especial", test: (p) => /[^a-zA-Z0-9]/.test(p) },
+];
+
 const inputSt = {
   width: "100%", padding: "9px 12px", borderRadius: 8,
   border: `1.5px solid ${C.border}`, fontSize: 13,
@@ -90,6 +98,10 @@ const PerfilTab = () => {
   const handleSavePassword = async () => {
     if (!passwords.old || !passwords.new || !passwords.confirm) {
       setPwdStatus({ type: "error", message: "Preencha todos os campos." });
+      return;
+    }
+    if (!PASSWORD_RULES.every(({ test }) => test(passwords.new))) {
+      setPwdStatus({ type: "error", message: "A nova senha não atende aos requisitos mínimos." });
       return;
     }
     if (passwords.new !== passwords.confirm) {
@@ -214,6 +226,19 @@ const PerfilTab = () => {
                     {showPwd.new ? <EyeOff size={15} color={C.mid} /> : <Eye size={15} color={C.mid} />}
                   </button>
                 </div>
+                {passwords.new.length > 0 && (
+                  <div style={{ marginTop: 6, display: "flex", flexDirection: "column", gap: 3 }}>
+                    {PASSWORD_RULES.map(({ key, label, test }) => {
+                      const ok = test(passwords.new);
+                      return (
+                        <div key={key} style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                          <span style={{ width: 6, height: 6, borderRadius: "50%", background: ok ? C.green : C.border, flexShrink: 0 }} />
+                          <span style={{ fontSize: 11, color: ok ? C.green : C.mid }}>{label}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
               <div>
                 <FieldLabel>Confirmar nova senha</FieldLabel>

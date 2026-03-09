@@ -42,8 +42,9 @@ const Field = ({ label, required, error, hint, children }) => (
 );
 
 const PASSWORD_RULES = [
-  { key: "length",  label: "Mínimo 6 caracteres",             test: (p) => p.length >= 6 },
-  { key: "letter",  label: "Pelo menos uma letra",             test: (p) => /[a-zA-Z]/.test(p) },
+  { key: "length",  label: "Mínimo 6 caracteres",              test: (p) => p.length >= 6 },
+  { key: "upper",   label: "Pelo menos uma letra maiúscula",   test: (p) => /[A-Z]/.test(p) },
+  { key: "lower",   label: "Pelo menos uma letra minúscula",   test: (p) => /[a-z]/.test(p) },
   { key: "number",  label: "Pelo menos um número",             test: (p) => /[0-9]/.test(p) },
   { key: "special", label: "Pelo menos um caractere especial", test: (p) => /[^a-zA-Z0-9]/.test(p) },
 ];

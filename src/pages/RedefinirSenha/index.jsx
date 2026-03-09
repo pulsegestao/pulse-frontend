@@ -18,9 +18,13 @@ const inputStyle = (hasError) => ({
   background: C.surface,
 });
 
-function isStrongPassword(p) {
-  return p.length >= 8 && /[A-Z]/.test(p) && /[a-z]/.test(p) && /[0-9]/.test(p);
-}
+const PASSWORD_RULES = [
+  { key: "length",  label: "Mínimo 6 caracteres",              test: (p) => p.length >= 6 },
+  { key: "upper",   label: "Pelo menos uma letra maiúscula",   test: (p) => /[A-Z]/.test(p) },
+  { key: "lower",   label: "Pelo menos uma letra minúscula",   test: (p) => /[a-z]/.test(p) },
+  { key: "number",  label: "Pelo menos um número",             test: (p) => /[0-9]/.test(p) },
+  { key: "special", label: "Pelo menos um caractere especial", test: (p) => /[^a-zA-Z0-9]/.test(p) },
+];
 
 export default function RedefinirSenhaPage() {
   const navigate = useNavigate();
@@ -38,8 +42,8 @@ export default function RedefinirSenhaPage() {
 
   const validate = () => {
     const errs = {};
-    if (!isStrongPassword(password)) {
-      errs.password = "Mínimo 8 caracteres, com maiúscula, minúscula e número";
+    if (!PASSWORD_RULES.every(({ test }) => test(password))) {
+      errs.password = "A senha não atende aos requisitos";
     }
     if (password !== confirm) {
       errs.confirm = "As senhas não coincidem";
@@ -215,6 +219,25 @@ export default function RedefinirSenhaPage() {
                     {showPassword ? <EyeOff size={18} strokeWidth={2} /> : <Eye size={18} strokeWidth={2} />}
                   </button>
                 </div>
+                {password.length > 0 && (
+                  <div style={{ marginTop: 8, display: "flex", flexDirection: "column", gap: 4 }}>
+                    {PASSWORD_RULES.map(({ key, label, test }) => {
+                      const ok = test(password);
+                      return (
+                        <div key={key} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                          <span style={{
+                            width: 7, height: 7, borderRadius: "50%",
+                            background: ok ? C.green : C.border,
+                            transition: "background 0.2s", flexShrink: 0,
+                          }} />
+                          <span style={{ fontSize: 12, color: ok ? C.green : C.mid, transition: "color 0.2s" }}>
+                            {label}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
                 {errors.password && (
                   <p style={{ fontSize: 12, color: "#EF4444", marginTop: 4 }}>{errors.password}</p>
                 )}
