@@ -122,7 +122,7 @@ const ManualEntry = ({ products, onProductCreated }) => {
       if (onProductCreated) onProductCreated(created);
       cancelCreate();
     } catch (err) {
-      setCreateApiError(err.message || "Erro ao criar produto.");
+      setCreateApiError(friendlyError(err.message) || "Erro ao criar produto.");
     } finally {
       setCreating(false);
     }
@@ -149,7 +149,7 @@ const ManualEntry = ({ products, onProductCreated }) => {
       setSuccess(true);
       setItems([]);
     } catch (err) {
-      setError(err.message);
+      setError(friendlyError(err.message));
     } finally {
       setLoading(false);
     }

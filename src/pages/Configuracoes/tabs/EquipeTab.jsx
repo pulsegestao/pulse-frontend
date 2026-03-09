@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Loader2, UserPlus, AlertCircle } from "lucide-react";
 import C from "../../../theme/colors";
 import { getCompanyMembers } from "../../../services/api";
+import { friendlyError } from "../../../utils/errorMessage";
 
 const ROLE_CONFIG = {
   owner:    { label: "Proprietário", color: C.blue,   bg: C.bluePale },
@@ -17,7 +18,7 @@ const EquipeTab = ({ role }) => {
   useEffect(() => {
     getCompanyMembers()
       .then(data => setMembers(data || []))
-      .catch(e => setError(e.message || "Erro ao carregar membros."))
+      .catch(e => setError(friendlyError(e.message) || "Não foi possível carregar a equipe."))
       .finally(() => setLoading(false));
   }, []);
 

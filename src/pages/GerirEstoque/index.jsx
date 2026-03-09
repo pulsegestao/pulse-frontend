@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search, Plus, Loader2, AlertCircle, X } from "lucide-react";
+import { friendlyError } from "../../utils/errorMessage";
+import WidgetError from "../../components/WidgetError";
 import C from "../../theme/colors";
 import DashboardHeader from "../Dashboard/components/DashboardHeader";
 import MetricCards from "./components/MetricCards";
@@ -82,7 +84,7 @@ const EditModal = ({ product, onClose, onSuccess }) => {
       });
       onSuccess();
     } catch (e) {
-      setError(e.message || "Erro ao salvar.");
+      setError(friendlyError(e.message) || "Erro ao salvar.");
     } finally {
       setSaving(false);
     }
@@ -150,7 +152,7 @@ const AddStockModal = ({ product, onClose, onSuccess }) => {
       await updateStock(product.id, { type: "in", quantity: qty, reason: "Adição manual" });
       onSuccess();
     } catch (e) {
-      setError(e.message || "Erro ao adicionar estoque.");
+      setError(friendlyError(e.message) || "Erro ao adicionar estoque.");
     } finally {
       setSaving(false);
     }
@@ -202,7 +204,7 @@ const AdjustStockModal = ({ product, onClose, onSuccess }) => {
       await updateStock(product.id, { type: "adjustment", quantity: qty, reason: "Ajuste manual" });
       onSuccess();
     } catch (e) {
-      setError(e.message || "Erro ao ajustar estoque.");
+      setError(friendlyError(e.message) || "Erro ao ajustar estoque.");
     } finally {
       setSaving(false);
     }
@@ -255,7 +257,7 @@ const GerirEstoquePage = () => {
     setError("");
     getProducts()
       .then(data => setProducts(data || []))
-      .catch(err => setError(err.message || "Erro ao carregar produtos."))
+      .catch(err => setError(friendlyError(err.message) || "Não foi possível carregar os produtos."))
       .finally(() => setLoading(false));
   };
 
@@ -346,13 +348,7 @@ const GerirEstoquePage = () => {
             Carregando produtos...
           </div>
         ) : error ? (
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12, padding: "60px 0" }}>
-            <AlertCircle size={28} color="#EF4444" strokeWidth={1.5} />
-            <p style={{ fontSize: 14, color: "#EF4444", margin: 0 }}>{error}</p>
-            <button onClick={fetchProducts} style={{ fontSize: 13, fontWeight: 600, color: C.blue, background: "none", border: `1px solid ${C.blue}`, borderRadius: 8, padding: "7px 16px", cursor: "pointer" }}>
-              Tentar novamente
-            </button>
-          </div>
+          <WidgetError message={error} onRetry={fetchProducts} />
         ) : (
           <ProductTable products={filtered} onAction={(type, product) => setModal({ type, product })} />
         )}

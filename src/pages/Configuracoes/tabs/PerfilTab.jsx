@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Loader2, CheckCircle, Eye, EyeOff } from "lucide-react";
 import C from "../../../theme/colors";
 import { getMe, updateMe } from "../../../services/api";
+import { friendlyError } from "../../../utils/errorMessage";
 
 const inputSt = {
   width: "100%", padding: "9px 12px", borderRadius: 8,
@@ -78,7 +79,7 @@ const PerfilTab = () => {
       setUser(updated);
       setNameStatus({ type: "success", message: "Nome atualizado com sucesso." });
     } catch (e) {
-      setNameStatus({ type: "error", message: e.message || "Erro ao salvar." });
+      setNameStatus({ type: "error", message: friendlyError(e.message) || "Erro ao salvar." });
     } finally {
       setSavingName(false);
     }
@@ -101,7 +102,7 @@ const PerfilTab = () => {
       setPasswords({ old: "", new: "", confirm: "" });
       setShowPasswordForm(false);
     } catch (e) {
-      setPwdStatus({ type: "error", message: e.message || "Erro ao alterar senha." });
+      setPwdStatus({ type: "error", message: friendlyError(e.message) || "Erro ao alterar senha." });
     } finally {
       setSavingPwd(false);
     }

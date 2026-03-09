@@ -47,7 +47,7 @@ export default function EstoqueEntradaPage() {
       const data = await previewNFe(formData);
       setPreview(data);
     } catch (err) {
-      setPreviewError(err.message);
+      setPreviewError(friendlyError(err.message));
     } finally {
       setLoadingPreview(false);
     }
@@ -62,7 +62,7 @@ export default function EstoqueEntradaPage() {
       setConfirmedCount(data.updated);
       setConfirmed(true);
     } catch (err) {
-      setConfirmError(err.message);
+      setConfirmError(friendlyError(err.message));
     } finally {
       setLoadingConfirm(false);
     }

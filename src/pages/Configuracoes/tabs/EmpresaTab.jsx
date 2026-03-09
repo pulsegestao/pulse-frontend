@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Loader2, CheckCircle } from "lucide-react";
 import C from "../../../theme/colors";
 import { getCompanySettings, updateCompanySettings } from "../../../services/api";
+import { friendlyError } from "../../../utils/errorMessage";
 
 const COMPANY_TYPES = [
   { value: "mercado",     label: "Mercado / Supermercado" },
@@ -66,7 +67,7 @@ const EmpresaTab = ({ role }) => {
       setCompany(updated);
       setStatus({ type: "success", message: "Dados da empresa atualizados." });
     } catch (e) {
-      setStatus({ type: "error", message: e.message || "Erro ao salvar." });
+      setStatus({ type: "error", message: friendlyError(e.message) || "Erro ao salvar." });
     } finally {
       setSaving(false);
     }

@@ -3,6 +3,8 @@ import { ArrowRight, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import C from "../../../theme/colors";
 import { getLowStock } from "../../../services/api";
+import { friendlyError } from "../../../utils/errorMessage";
+import WidgetError from "../../../components/WidgetError";
 
 const getUrgency = (ratio) => {
   if (ratio <= 0.5) return { label: "Crítico", color: "#DC2626", bg: C.redPale };
@@ -45,12 +47,16 @@ const LowStockTable = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  useEffect(() => {
+  const load = () => {
+    setLoading(true);
+    setError("");
     getLowStock()
       .then(data => setProducts(data || []))
-      .catch(err => setError(err.message || "Erro ao carregar estoque."))
+      .catch(err => setError(friendlyError(err.message) || "Não foi possível carregar o estoque."))
       .finally(() => setLoading(false));
-  }, []);
+  };
+
+  useEffect(() => { load(); }, []);
 
   const sorted = [...products].sort((a, b) => {
     const ra = a.inventory?.min_quantity > 0 ? a.inventory.quantity / a.inventory.min_quantity : 0;
@@ -82,9 +88,7 @@ const LowStockTable = () => {
           <Loader2 size={22} color={C.mid} strokeWidth={2} style={{ animation: "spin 1s linear infinite" }} />
         </div>
       ) : error ? (
-        <p style={{ fontSize: 13, color: "#EF4444", textAlign: "center", padding: "24px 0", margin: 0 }}>
-          {error}
-        </p>
+        <WidgetError message={error} onRetry={load} />
       ) : sorted.length === 0 ? (
         <p style={{ fontSize: 13, color: C.mid, textAlign: "center", padding: "24px 0", margin: 0 }}>
           Estoque em dia! Nenhum produto abaixo do mínimo.

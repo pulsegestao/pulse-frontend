@@ -10,6 +10,8 @@ import EstoqueEntradaPage from "./pages/EstoqueEntrada";
 import GerirEstoquePage from "./pages/GerirEstoque";
 import SessionExpiredPage from "./pages/SessionExpired";
 import ConfiguracoesPage from "./pages/Configuracoes";
+import ErrorBoundary from "./components/ErrorBoundary";
+import ToastContainer from "./components/Toast";
 
 function SessionGuard({ children }) {
   const navigate = useNavigate();
@@ -34,6 +36,7 @@ function AuthShell({ children }) {
 
   return (
     <div data-theme={dark ? "dark" : "light"}>
+      <ToastContainer />
       {children}
     </div>
   );
@@ -49,11 +52,11 @@ export default function App() {
           <Route path="/cadastro" element={<CadastroPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/verify-email" element={<VerifyEmailPage />} />
-          <Route path="/dashboard" element={<AuthShell><DashboardPage /></AuthShell>} />
-          <Route path="/estoque/entrada" element={<AuthShell><EstoqueEntradaPage /></AuthShell>} />
-          <Route path="/gerir-estoque" element={<AuthShell><GerirEstoquePage /></AuthShell>} />
-          <Route path="/sessao-expirada" element={<AuthShell><SessionExpiredPage /></AuthShell>} />
-          <Route path="/configuracoes" element={<AuthShell><ConfiguracoesPage /></AuthShell>} />
+          <Route path="/dashboard" element={<AuthShell><ErrorBoundary><DashboardPage /></ErrorBoundary></AuthShell>} />
+          <Route path="/estoque/entrada" element={<AuthShell><ErrorBoundary><EstoqueEntradaPage /></ErrorBoundary></AuthShell>} />
+          <Route path="/gerir-estoque" element={<AuthShell><ErrorBoundary><GerirEstoquePage /></ErrorBoundary></AuthShell>} />
+          <Route path="/sessao-expirada" element={<AuthShell><ErrorBoundary><SessionExpiredPage /></ErrorBoundary></AuthShell>} />
+          <Route path="/configuracoes" element={<AuthShell><ErrorBoundary><ConfiguracoesPage /></ErrorBoundary></AuthShell>} />
         </Routes>
       </SessionGuard>
     </BrowserRouter>
