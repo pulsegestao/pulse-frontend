@@ -136,12 +136,6 @@ export default function LoginPage() {
             />
           </Field>
 
-          <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 6 }}>
-            <Link to="/esqueci-senha" style={{ fontSize: 12, color: C.blue, textDecoration: "none", fontWeight: 500 }}>
-              Esqueci minha senha
-            </Link>
-          </div>
-
           <Field label="Senha" error={touched.password && errors.password}>
             <div style={{ position: "relative" }}>
               <input
@@ -239,6 +233,11 @@ export default function LoginPage() {
           >
             {loading ? "Entrando..." : "Entrar"}
           </button>
+          <div style={{ textAlign: "center", marginTop: 14 }}>
+            <Link to="/esqueci-senha" style={{ fontSize: 13, color: C.mid, textDecoration: "none", fontWeight: 500 }}>
+              Esqueci minha senha
+            </Link>
+          </div>
         </form>
       </div>
 
