@@ -1,4 +1,5 @@
 const TOKEN_KEY = "pulse_token";
+const PROFILE_CACHE_KEY = "pulse_profile_cache";
 
 export function saveToken(token) {
   localStorage.setItem(TOKEN_KEY, token);
@@ -10,6 +11,7 @@ export function getToken() {
 
 export function removeToken() {
   localStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem(PROFILE_CACHE_KEY);
 }
 
 export function isAuthenticated() {
@@ -21,12 +23,19 @@ export function getProfile() {
   if (!token) return null;
   try {
     const payload = JSON.parse(atob(token.split(".")[1]));
+    const cache = JSON.parse(localStorage.getItem(PROFILE_CACHE_KEY) || "{}");
     return {
-      userName: payload.user_name || "",
-      companyName: payload.company_name || "",
-      role: payload.role || "",
+      userName:    cache.userName    ?? payload.user_name    ?? "",
+      companyName: cache.companyName ?? payload.company_name ?? "",
+      role:        payload.role ?? "",
     };
   } catch {
     return null;
   }
+}
+
+export function updateProfileCache(data) {
+  const current = JSON.parse(localStorage.getItem(PROFILE_CACHE_KEY) || "{}");
+  localStorage.setItem(PROFILE_CACHE_KEY, JSON.stringify({ ...current, ...data }));
+  window.dispatchEvent(new CustomEvent("pulse:profile-updated"));
 }

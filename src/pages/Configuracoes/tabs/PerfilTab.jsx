@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Loader2, CheckCircle, Eye, EyeOff } from "lucide-react";
 import C from "../../../theme/colors";
 import { getMe, updateMe } from "../../../services/api";
+import { updateProfileCache } from "../../../hooks/useAuth";
 import { friendlyError } from "../../../utils/errorMessage";
 
 const inputSt = {
@@ -77,6 +78,7 @@ const PerfilTab = () => {
     try {
       const updated = await updateMe({ name: name.trim() });
       setUser(updated);
+      updateProfileCache({ userName: updated.name });
       setNameStatus({ type: "success", message: "Nome atualizado com sucesso." });
     } catch (e) {
       setNameStatus({ type: "error", message: friendlyError(e.message) || "Erro ao salvar." });

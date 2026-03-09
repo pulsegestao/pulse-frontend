@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Loader2, CheckCircle } from "lucide-react";
 import C from "../../../theme/colors";
 import { getCompanySettings, updateCompanySettings } from "../../../services/api";
+import { updateProfileCache } from "../../../hooks/useAuth";
 import { friendlyError } from "../../../utils/errorMessage";
 
 const COMPANY_TYPES = [
@@ -65,6 +66,7 @@ const EmpresaTab = ({ role }) => {
         cnpj: form.cnpj.trim() || undefined,
       });
       setCompany(updated);
+      updateProfileCache({ companyName: updated.name });
       setStatus({ type: "success", message: "Dados da empresa atualizados." });
     } catch (e) {
       setStatus({ type: "error", message: friendlyError(e.message) || "Erro ao salvar." });

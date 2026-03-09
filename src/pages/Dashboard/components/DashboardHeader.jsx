@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Bell, ChevronDown, LogOut, Moon, Settings, Sun } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import C from "../../../theme/colors";
@@ -33,13 +33,19 @@ const IconBtn = ({ children, onClick, title }) => (
 
 const DashboardHeader = () => {
   const navigate = useNavigate();
-  const profile = getProfile();
+  const [profile, setProfile] = useState(getProfile);
   const userName = profile?.userName || "Usuário";
   const companyName = profile?.companyName || "Minha Empresa";
   const role = profile?.role || "employee";
   const { dark, toggle } = useTheme();
 
   const [confirmingLogout, setConfirmingLogout] = useState(false);
+
+  useEffect(() => {
+    const handler = () => setProfile(getProfile());
+    window.addEventListener("pulse:profile-updated", handler);
+    return () => window.removeEventListener("pulse:profile-updated", handler);
+  }, []);
 
   const handleLogout = () => {
     removeToken();
