@@ -61,7 +61,7 @@ const DashboardHeader = () => {
     }}>
       {/* Left: logo + divider + company name */}
       <div style={{ display: "flex", alignItems: "center", gap: 16, flexShrink: 0 }}>
-        <Link to="/" style={{ display: "flex", alignItems: "center", gap: 9, textDecoration: "none" }}>
+        <Link to="/dashboard" style={{ display: "flex", alignItems: "center", gap: 9, textDecoration: "none" }}>
           <div style={{
             width: 34, height: 34, borderRadius: 9,
             background: `linear-gradient(135deg, ${C.blue}, ${C.blueLight})`,
