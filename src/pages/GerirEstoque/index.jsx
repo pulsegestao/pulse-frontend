@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Search, Plus, Loader2, AlertCircle, X } from "lucide-react";
+import { useNavigate, Link } from "react-router-dom";
+import { Search, Plus, Loader2, AlertCircle, X, ArrowLeft } from "lucide-react";
 import { friendlyError } from "../../utils/errorMessage";
 import WidgetError from "../../components/WidgetError";
 import C from "../../theme/colors";
@@ -280,13 +280,27 @@ const GerirEstoquePage = () => {
       <main style={{ maxWidth: 1280, margin: "0 auto", padding: "80px 24px 48px" }}>
         {/* Page header */}
         <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: 28, paddingTop: 8, gap: 16 }}>
-          <div>
-            <p style={{ fontSize: 13, fontWeight: 600, color: C.mid, margin: "0 0 4px", textTransform: "uppercase", letterSpacing: "0.3px" }}>
-              Estoque
-            </p>
-            <h1 style={{ fontSize: 26, fontWeight: 800, color: C.graphite, margin: 0, letterSpacing: "-0.3px" }}>
-              Gerir Estoque
-            </h1>
+          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+            <Link to="/dashboard" style={{
+              display: "flex", alignItems: "center", justifyContent: "center",
+              width: 36, height: 36, borderRadius: 9, flexShrink: 0,
+              background: C.surface, border: `1px solid ${C.border}`,
+              color: C.mid, textDecoration: "none",
+              transition: "all 0.15s",
+            }}
+              onMouseEnter={e => { e.currentTarget.style.background = C.gray; e.currentTarget.style.color = C.graphite; }}
+              onMouseLeave={e => { e.currentTarget.style.background = C.surface; e.currentTarget.style.color = C.mid; }}
+            >
+              <ArrowLeft size={17} strokeWidth={2} color="currentColor" />
+            </Link>
+            <div>
+              <p style={{ fontSize: 13, fontWeight: 600, color: C.mid, margin: "0 0 4px", textTransform: "uppercase", letterSpacing: "0.3px" }}>
+                Estoque
+              </p>
+              <h1 style={{ fontSize: 26, fontWeight: 800, color: C.graphite, margin: 0, letterSpacing: "-0.3px" }}>
+                Gerir Estoque
+              </h1>
+            </div>
           </div>
 
           <button

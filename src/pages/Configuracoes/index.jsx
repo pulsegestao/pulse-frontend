@@ -1,6 +1,6 @@
 import { useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { User, Building2, Users, SlidersHorizontal, Shield } from "lucide-react";
+import { useNavigate, useSearchParams, Link } from "react-router-dom";
+import { User, Building2, Users, SlidersHorizontal, Shield, ArrowLeft } from "lucide-react";
 import C from "../../theme/colors";
 import DashboardHeader from "../Dashboard/components/DashboardHeader";
 import { getProfile, isAuthenticated } from "../../hooks/useAuth";
@@ -50,13 +50,27 @@ const ConfiguracoesPage = () => {
       <DashboardHeader />
 
       <main style={{ maxWidth: 1100, margin: "0 auto", padding: "80px 24px 48px" }}>
-        <div style={{ paddingTop: 8, marginBottom: 28 }}>
-          <p style={{ fontSize: 13, fontWeight: 600, color: C.mid, margin: "0 0 4px", textTransform: "uppercase", letterSpacing: "0.3px" }}>
-            Conta
-          </p>
-          <h1 style={{ fontSize: 26, fontWeight: 800, color: C.graphite, margin: 0, letterSpacing: "-0.3px" }}>
-            Configurações
-          </h1>
+        <div style={{ paddingTop: 8, marginBottom: 28, display: "flex", alignItems: "center", gap: 14 }}>
+          <Link to="/dashboard" style={{
+            display: "flex", alignItems: "center", justifyContent: "center",
+            width: 36, height: 36, borderRadius: 9, flexShrink: 0,
+            background: C.surface, border: `1px solid ${C.border}`,
+            color: C.mid, textDecoration: "none",
+            transition: "all 0.15s",
+          }}
+            onMouseEnter={e => { e.currentTarget.style.background = C.gray; e.currentTarget.style.color = C.graphite; }}
+            onMouseLeave={e => { e.currentTarget.style.background = C.surface; e.currentTarget.style.color = C.mid; }}
+          >
+            <ArrowLeft size={17} strokeWidth={2} color="currentColor" />
+          </Link>
+          <div>
+            <p style={{ fontSize: 13, fontWeight: 600, color: C.mid, margin: "0 0 4px", textTransform: "uppercase", letterSpacing: "0.3px" }}>
+              Conta
+            </p>
+            <h1 style={{ fontSize: 26, fontWeight: 800, color: C.graphite, margin: 0, letterSpacing: "-0.3px" }}>
+              Configurações
+            </h1>
+          </div>
         </div>
 
         <div style={{ display: "flex", gap: 24, alignItems: "flex-start" }}>
