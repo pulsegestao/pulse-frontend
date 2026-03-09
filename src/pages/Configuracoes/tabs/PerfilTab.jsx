@@ -104,6 +104,10 @@ const PerfilTab = () => {
       setPwdStatus({ type: "error", message: "A nova senha não atende aos requisitos mínimos." });
       return;
     }
+    if (passwords.old === passwords.new) {
+      setPwdStatus({ type: "error", message: "A nova senha deve ser diferente da senha atual." });
+      return;
+    }
     if (passwords.new !== passwords.confirm) {
       setPwdStatus({ type: "error", message: "As senhas não coincidem." });
       return;
