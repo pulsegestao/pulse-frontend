@@ -53,7 +53,7 @@ const Navbar = () => {
 
         {/* CTA */}
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <Link to="/cadastro" style={{ fontSize: 14, fontWeight: 600, color: C.blue, textDecoration: "none" }}>Entrar</Link>
+          <Link to="/login" style={{ fontSize: 14, fontWeight: 600, color: C.blue, textDecoration: "none" }}>Entrar</Link>
           <Link to="/cadastro" style={{
             background: C.blue, color: "white",
             padding: "10px 22px", borderRadius: 10,

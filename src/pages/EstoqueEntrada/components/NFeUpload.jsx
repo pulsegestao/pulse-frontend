@@ -39,7 +39,7 @@ const NFeUpload = ({ onFile, loading }) => {
             padding: "48px 24px",
             textAlign: "center",
             cursor: loading ? "not-allowed" : "pointer",
-            background: dragging ? C.bluePale : "white",
+            background: dragging ? C.bluePale : C.surface,
             transition: "all 0.2s",
           }}
         >
@@ -77,7 +77,7 @@ const NFeUpload = ({ onFile, loading }) => {
         <div style={{
           display: "flex", alignItems: "center", gap: 14,
           padding: "16px 20px", borderRadius: 12,
-          border: `1.5px solid ${C.border}`, background: "white",
+          border: `1.5px solid ${C.border}`, background: C.surface,
         }}>
           <div style={{
             width: 40, height: 40, borderRadius: 10,

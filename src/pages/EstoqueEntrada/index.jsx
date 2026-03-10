@@ -3,7 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { ArrowLeft, FileText, PenLine, Loader2 } from "lucide-react";
 import C from "../../theme/colors";
 import { isAuthenticated } from "../../hooks/useAuth";
-import { getProducts, previewNFe, confirmNFe } from "../../services/api";
+import { getProducts, getCompanySettings, previewNFe, confirmNFe } from "../../services/api";
 import DashboardHeader from "../Dashboard/components/DashboardHeader";
 import NFeUpload from "./components/NFeUpload";
 import NFePreviewTable from "./components/NFePreviewTable";
@@ -16,6 +16,7 @@ export default function EstoqueEntradaPage() {
   const navigate = useNavigate();
   const [tab, setTab] = useState(TAB_NFE);
   const [products, setProducts] = useState([]);
+  const [defaultMinStock, setDefaultMinStock] = useState(0);
   const [nfeFile, setNfeFile] = useState(null);
   const [preview, setPreview] = useState(null);
   const [previewItems, setPreviewItems] = useState([]);
@@ -29,6 +30,7 @@ export default function EstoqueEntradaPage() {
   useEffect(() => {
     if (!isAuthenticated()) { navigate("/", { replace: true }); return; }
     getProducts().then(setProducts).catch(() => {});
+    getCompanySettings().then(d => setDefaultMinStock(d.default_min_stock || 0)).catch(() => {});
   }, []);
 
   const handleFile = async (file) => {
@@ -47,7 +49,7 @@ export default function EstoqueEntradaPage() {
       const data = await previewNFe(formData);
       setPreview(data);
     } catch (err) {
-      setPreviewError(err.message);
+      setPreviewError(friendlyError(err.message));
     } finally {
       setLoadingPreview(false);
     }
@@ -62,7 +64,7 @@ export default function EstoqueEntradaPage() {
       setConfirmedCount(data.updated);
       setConfirmed(true);
     } catch (err) {
-      setConfirmError(err.message);
+      setConfirmError(friendlyError(err.message));
     } finally {
       setLoadingConfirm(false);
     }
@@ -79,7 +81,7 @@ export default function EstoqueEntradaPage() {
   };
 
   return (
-    <div style={{ minHeight: "100vh", background: "#F8F9FB" }}>
+    <div style={{ minHeight: "100vh", background: C.pageBg }}>
       <DashboardHeader />
 
       <main style={{ maxWidth: 960, margin: "0 auto", padding: "80px 24px 48px" }}>
@@ -88,7 +90,7 @@ export default function EstoqueEntradaPage() {
           <Link to="/dashboard" style={{
             display: "flex", alignItems: "center", justifyContent: "center",
             width: 36, height: 36, borderRadius: 9,
-            background: "white", border: `1px solid ${C.border}`,
+            background: C.surface, border: `1px solid ${C.border}`,
             color: C.mid, textDecoration: "none",
             transition: "all 0.15s",
           }}>
@@ -106,7 +108,7 @@ export default function EstoqueEntradaPage() {
 
         {/* Card */}
         <div style={{
-          background: "white", borderRadius: 18,
+          background: C.surface, borderRadius: 18,
           border: `1px solid ${C.border}`,
           boxShadow: "0 2px 16px rgba(0,0,0,0.04)",
           overflow: "hidden",
@@ -200,7 +202,7 @@ export default function EstoqueEntradaPage() {
 
             {/* ── Tab Manual ── */}
             {tab === TAB_MANUAL && (
-              <ManualEntry products={products} />
+              <ManualEntry products={products} onProductCreated={(p) => setProducts(prev => [...prev, p])} defaultMinStock={defaultMinStock} />
             )}
           </div>
         </div>
@@ -241,7 +243,7 @@ const SuccessState = ({ count, onReset }) => (
       </Link>
       <button onClick={onReset} style={{
         padding: "11px 24px", borderRadius: 9,
-        background: "white", color: C.graphite,
+        background: C.surface, color: C.graphite,
         border: `1.5px solid ${C.border}`,
         fontSize: 14, fontWeight: 700, cursor: "pointer",
       }}>

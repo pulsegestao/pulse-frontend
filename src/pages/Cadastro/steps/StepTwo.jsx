@@ -17,25 +17,26 @@ const inputStyle = (hasError) => ({
   appearance: "none",
 });
 
-const labelStyle = {
-  display: "block",
-  fontSize: 13,
-  fontWeight: 600,
-  color: C.graphite,
-  marginBottom: 6,
-};
+const RequiredDot = () => (
+  <span style={{
+    display: "inline-block",
+    width: 6, height: 6,
+    borderRadius: "50%",
+    background: "#EF4444",
+    marginLeft: 5,
+    verticalAlign: "middle",
+    marginBottom: 2,
+  }} />
+);
 
-const errorStyle = {
-  fontSize: 12,
-  color: "#EF4444",
-  marginTop: 4,
-};
-
-const Field = ({ label, error, children }) => (
+const Field = ({ label, required, error, children }) => (
   <div style={{ marginBottom: 18 }}>
-    <label style={labelStyle}>{label}</label>
+    <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: C.graphite, marginBottom: 6 }}>
+      {label}
+      {required && <RequiredDot />}
+    </label>
     {children}
-    {error && <p style={errorStyle}>{error}</p>}
+    {error && <p style={{ fontSize: 12, color: "#EF4444", marginTop: 4 }}>{error}</p>}
   </div>
 );
 
@@ -50,6 +51,19 @@ const TIPOS = [
   "Outro",
 ];
 
+function formatCNPJ(value) {
+  const d = value.replace(/\D/g, "").slice(0, 14);
+  if (d.length <= 2) return d;
+  if (d.length <= 5) return `${d.slice(0, 2)}.${d.slice(2)}`;
+  if (d.length <= 8) return `${d.slice(0, 2)}.${d.slice(2, 5)}.${d.slice(5)}`;
+  if (d.length <= 12) return `${d.slice(0, 2)}.${d.slice(2, 5)}.${d.slice(5, 8)}/${d.slice(8)}`;
+  return `${d.slice(0, 2)}.${d.slice(2, 5)}.${d.slice(5, 8)}/${d.slice(8, 12)}-${d.slice(12, 14)}`;
+}
+
+function validateCNPJ(value) {
+  return value.replace(/\D/g, "").length === 14;
+}
+
 const StepTwo = ({ data, onChange, onBack, onFinish, loading = false, apiError = "" }) => {
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
@@ -58,9 +72,11 @@ const StepTwo = ({ data, onChange, onBack, onFinish, loading = false, apiError =
     const e = {};
     if (!fields.negocio.trim()) e.negocio = "Nome do negócio obrigatório";
     if (!fields.tipoNegocio) e.tipoNegocio = "Selecione o tipo de negócio";
-    if (fields.temCnpj === null || fields.temCnpj === undefined)
-      e.temCnpj = "Selecione uma opção";
-    if (fields.temCnpj === "sim" && !fields.cnpj.trim()) e.cnpj = "CNPJ obrigatório";
+    if (fields.temCnpj === null || fields.temCnpj === undefined) e.temCnpj = "Selecione uma opção";
+    if (fields.temCnpj === "sim") {
+      if (!fields.cnpj.trim()) e.cnpj = "CNPJ obrigatório";
+      else if (!validateCNPJ(fields.cnpj)) e.cnpj = "CNPJ inválido (14 dígitos)";
+    }
     return e;
   };
 
@@ -85,11 +101,12 @@ const StepTwo = ({ data, onChange, onBack, onFinish, loading = false, apiError =
         Quase lá! Fale um pouco sobre sua empresa.
       </p>
 
-      <Field label="Nome do negócio" error={touched.negocio && errors.negocio}>
+      <Field label="Nome do negócio" required error={touched.negocio && errors.negocio}>
         <input
           type="text"
           placeholder="Ex: Mercadinho do João"
           value={data.negocio}
+          maxLength={100}
           style={inputStyle(touched.negocio && errors.negocio)}
           onChange={(e) => onChange({ negocio: e.target.value })}
           onBlur={() => handleBlur("negocio")}
@@ -97,15 +114,11 @@ const StepTwo = ({ data, onChange, onBack, onFinish, loading = false, apiError =
         />
       </Field>
 
-      <Field label="Tipo de negócio" error={touched.tipoNegocio && errors.tipoNegocio}>
+      <Field label="Tipo de negócio" required error={touched.tipoNegocio && errors.tipoNegocio}>
         <div style={{ position: "relative" }}>
           <select
             value={data.tipoNegocio}
-            style={{
-              ...inputStyle(touched.tipoNegocio && errors.tipoNegocio),
-              paddingRight: 40,
-              cursor: "pointer",
-            }}
+            style={{ ...inputStyle(touched.tipoNegocio && errors.tipoNegocio), paddingRight: 40, cursor: "pointer" }}
             onChange={(e) => {
               onChange({ tipoNegocio: e.target.value });
               setTouched((t) => ({ ...t, tipoNegocio: true }));
@@ -119,16 +132,14 @@ const StepTwo = ({ data, onChange, onBack, onFinish, loading = false, apiError =
               <option key={t} value={t}>{t}</option>
             ))}
           </select>
-          <svg
-            style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }}
-            width="16" height="16" viewBox="0 0 24 24" fill="none"
-          >
+          <svg style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }}
+            width="16" height="16" viewBox="0 0 24 24" fill="none">
             <path d="M6 9l6 6 6-6" stroke={C.mid} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </div>
       </Field>
 
-      <Field label="Possui CNPJ?" error={touched.temCnpj && errors.temCnpj}>
+      <Field label="Possui CNPJ?" required error={touched.temCnpj && errors.temCnpj}>
         <div style={{ display: "flex", gap: 12 }}>
           {["sim", "nao"].map((opt) => {
             const active = data.temCnpj === opt;
@@ -142,17 +153,12 @@ const StepTwo = ({ data, onChange, onBack, onFinish, loading = false, apiError =
                   setErrors(validate({ ...data, temCnpj: opt }));
                 }}
                 style={{
-                  flex: 1,
-                  padding: "11px",
-                  borderRadius: 10,
+                  flex: 1, padding: "11px", borderRadius: 10,
                   border: `1.5px solid ${active ? C.blue : C.border}`,
                   background: active ? C.bluePale : "white",
                   color: active ? C.blue : C.mid,
-                  fontSize: 14,
-                  fontWeight: active ? 700 : 500,
-                  cursor: "pointer",
-                  fontFamily: "inherit",
-                  transition: "all 0.15s",
+                  fontSize: 14, fontWeight: active ? 700 : 500,
+                  cursor: "pointer", fontFamily: "inherit", transition: "all 0.15s",
                 }}
               >
                 {opt === "sim" ? "Sim" : "Não"}
@@ -163,13 +169,15 @@ const StepTwo = ({ data, onChange, onBack, onFinish, loading = false, apiError =
       </Field>
 
       {data.temCnpj === "sim" && (
-        <Field label="CNPJ" error={touched.cnpj && errors.cnpj}>
+        <Field label="CNPJ" required error={touched.cnpj && errors.cnpj}>
           <input
             type="text"
+            inputMode="numeric"
             placeholder="00.000.000/0000-00"
             value={data.cnpj}
+            maxLength={18}
             style={inputStyle(touched.cnpj && errors.cnpj)}
-            onChange={(e) => onChange({ cnpj: e.target.value })}
+            onChange={(e) => onChange({ cnpj: formatCNPJ(e.target.value) })}
             onBlur={() => handleBlur("cnpj")}
             onFocus={(e) => (e.target.style.borderColor = C.blue)}
           />
@@ -179,11 +187,8 @@ const StepTwo = ({ data, onChange, onBack, onFinish, loading = false, apiError =
       {data.temCnpj === "nao" && (
         <div style={{
           display: "flex", alignItems: "flex-start", gap: 10,
-          background: C.bluePale,
-          border: `1px solid ${C.blue}22`,
-          borderRadius: 10,
-          padding: "12px 14px",
-          marginBottom: 18,
+          background: C.bluePale, border: `1px solid ${C.blue}22`,
+          borderRadius: 10, padding: "12px 14px", marginBottom: 18,
         }}>
           <Info size={16} color={C.blue} strokeWidth={2} style={{ marginTop: 1, flexShrink: 0 }} />
           <p style={{ fontSize: 13, color: C.blue, margin: 0, lineHeight: 1.5 }}>
@@ -194,9 +199,13 @@ const StepTwo = ({ data, onChange, onBack, onFinish, loading = false, apiError =
       )}
 
       {apiError && (
-        <p style={{ fontSize: 13, color: "#EF4444", marginBottom: 12, textAlign: "center" }}>
+        <div style={{
+          background: "#FEF2F2", border: "1px solid #FECACA",
+          borderRadius: 10, padding: "12px 14px", marginBottom: 16,
+          fontSize: 13, color: "#DC2626", fontWeight: 500,
+        }}>
           {apiError}
-        </p>
+        </div>
       )}
 
       <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
@@ -204,18 +213,10 @@ const StepTwo = ({ data, onChange, onBack, onFinish, loading = false, apiError =
           onClick={onBack}
           disabled={loading}
           style={{
-            flex: 1,
-            padding: "14px",
-            background: "white",
-            color: C.graphite,
-            border: `1.5px solid ${C.border}`,
-            borderRadius: 12,
-            fontSize: 15,
-            fontWeight: 600,
-            cursor: loading ? "not-allowed" : "pointer",
-            fontFamily: "inherit",
-            transition: "border-color 0.15s",
-            opacity: loading ? 0.6 : 1,
+            flex: 1, padding: "14px", background: "white", color: C.graphite,
+            border: `1.5px solid ${C.border}`, borderRadius: 12, fontSize: 15,
+            fontWeight: 600, cursor: loading ? "not-allowed" : "pointer",
+            fontFamily: "inherit", transition: "border-color 0.15s", opacity: loading ? 0.6 : 1,
           }}
           onMouseEnter={(e) => { if (!loading) e.currentTarget.style.borderColor = C.blue; }}
           onMouseLeave={(e) => { if (!loading) e.currentTarget.style.borderColor = C.border; }}
@@ -227,22 +228,13 @@ const StepTwo = ({ data, onChange, onBack, onFinish, loading = false, apiError =
           onClick={handleSubmit}
           disabled={loading}
           style={{
-            flex: 2,
-            padding: "14px",
+            flex: 2, padding: "14px",
             background: loading ? C.mid : `linear-gradient(135deg, ${C.green}, ${C.greenLight})`,
-            color: "white",
-            border: "none",
-            borderRadius: 12,
-            fontSize: 15,
-            fontWeight: 700,
-            cursor: loading ? "not-allowed" : "pointer",
+            color: "white", border: "none", borderRadius: 12, fontSize: 15,
+            fontWeight: 700, cursor: loading ? "not-allowed" : "pointer",
             boxShadow: loading ? "none" : `0 6px 20px ${C.green}33`,
-            fontFamily: "inherit",
-            transition: "transform 0.15s, box-shadow 0.15s",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 8,
+            fontFamily: "inherit", transition: "transform 0.15s, box-shadow 0.15s",
+            display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
           }}
           onMouseEnter={(e) => {
             if (!loading) {
@@ -262,8 +254,7 @@ const StepTwo = ({ data, onChange, onBack, onFinish, loading = false, apiError =
               <div style={{
                 width: 16, height: 16, borderRadius: "50%",
                 border: "2px solid rgba(255,255,255,0.4)",
-                borderTopColor: "white",
-                animation: "spin 0.7s linear infinite",
+                borderTopColor: "white", animation: "spin 0.7s linear infinite",
               }} />
               Criando conta...
             </>

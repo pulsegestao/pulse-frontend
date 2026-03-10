@@ -1,8 +1,46 @@
-import C from "../theme/colors";
-
 const GlobalStyles = () => (
   <style>{`
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap');
+
+    :root {
+      --c-blue:        #1E3A8A;
+      --c-blue-light:  #2952B3;
+      --c-blue-pale:   #EFF4FF;
+      --c-green:       #16A34A;
+      --c-green-light: #22C55E;
+      --c-green-pale:  #F0FDF4;
+      --c-white:       #FFFFFF;
+      --c-gray:        #F3F4F6;
+      --c-graphite:    #1F2937;
+      --c-mid:         #6B7280;
+      --c-border:      #E5E7EB;
+      --c-surface:     #FFFFFF;
+      --c-page-bg:     #F8F9FB;
+      --c-purple-pale: #F5F3FF;
+      --c-amber-pale:  #FFFBEB;
+      --c-red-pale:    #FEE2E2;
+      --c-yellow-pale: #FEF9C3;
+      --c-orange-pale: #FFF7ED;
+      --c-pink-pale:   #FDF2F8;
+    }
+
+    [data-theme="dark"] {
+      --c-blue-pale:   #1A2744;
+      --c-green-pale:  #0E2318;
+      --c-white:       #374151;
+      --c-gray:        #1F2937;
+      --c-graphite:    #F9FAFB;
+      --c-mid:         #9CA3AF;
+      --c-border:      #374151;
+      --c-surface:     #1F2937;
+      --c-page-bg:     #111827;
+      --c-purple-pale: #1E1040;
+      --c-amber-pale:  #2D1A00;
+      --c-red-pale:    #2D0000;
+      --c-yellow-pale: #2D2400;
+      --c-orange-pale: #2D1200;
+      --c-pink-pale:   #2D0020;
+    }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -11,7 +49,7 @@ const GlobalStyles = () => (
     body {
       font-family: 'Plus Jakarta Sans', sans-serif;
       background: #FFFFFF;
-      color: ${C.graphite};
+      color: #1F2937;
       line-height: 1.6;
       overflow-x: hidden;
     }
@@ -35,8 +73,8 @@ const GlobalStyles = () => (
     .fade-up.d6 { transition-delay: 0.55s; }
 
     ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: #f1f1f1; }
-    ::-webkit-scrollbar-thumb { background: #c5c5c5; border-radius: 3px; }
+    ::-webkit-scrollbar-track { background: var(--c-gray); }
+    ::-webkit-scrollbar-thumb { background: var(--c-border); border-radius: 3px; }
 
     a { text-decoration: none; color: inherit; }
 

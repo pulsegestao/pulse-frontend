@@ -7,7 +7,7 @@ import SalesChart from "./components/SalesChart";
 import LowStockTable from "./components/LowStockTable";
 import TopProducts from "./components/TopProducts";
 import QuickActions from "./components/QuickActions";
-import { isAuthenticated } from "../../hooks/useAuth";
+import { isAuthenticated, getProfile } from "../../hooks/useAuth";
 
 const getGreeting = () => {
   const h = new Date().getHours();
@@ -25,13 +25,14 @@ const formatDate = () => {
 
 const DashboardPage = () => {
   const navigate = useNavigate();
+  const firstName = getProfile()?.userName?.split(" ")[0] || "você";
 
   useEffect(() => {
     if (!isAuthenticated()) navigate("/", { replace: true });
   }, []);
 
   return (
-  <div style={{ minHeight: "100vh", background: "#F8F9FB" }}>
+  <div style={{ minHeight: "100vh", background: C.pageBg }}>
     <DashboardHeader />
 
     <main style={{
@@ -45,7 +46,7 @@ const DashboardPage = () => {
           fontSize: 26, fontWeight: 800, color: C.graphite,
           margin: "0 0 4px", letterSpacing: "-0.3px",
         }}>
-          {getGreeting()}, João
+          {getGreeting()}, {firstName}
         </h1>
         <p style={{ fontSize: 14, color: C.mid, margin: 0 }}>{formatDate()}</p>
       </div>

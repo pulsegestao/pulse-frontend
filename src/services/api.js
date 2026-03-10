@@ -1,10 +1,38 @@
 const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
 
+function notifySessionExpired() {
+  localStorage.removeItem("pulse_token");
+  sessionStorage.removeItem("pulse_token");
+  window.dispatchEvent(new Event("pulse:session-expired"));
+}
+
 async function request(path, options = {}) {
   const res = await fetch(`${BASE_URL}${path}`, {
     ...options,
     headers: { "Content-Type": "application/json", ...options.headers },
   });
+  const json = await res.json();
+  if (!res.ok) throw new Error(json.error || "Erro desconhecido");
+  return json.data;
+}
+
+function getToken() {
+  return localStorage.getItem("pulse_token") || sessionStorage.getItem("pulse_token") || null;
+}
+
+async function authRequest(path, options = {}) {
+  const res = await fetch(`${BASE_URL}${path}`, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+      Authorization: `Bearer ${getToken()}`,
+    },
+  });
+  if (res.status === 401) {
+    notifySessionExpired();
+    throw new Error("Sessão expirada.");
+  }
   const json = await res.json();
   if (!res.ok) throw new Error(json.error || "Erro desconhecido");
   return json.data;
@@ -24,24 +52,24 @@ export function verifyEmail(token) {
   return request(`/api/v1/auth/verify-email?token=${encodeURIComponent(token)}`);
 }
 
-export function loginUser(email, password) {
+export function loginUser(email, password, rememberMe = false) {
   return request("/api/v1/auth/login", {
     method: "POST",
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify({ email, password, remember_me: rememberMe }),
   });
 }
 
-function getToken() {
-  return localStorage.getItem("pulse_token");
+export function forgotPassword(email) {
+  return request("/api/v1/auth/forgot-password", {
+    method: "POST",
+    body: JSON.stringify({ email }),
+  });
 }
 
-function authRequest(path, options = {}) {
-  return request(path, {
-    ...options,
-    headers: {
-      ...options.headers,
-      Authorization: `Bearer ${getToken()}`,
-    },
+export function resetPassword(token, password) {
+  return request("/api/v1/auth/reset-password", {
+    method: "POST",
+    body: JSON.stringify({ token, password }),
   });
 }
 
@@ -56,16 +84,19 @@ export function updateStock(productId, input) {
   });
 }
 
-export function previewNFe(formData) {
-  return fetch(`${BASE_URL}/api/v1/inventory/nfe/preview`, {
+export async function previewNFe(formData) {
+  const res = await fetch(`${BASE_URL}/api/v1/inventory/nfe/preview`, {
     method: "POST",
     headers: { Authorization: `Bearer ${getToken()}` },
     body: formData,
-  }).then(async (res) => {
-    const json = await res.json();
-    if (!res.ok) throw new Error(json.error || "Erro desconhecido");
-    return json.data;
   });
+  if (res.status === 401) {
+    notifySessionExpired();
+    throw new Error("Sessão expirada.");
+  }
+  const json = await res.json();
+  if (!res.ok) throw new Error(json.error || "Erro desconhecido");
+  return json.data;
 }
 
 export function confirmNFe(items) {
@@ -80,4 +111,116 @@ export function createProduct(input) {
     method: "POST",
     body: JSON.stringify(input),
   });
+}
+
+export function updateProduct(productId, input) {
+  return authRequest(`/api/v1/products/${productId}`, {
+    method: "PUT",
+    body: JSON.stringify(input),
+  });
+}
+
+export function getLowStock() {
+  return authRequest("/api/v1/products/low-stock");
+}
+
+export function checkEmail(email) {
+  return request(`/api/v1/auth/check-email?email=${encodeURIComponent(email)}`);
+}
+
+export function getMe() {
+  return authRequest("/api/v1/users/me");
+}
+
+export function updateMe(input) {
+  return authRequest("/api/v1/users/me", {
+    method: "PATCH",
+    body: JSON.stringify(input),
+  });
+}
+
+export function getCompanySettings() {
+  return authRequest("/api/v1/companies/me");
+}
+
+export function updateCompanySettings(input) {
+  return authRequest("/api/v1/companies/me", {
+    method: "PATCH",
+    body: JSON.stringify(input),
+  });
+}
+
+export function getCompanyMembers() {
+  return authRequest("/api/v1/companies/me/members");
+}
+
+export function getPaymentIntegrations() {
+  return authRequest("/api/v1/integrations/payment");
+}
+
+export function savePaymentIntegration(data) {
+  return authRequest("/api/v1/integrations/payment", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export function deletePaymentIntegration(provider) {
+  return authRequest(`/api/v1/integrations/payment/${provider}`, {
+    method: "DELETE",
+  });
+}
+
+export function testPaymentIntegration(provider) {
+  return authRequest(`/api/v1/integrations/payment/test/${provider}`, {
+    method: "POST",
+  });
+}
+
+export function createPaymentIntent(data) {
+  return authRequest("/api/v1/integrations/point/payment-intents", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export function getPaymentIntentStatus(id) {
+  return authRequest(`/api/v1/integrations/point/payment-intents/${id}`);
+}
+
+export function cancelPaymentIntent(id) {
+  return authRequest(`/api/v1/integrations/point/payment-intents/${id}`, {
+    method: "DELETE",
+  });
+}
+
+export function registerSale(input) {
+  return authRequest("/api/v1/sales/", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+export function getDashboardSummary() {
+  return authRequest("/api/v1/dashboard/summary");
+}
+
+export function getRevenueChart(period = "week") {
+  return authRequest(`/api/v1/dashboard/revenue?period=${period}`);
+}
+
+export function getTopProducts(period = "week") {
+  return authRequest(`/api/v1/dashboard/top-products?period=${period}`);
+}
+
+export function getProductReport(period = "month") {
+  return authRequest(`/api/v1/reports/products?period=${period}`);
+}
+
+export function getPaymentMethods(period = "month") {
+  return authRequest(`/api/v1/reports/payment-methods?period=${period}`);
+}
+
+export function getDeadStock() {
+  return authRequest("/api/v1/reports/dead-stock");
 }
