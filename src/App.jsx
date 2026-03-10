@@ -12,6 +12,7 @@ import EstoqueEntradaPage from "./pages/EstoqueEntrada";
 import GerirEstoquePage from "./pages/GerirEstoque";
 import SessionExpiredPage from "./pages/SessionExpired";
 import ConfiguracoesPage from "./pages/Configuracoes";
+import PDVPage from "./pages/PDV";
 import ErrorBoundary from "./components/ErrorBoundary";
 import ToastContainer from "./components/Toast";
 
@@ -61,6 +62,7 @@ export default function App() {
           <Route path="/gerir-estoque" element={<AuthShell><ErrorBoundary><GerirEstoquePage /></ErrorBoundary></AuthShell>} />
           <Route path="/sessao-expirada" element={<AuthShell><ErrorBoundary><SessionExpiredPage /></ErrorBoundary></AuthShell>} />
           <Route path="/configuracoes" element={<AuthShell><ErrorBoundary><ConfiguracoesPage /></ErrorBoundary></AuthShell>} />
+          <Route path="/pdv" element={<AuthShell><ErrorBoundary><PDVPage /></ErrorBoundary></AuthShell>} />
         </Routes>
       </SessionGuard>
     </BrowserRouter>

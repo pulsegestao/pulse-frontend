@@ -9,6 +9,7 @@ const ACTIONS = [
     icon: ShoppingCart,
     color: C.blue,
     bg: C.bluePale,
+    href: "/pdv",
   },
   {
     label: "Pulse Insights",
