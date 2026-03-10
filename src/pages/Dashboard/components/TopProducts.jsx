@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { Loader2 } from "lucide-react";
+import { ArrowRight, Loader2 } from "lucide-react";
+import { Link } from "react-router-dom";
 import C from "../../../theme/colors";
 import { getTopProducts } from "../../../services/api";
 import { friendlyError } from "../../../utils/errorMessage";
@@ -85,45 +86,63 @@ const TopProducts = () => {
           <p style={{ fontSize: 12, color: C.mid, margin: 0 }}>Os produtos mais vendidos aparecerão aqui</p>
         </div>
       ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-          {data.map((p, i) => {
-            const rank = RANK_COLORS[i] || RANK_COLORS[RANK_COLORS.length - 1];
-            const pct = Math.round((p.quantity / maxQty) * 100);
-            return (
-              <div key={p.product_id} style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <div style={{
-                  width: 28, height: 28, borderRadius: 8,
-                  background: rank.bg,
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  fontSize: 12, fontWeight: 800, color: rank.color,
-                  flexShrink: 0,
-                }}>
-                  {i + 1}
-                </div>
+        <>
+          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            {data.map((p, i) => {
+              const rank = RANK_COLORS[i] || RANK_COLORS[RANK_COLORS.length - 1];
+              const pct = Math.round((p.quantity / maxQty) * 100);
+              return (
+                <div key={p.product_id} style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                  <div style={{
+                    width: 28, height: 28, borderRadius: 8,
+                    background: rank.bg,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    fontSize: 12, fontWeight: 800, color: rank.color,
+                    flexShrink: 0,
+                  }}>
+                    {i + 1}
+                  </div>
 
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
-                    <span style={{ fontSize: 13, fontWeight: 600, color: C.graphite, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                      {p.product_name}
-                    </span>
-                    <span style={{ fontSize: 12, fontWeight: 700, color: C.mid, flexShrink: 0, marginLeft: 8 }}>
-                      {p.quantity} un.
-                    </span>
-                  </div>
-                  <div style={{ height: 5, background: C.border, borderRadius: 4 }}>
-                    <div style={{
-                      height: "100%",
-                      width: `${pct}%`,
-                      borderRadius: 4,
-                      background: rank.color,
-                      opacity: 0.7,
-                    }} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
+                      <span style={{ fontSize: 13, fontWeight: 600, color: C.graphite, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                        {p.product_name}
+                      </span>
+                      <span style={{ fontSize: 12, fontWeight: 700, color: C.mid, flexShrink: 0, marginLeft: 8 }}>
+                        {p.quantity} un.
+                      </span>
+                    </div>
+                    <div style={{ height: 5, background: C.border, borderRadius: 4 }}>
+                      <div style={{
+                        height: "100%",
+                        width: `${pct}%`,
+                        borderRadius: 4,
+                        background: rank.color,
+                        opacity: 0.7,
+                      }} />
+                    </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+
+          <div style={{ marginTop: 16, paddingTop: 14, borderTop: `1px solid ${C.border}` }}>
+            <Link
+              to="/relatorios"
+              style={{
+                display: "inline-flex", alignItems: "center", gap: 4,
+                fontSize: 12, fontWeight: 600, color: C.blue,
+                textDecoration: "none", transition: "color 0.15s",
+              }}
+              onMouseEnter={e => e.currentTarget.style.color = C.blueLight}
+              onMouseLeave={e => e.currentTarget.style.color = C.blue}
+            >
+              Ver análise completa
+              <ArrowRight size={13} strokeWidth={2} />
+            </Link>
+          </div>
+        </>
       )}
     </div>
   );

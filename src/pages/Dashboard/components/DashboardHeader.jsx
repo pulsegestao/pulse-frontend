@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { Bell, LogOut, Moon, Settings, Sun } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { BarChart2, Bell, LayoutDashboard, LogOut, Moon, Settings, Sun } from "lucide-react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import C from "../../../theme/colors";
 import { getProfile, removeToken } from "../../../hooks/useAuth";
 import { useTheme } from "../../../hooks/useTheme";
@@ -31,8 +31,14 @@ const IconBtn = ({ children, onClick, title }) => (
   </button>
 );
 
+const NAV_ITEMS = [
+  { href: "/dashboard",  label: "Dashboard",  icon: LayoutDashboard },
+  { href: "/relatorios", label: "Relatórios", icon: BarChart2 },
+];
+
 const DashboardHeader = () => {
   const navigate = useNavigate();
+  const { pathname } = useLocation();
   const [profile, setProfile] = useState(getProfile);
   const userName = profile?.userName || "Usuário";
   const companyName = profile?.companyName || "Minha Empresa";
@@ -54,6 +60,7 @@ const DashboardHeader = () => {
 
   return (
     <>
+    <style>{`@media (max-width: 640px) { .nav-label { display: none; } }`}</style>
     <header style={{
       position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
       background: C.surface,
@@ -94,6 +101,33 @@ const DashboardHeader = () => {
           </p>
         </div>
       </div>
+
+      {/* Center: nav */}
+      <nav style={{ display: "flex", alignItems: "center", gap: 2 }}>
+        {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
+          const active = pathname === href;
+          return (
+            <Link
+              key={href}
+              to={href}
+              style={{
+                display: "flex", alignItems: "center", gap: 6,
+                padding: "7px 12px", borderRadius: 9,
+                background: active ? C.bluePale : "transparent",
+                color: active ? C.blue : C.mid,
+                fontSize: 13, fontWeight: active ? 700 : 500,
+                textDecoration: "none",
+                transition: "all 0.15s",
+              }}
+              onMouseEnter={e => { if (!active) e.currentTarget.style.background = C.gray; }}
+              onMouseLeave={e => { if (!active) e.currentTarget.style.background = "transparent"; }}
+            >
+              <Icon size={15} strokeWidth={2} />
+              <span className="nav-label">{label}</span>
+            </Link>
+          );
+        })}
+      </nav>
 
       {/* Right: actions */}
       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
