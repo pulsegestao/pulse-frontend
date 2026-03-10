@@ -1,7 +1,8 @@
-import { useState } from "react";
-import { Moon, Sun, Bell, Package } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Moon, Sun, Bell, Package, Loader2, CheckCircle } from "lucide-react";
 import C from "../../../theme/colors";
 import { useTheme } from "../../../hooks/useTheme";
+import { getCompanySettings, updateCompanySettings } from "../../../services/api";
 
 const SectionCard = ({ title, subtitle, children }) => (
   <div style={{
@@ -70,9 +71,15 @@ const PreferenciasTab = () => {
   const [lowStockAlerts, setLowStockAlerts] = useState(
     () => localStorage.getItem("pulse_low_stock_alerts") !== "false"
   );
-  const [defaultMinStock, setDefaultMinStock] = useState(
-    () => localStorage.getItem("pulse_default_min_stock") || "5"
-  );
+  const [defaultMinStock, setDefaultMinStock] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    getCompanySettings()
+      .then(data => setDefaultMinStock(String(data.default_min_stock ?? "")))
+      .catch(() => {});
+  }, []);
 
   const handleLowStockToggle = () => {
     const next = !lowStockAlerts;
@@ -80,10 +87,17 @@ const PreferenciasTab = () => {
     localStorage.setItem("pulse_low_stock_alerts", String(next));
   };
 
-  const handleMinStockChange = (e) => {
-    const val = e.target.value;
-    setDefaultMinStock(val);
-    localStorage.setItem("pulse_default_min_stock", val);
+  const handleSaveMinStock = async () => {
+    setSaving(true);
+    setSaved(false);
+    try {
+      await updateCompanySettings({ default_min_stock: parseInt(defaultMinStock) || 0 });
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    } catch {
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -128,7 +142,7 @@ const PreferenciasTab = () => {
               type="number"
               min="0"
               value={defaultMinStock}
-              onChange={handleMinStockChange}
+              onChange={e => setDefaultMinStock(e.target.value)}
               style={{
                 width: 72, padding: "7px 10px", borderRadius: 8,
                 border: `1.5px solid ${C.border}`, fontSize: 13,
@@ -137,9 +151,27 @@ const PreferenciasTab = () => {
                 textAlign: "center",
               }}
             />
+            <button
+              onClick={handleSaveMinStock}
+              disabled={saving}
+              style={{
+                padding: "7px 16px", borderRadius: 8, border: "none",
+                background: saved ? C.green : saving ? C.border : C.blue,
+                color: saving ? C.mid : "white",
+                fontSize: 13, fontWeight: 600, cursor: saving ? "not-allowed" : "pointer",
+                fontFamily: "inherit", display: "flex", alignItems: "center", gap: 6,
+                transition: "background 0.2s",
+              }}
+            >
+              {saving && <Loader2 size={13} strokeWidth={2} style={{ animation: "spin 1s linear infinite" }} />}
+              {saved && <CheckCircle size={13} strokeWidth={2.5} />}
+              {saving ? "Salvando..." : saved ? "Salvo" : "Salvar"}
+            </button>
           </div>
         </div>
       </SectionCard>
+
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </>
   );
 };

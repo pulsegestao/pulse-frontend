@@ -3,7 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { ArrowLeft, FileText, PenLine, Loader2 } from "lucide-react";
 import C from "../../theme/colors";
 import { isAuthenticated } from "../../hooks/useAuth";
-import { getProducts, previewNFe, confirmNFe } from "../../services/api";
+import { getProducts, getCompanySettings, previewNFe, confirmNFe } from "../../services/api";
 import DashboardHeader from "../Dashboard/components/DashboardHeader";
 import NFeUpload from "./components/NFeUpload";
 import NFePreviewTable from "./components/NFePreviewTable";
@@ -16,6 +16,7 @@ export default function EstoqueEntradaPage() {
   const navigate = useNavigate();
   const [tab, setTab] = useState(TAB_NFE);
   const [products, setProducts] = useState([]);
+  const [defaultMinStock, setDefaultMinStock] = useState(0);
   const [nfeFile, setNfeFile] = useState(null);
   const [preview, setPreview] = useState(null);
   const [previewItems, setPreviewItems] = useState([]);
@@ -29,6 +30,7 @@ export default function EstoqueEntradaPage() {
   useEffect(() => {
     if (!isAuthenticated()) { navigate("/", { replace: true }); return; }
     getProducts().then(setProducts).catch(() => {});
+    getCompanySettings().then(d => setDefaultMinStock(d.default_min_stock || 0)).catch(() => {});
   }, []);
 
   const handleFile = async (file) => {
@@ -200,7 +202,7 @@ export default function EstoqueEntradaPage() {
 
             {/* ── Tab Manual ── */}
             {tab === TAB_MANUAL && (
-              <ManualEntry products={products} onProductCreated={(p) => setProducts(prev => [...prev, p])} />
+              <ManualEntry products={products} onProductCreated={(p) => setProducts(prev => [...prev, p])} defaultMinStock={defaultMinStock} />
             )}
           </div>
         </div>

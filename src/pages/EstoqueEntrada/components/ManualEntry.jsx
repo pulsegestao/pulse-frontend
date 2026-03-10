@@ -24,9 +24,12 @@ const Label = ({ children, required }) => (
   </label>
 );
 
-const EMPTY_NEW = { name: "", unit: "UN", sale_price: "", cost_price: "", barcode: "", quantity: "", min_quantity: "" };
+const emptyNew = (defaultMinStock = 0) => ({
+  name: "", unit: "UN", sale_price: "", cost_price: "", barcode: "", quantity: "",
+  min_quantity: defaultMinStock > 0 ? String(defaultMinStock) : "",
+});
 
-const ManualEntry = ({ products, onProductCreated }) => {
+const ManualEntry = ({ products, onProductCreated, defaultMinStock = 0 }) => {
   const [search, setSearch] = useState("");
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -34,7 +37,7 @@ const ManualEntry = ({ products, onProductCreated }) => {
   const [error, setError] = useState("");
 
   const [createMode, setCreateMode] = useState(false);
-  const [newProduct, setNewProduct] = useState(EMPTY_NEW);
+  const [newProduct, setNewProduct] = useState(() => emptyNew(defaultMinStock));
   const [createErrors, setCreateErrors] = useState({});
   const [creating, setCreating] = useState(false);
   const [createApiError, setCreateApiError] = useState("");
@@ -69,7 +72,7 @@ const ManualEntry = ({ products, onProductCreated }) => {
   };
 
   const openCreateMode = () => {
-    setNewProduct({ ...EMPTY_NEW, name: search.trim() });
+    setNewProduct({ ...emptyNew(defaultMinStock), name: search.trim() });
     setCreateErrors({});
     setCreateApiError("");
     setCreateMode(true);
@@ -78,7 +81,7 @@ const ManualEntry = ({ products, onProductCreated }) => {
 
   const cancelCreate = () => {
     setCreateMode(false);
-    setNewProduct(EMPTY_NEW);
+    setNewProduct(emptyNew(defaultMinStock));
     setCreateErrors({});
     setCreateApiError("");
   };
