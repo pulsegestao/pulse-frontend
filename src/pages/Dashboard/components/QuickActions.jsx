@@ -13,10 +13,11 @@ const ACTIONS = [
   },
   {
     label: "Pulse Insights",
-    description: "Análises com IA",
+    description: "Relatórios e análises",
     icon: Sparkles,
     color: C.green,
     bg: C.greenPale,
+    href: "/relatorios",
   },
   {
     label: "Entrada de estoque",

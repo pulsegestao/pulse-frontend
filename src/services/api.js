@@ -212,3 +212,15 @@ export function getRevenueChart(period = "week") {
 export function getTopProducts(period = "week") {
   return authRequest(`/api/v1/dashboard/top-products?period=${period}`);
 }
+
+export function getProductReport(period = "month") {
+  return authRequest(`/api/v1/reports/products?period=${period}`);
+}
+
+export function getPaymentMethods(period = "month") {
+  return authRequest(`/api/v1/reports/payment-methods?period=${period}`);
+}
+
+export function getDeadStock() {
+  return authRequest("/api/v1/reports/dead-stock");
+}
