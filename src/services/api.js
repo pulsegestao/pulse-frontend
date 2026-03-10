@@ -200,3 +200,11 @@ export function registerSale(input) {
     body: JSON.stringify(input),
   });
 }
+
+export function getDashboardSummary() {
+  return authRequest("/api/v1/dashboard/summary");
+}
+
+export function getRevenueChart(period = "week") {
+  return authRequest(`/api/v1/dashboard/revenue?period=${period}`);
+}

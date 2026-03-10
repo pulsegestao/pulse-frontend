@@ -1,13 +1,16 @@
 import { useEffect, useState } from "react";
 import { DollarSign, ShoppingCart, Package, AlertTriangle } from "lucide-react";
 import C from "../../../theme/colors";
-import { getLowStock } from "../../../services/api";
+import { getDashboardSummary } from "../../../services/api";
 
 const deltaColor = (positive) => {
   if (positive === true) return C.green;
   if (positive === false) return "#D97706";
   return C.mid;
 };
+
+const fmtBRL = (n) =>
+  `R$ ${Number(n || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
 const MetricCard = ({ label, value, unit, delta, positive, icon: Icon, iconColor, iconBg }) => (
   <div style={{
@@ -31,7 +34,6 @@ const MetricCard = ({ label, value, unit, delta, positive, icon: Icon, iconColor
         <Icon size={19} color={iconColor} strokeWidth={2} />
       </div>
     </div>
-
     <div>
       <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
         <span style={{ fontSize: 30, fontWeight: 800, color: C.graphite, lineHeight: 1 }}>
@@ -41,11 +43,7 @@ const MetricCard = ({ label, value, unit, delta, positive, icon: Icon, iconColor
           <span style={{ fontSize: 13, fontWeight: 600, color: C.mid }}>{unit}</span>
         )}
       </div>
-      <p style={{
-        fontSize: 12, fontWeight: 600,
-        color: deltaColor(positive),
-        margin: "6px 0 0",
-      }}>
+      <p style={{ fontSize: 12, fontWeight: 600, color: deltaColor(positive), margin: "6px 0 0" }}>
         {delta}
       </p>
     </div>
@@ -53,38 +51,43 @@ const MetricCard = ({ label, value, unit, delta, positive, icon: Icon, iconColor
 );
 
 const MetricsCards = () => {
-  const [lowStockCount, setLowStockCount] = useState("–");
+  const [summary, setSummary] = useState(null);
 
   useEffect(() => {
-    getLowStock()
-      .then(data => setLowStockCount((data || []).length))
-      .catch(() => setLowStockCount("–"));
+    getDashboardSummary()
+      .then(data => setSummary(data))
+      .catch(() => setSummary(null));
   }, []);
+
+  const salesTotal    = summary != null ? fmtBRL(summary.sales_today ?? 0)       : "–";
+  const salesCount    = summary != null ? String(summary.sales_count_today ?? 0) : "–";
+  const productsTotal = summary != null ? (summary.products_total ?? 0)          : null;
+  const lowStockCount = summary != null ? (summary.low_stock_count ?? 0)         : null;
 
   const metrics = [
     {
       label: "Faturamento hoje",
-      value: "R$ 3.840",
-      delta: "+12% vs ontem",
-      positive: true,
+      value: salesTotal,
+      delta: "total em vendas hoje",
+      positive: summary != null && summary.sales_today > 0 ? true : null,
       icon: DollarSign,
       iconColor: C.blue,
       iconBg: C.bluePale,
     },
     {
       label: "Vendas hoje",
-      value: "24",
-      unit: "vendas",
-      delta: "+3 vs ontem",
-      positive: true,
+      value: salesCount,
+      unit: summary?.sales_count_today === 1 ? "venda" : "vendas",
+      delta: "realizadas hoje",
+      positive: summary != null && summary.sales_count_today > 0 ? true : null,
       icon: ShoppingCart,
       iconColor: C.green,
       iconBg: C.greenPale,
     },
     {
       label: "Itens em estoque",
-      value: "1.247",
-      unit: "produtos",
+      value: productsTotal !== null ? String(productsTotal) : "–",
+      unit: productsTotal === 1 ? "produto" : "produtos",
       delta: "cadastrados",
       positive: null,
       icon: Package,
@@ -93,10 +96,10 @@ const MetricsCards = () => {
     },
     {
       label: "Atenção ao estoque",
-      value: String(lowStockCount),
+      value: lowStockCount !== null ? String(lowStockCount) : "–",
       unit: lowStockCount === 1 ? "produto" : "produtos",
-      delta: "baixo + crítico combinados",
-      positive: lowStockCount === 0 ? null : false,
+      delta: "abaixo do mínimo",
+      positive: lowStockCount === 0 ? null : (lowStockCount > 0 ? false : null),
       icon: AlertTriangle,
       iconColor: "#D97706",
       iconBg: C.amberPale,
@@ -104,11 +107,7 @@ const MetricsCards = () => {
   ];
 
   return (
-    <div style={{
-      display: "grid",
-      gridTemplateColumns: "repeat(4, 1fr)",
-      gap: 16,
-    }} className="metrics-grid">
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16 }} className="metrics-grid">
       {metrics.map(m => <MetricCard key={m.label} {...m} />)}
     </div>
   );
