@@ -153,3 +153,50 @@ export function updateCompanySettings(input) {
 export function getCompanyMembers() {
   return authRequest("/api/v1/companies/me/members");
 }
+
+export function getPaymentIntegrations() {
+  return authRequest("/api/v1/integrations/payment");
+}
+
+export function savePaymentIntegration(data) {
+  return authRequest("/api/v1/integrations/payment", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export function deletePaymentIntegration(provider) {
+  return authRequest(`/api/v1/integrations/payment/${provider}`, {
+    method: "DELETE",
+  });
+}
+
+export function testPaymentIntegration(provider) {
+  return authRequest(`/api/v1/integrations/payment/test/${provider}`, {
+    method: "POST",
+  });
+}
+
+export function createPaymentIntent(data) {
+  return authRequest("/api/v1/integrations/point/payment-intents", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export function getPaymentIntentStatus(id) {
+  return authRequest(`/api/v1/integrations/point/payment-intents/${id}`);
+}
+
+export function cancelPaymentIntent(id) {
+  return authRequest(`/api/v1/integrations/point/payment-intents/${id}`, {
+    method: "DELETE",
+  });
+}
+
+export function registerSale(input) {
+  return authRequest("/api/v1/sales/", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}

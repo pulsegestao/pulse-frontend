@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
-import { User, Building2, Users, SlidersHorizontal, Shield, ArrowLeft } from "lucide-react";
+import { User, Building2, Users, SlidersHorizontal, Shield, Plug, ArrowLeft } from "lucide-react";
 import C from "../../theme/colors";
 import DashboardHeader from "../Dashboard/components/DashboardHeader";
 import { getProfile, isAuthenticated } from "../../hooks/useAuth";
@@ -9,13 +9,15 @@ import EmpresaTab from "./tabs/EmpresaTab";
 import EquipeTab from "./tabs/EquipeTab";
 import PreferenciasTab from "./tabs/PreferenciasTab";
 import SegurancaTab from "./tabs/SegurancaTab";
+import IntegracoesTab from "./tabs/IntegracoesTab";
 
 const ALL_TABS = [
-  { id: "perfil",       label: "Perfil",       icon: User,               roles: ["owner", "manager", "employee"] },
-  { id: "empresa",      label: "Empresa",       icon: Building2,          roles: ["owner", "manager"] },
-  { id: "equipe",       label: "Equipe",        icon: Users,              roles: ["owner", "manager"] },
-  { id: "preferencias", label: "Preferências",  icon: SlidersHorizontal,  roles: ["owner", "manager", "employee"] },
-  { id: "seguranca",    label: "Segurança",     icon: Shield,             roles: ["owner", "manager", "employee"] },
+  { id: "perfil",       label: "Perfil",        icon: User,              roles: ["owner", "manager", "employee"] },
+  { id: "empresa",      label: "Empresa",        icon: Building2,         roles: ["owner", "manager"] },
+  { id: "equipe",       label: "Equipe",         icon: Users,             roles: ["owner", "manager"] },
+  { id: "preferencias", label: "Preferências",   icon: SlidersHorizontal, roles: ["owner", "manager", "employee"] },
+  { id: "integracoes",  label: "Integrações",    icon: Plug,              roles: ["owner", "manager"] },
+  { id: "seguranca",    label: "Segurança",      icon: Shield,            roles: ["owner", "manager", "employee"] },
 ];
 
 const TAB_COMPONENTS = {
@@ -23,6 +25,7 @@ const TAB_COMPONENTS = {
   empresa:      EmpresaTab,
   equipe:       EquipeTab,
   preferencias: PreferenciasTab,
+  integracoes:  IntegracoesTab,
   seguranca:    SegurancaTab,
 };
 
