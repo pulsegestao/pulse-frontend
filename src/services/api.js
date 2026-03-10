@@ -208,3 +208,7 @@ export function getDashboardSummary() {
 export function getRevenueChart(period = "week") {
   return authRequest(`/api/v1/dashboard/revenue?period=${period}`);
 }
+
+export function getTopProducts(period = "week") {
+  return authRequest(`/api/v1/dashboard/top-products?period=${period}`);
+}
