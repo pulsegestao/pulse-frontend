@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Bell, ChevronDown, LogOut, Moon, Settings, Sun } from "lucide-react";
+import { Bell, LogOut, Moon, Settings, Sun } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import C from "../../../theme/colors";
 import { getProfile, removeToken } from "../../../hooks/useAuth";
@@ -122,15 +122,10 @@ const DashboardHeader = () => {
 
         <div style={{ width: 1, height: 26, background: C.border, margin: "0 4px" }} />
 
-        <button style={{
+        <div style={{
           display: "flex", alignItems: "center", gap: 10,
           padding: "6px 10px", borderRadius: 12,
-          border: "none", background: "transparent", cursor: "pointer",
-          transition: "background 0.15s",
-        }}
-          onMouseEnter={e => e.currentTarget.style.background = C.gray}
-          onMouseLeave={e => e.currentTarget.style.background = "transparent"}
-        >
+        }}>
           <div style={{
             width: 34, height: 34, borderRadius: "50%",
             background: `linear-gradient(135deg, ${C.blue}, ${C.blueLight})`,
@@ -143,8 +138,7 @@ const DashboardHeader = () => {
             <p style={{ fontSize: 13, fontWeight: 700, color: C.graphite, margin: 0, lineHeight: 1.2 }}>{userName}</p>
             <p style={{ fontSize: 11, color: C.mid, margin: 0, lineHeight: 1.2 }}>{roleLabel(role)}</p>
           </div>
-          <ChevronDown size={14} color={C.mid} strokeWidth={2.5} />
-        </button>
+        </div>
 
         <button
           onClick={() => setConfirmingLogout(true)}
