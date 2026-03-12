@@ -170,8 +170,8 @@ const CartItem = ({ item, onUpdateQty, onRemove }) => (
       <span style={{ width: 26, textAlign: "center", fontSize: 13, fontWeight: 700, color: C.graphite }}>
         {item.qty}
       </span>
-      <QtyBtn onClick={() => onUpdateQty(item.id, 1)}>
-        <Plus size={12} strokeWidth={2.5} color={C.graphite} />
+      <QtyBtn onClick={() => onUpdateQty(item.id, 1)} disabled={item.qty >= item.stock}>
+        <Plus size={12} strokeWidth={2.5} color={item.qty >= item.stock ? C.border : C.graphite} />
       </QtyBtn>
       <button
         onClick={() => onRemove(item.id)}
@@ -780,7 +780,13 @@ const PDVPage = () => {
   const addToCart = (product) => {
     setCart(prev => {
       const existing = prev.find(i => i.id === product.id);
-      if (existing) return prev.map(i => i.id === product.id ? { ...i, qty: i.qty + 1 } : i);
+      if (existing) {
+        if (existing.qty >= product.stock) {
+          toast.warning(`Estoque esgotado para ${product.name}.`);
+          return prev;
+        }
+        return prev.map(i => i.id === product.id ? { ...i, qty: i.qty + 1 } : i);
+      }
       return [...prev, { ...product, qty: 1 }];
     });
     setSearch("");
@@ -788,7 +794,14 @@ const PDVPage = () => {
   };
 
   const updateQty = (id, delta) => {
-    setCart(prev => prev.map(i => i.id === id ? { ...i, qty: Math.max(1, i.qty + delta) } : i));
+    setCart(prev => prev.map(i => {
+      if (i.id !== id) return i;
+      if (delta > 0 && i.qty >= i.stock) {
+        toast.warning(`Estoque esgotado para ${i.name}.`);
+        return i;
+      }
+      return { ...i, qty: Math.max(1, i.qty + delta) };
+    }));
   };
 
   const removeItem = (id) => setCart(prev => prev.filter(i => i.id !== id));
