@@ -8,6 +8,7 @@ import DashboardHeader from "../Dashboard/components/DashboardHeader";
 import NFeUpload from "./components/NFeUpload";
 import NFePreviewTable from "./components/NFePreviewTable";
 import ManualEntry from "./components/ManualEntry";
+import QuickActionsBar from "../../components/layout/QuickActionsBar";
 
 const TAB_NFE = "nfe";
 const TAB_MANUAL = "manual";
@@ -83,8 +84,9 @@ export default function EstoqueEntradaPage() {
   return (
     <div style={{ minHeight: "100vh", background: C.pageBg }}>
       <DashboardHeader />
+      <QuickActionsBar />
 
-      <main style={{ maxWidth: 960, margin: "0 auto", padding: "80px 24px 48px" }}>
+      <main style={{ maxWidth: 960, margin: "0 auto", padding: "124px 24px 48px" }}>
         {/* Page header */}
         <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 28, paddingTop: 8 }}>
           <Link to="/dashboard" style={{

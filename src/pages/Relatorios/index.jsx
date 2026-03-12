@@ -7,6 +7,7 @@ import ProductReport from "./components/ProductReport";
 import PaymentMethods from "./components/PaymentMethods";
 import DeadStock from "./components/DeadStock";
 import { isAuthenticated } from "../../hooks/useAuth";
+import QuickActionsBar from "../../components/layout/QuickActionsBar";
 
 const PERIODS = ["Semana", "Mês", "Ano"];
 const PERIOD_KEY = { "Semana": "week", "Mês": "month", "Ano": "year" };
@@ -25,7 +26,8 @@ const RelatoriosPage = () => {
   return (
     <div style={{ background: C.pageBg, minHeight: "100vh" }}>
       <DashboardHeader />
-      <main style={{ padding: "80px 24px 48px", maxWidth: 1100, margin: "0 auto" }}>
+      <QuickActionsBar />
+      <main style={{ padding: "124px 24px 48px", maxWidth: 1100, margin: "0 auto" }}>
 
         <div style={{
           display: "flex",

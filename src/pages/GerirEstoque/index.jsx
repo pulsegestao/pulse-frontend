@@ -9,6 +9,7 @@ import MetricCards from "./components/MetricCards";
 import ProductTable from "./components/ProductTable";
 import { isAuthenticated } from "../../hooks/useAuth";
 import { getProducts, updateProduct, updateStock } from "../../services/api";
+import QuickActionsBar from "../../components/layout/QuickActionsBar";
 
 const UNITS = ["UN", "KG", "L", "CX", "PCT", "DZ", "M", "G"];
 
@@ -276,8 +277,9 @@ const GerirEstoquePage = () => {
   return (
     <div style={{ minHeight: "100vh", background: C.pageBg }}>
       <DashboardHeader />
+      <QuickActionsBar />
 
-      <main style={{ maxWidth: 1280, margin: "0 auto", padding: "80px 24px 48px" }}>
+      <main style={{ maxWidth: 1280, margin: "0 auto", padding: "124px 24px 48px" }}>
         {/* Page header */}
         <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: 28, paddingTop: 8, gap: 16 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
