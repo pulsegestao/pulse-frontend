@@ -138,51 +138,59 @@ const InsightFeed = ({ onInsightRead }) => {
         </select>
       </div>
 
-      {/* Lista */}
-      {items.length === 0 ? (
-        <div style={{
-          display: "flex", flexDirection: "column", alignItems: "center",
-          padding: "48px 24px", gap: 10,
-          background: C.surface, borderRadius: 14, border: `1px solid ${C.border}`,
-        }}>
-          <Inbox size={32} color={C.mid} strokeWidth={1.5} />
-          <p style={{ fontSize: 14, color: C.mid, margin: 0, fontWeight: 600 }}>
-            Nenhum insight encontrado
-          </p>
-          <p style={{ fontSize: 12, color: C.mid, margin: 0 }}>
-            Tente mudar os filtros ou aguarde o próximo ciclo de análise.
-          </p>
-        </div>
-      ) : (
-        <>
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+      {/* Lista com scroll interno */}
+      <div style={{
+        maxHeight: 580,
+        overflowY: "auto",
+        display: "flex",
+        flexDirection: "column",
+        gap: 10,
+        paddingRight: 4,
+      }}>
+        {items.length === 0 ? (
+          <div style={{
+            display: "flex", flexDirection: "column", alignItems: "center",
+            padding: "48px 24px", gap: 10,
+            background: C.surface, borderRadius: 14, border: `1px solid ${C.border}`,
+          }}>
+            <Inbox size={32} color={C.mid} strokeWidth={1.5} />
+            <p style={{ fontSize: 14, color: C.mid, margin: 0, fontWeight: 600 }}>
+              Nenhum insight encontrado
+            </p>
+            <p style={{ fontSize: 12, color: C.mid, margin: 0 }}>
+              Tente mudar os filtros ou aguarde o próximo ciclo de análise.
+            </p>
+          </div>
+        ) : (
+          <>
             {items.map(ins => (
               <InsightCard key={ins.id} insight={ins} onRead={handleRead} />
             ))}
-          </div>
 
-          {remaining > 0 && (
-            <button
-              onClick={() => load(offset + PAGE_SIZE, true)}
-              disabled={loadingMore}
-              style={{
-                width: "100%", padding: "11px 16px",
-                borderRadius: 10, border: `1px solid ${C.border}`,
-                background: C.surface, color: C.mid,
-                fontSize: 13, fontWeight: 600,
-                cursor: loadingMore ? "not-allowed" : "pointer",
-                fontFamily: "inherit",
-                display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-              }}
-            >
-              {loadingMore
-                ? <><Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} /> Carregando...</>
-                : `Carregar mais (${remaining} restantes)`
-              }
-            </button>
-          )}
-        </>
-      )}
+            {remaining > 0 && (
+              <button
+                onClick={() => load(offset + PAGE_SIZE, true)}
+                disabled={loadingMore}
+                style={{
+                  width: "100%", padding: "11px 16px",
+                  borderRadius: 10, border: `1px solid ${C.border}`,
+                  background: C.surface, color: C.mid,
+                  fontSize: 13, fontWeight: 600,
+                  cursor: loadingMore ? "not-allowed" : "pointer",
+                  fontFamily: "inherit",
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                  flexShrink: 0,
+                }}
+              >
+                {loadingMore
+                  ? <><Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} /> Carregando...</>
+                  : `Carregar mais (${remaining} restantes)`
+                }
+              </button>
+            )}
+          </>
+        )}
+      </div>
     </div>
   );
 };
