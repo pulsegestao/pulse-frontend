@@ -224,3 +224,32 @@ export function getPaymentMethods(period = "month") {
 export function getDeadStock() {
   return authRequest("/api/v1/reports/dead-stock");
 }
+export function getInsights({ type, severity, read, limit = 10, offset = 0 } = {}) {
+  const params = new URLSearchParams();
+  if (type)     params.set("type", type);
+  if (severity) params.set("severity", severity);
+  if (read !== undefined && read !== null) params.set("read", String(read));
+  params.set("limit", limit);
+  params.set("offset", offset);
+  return authRequest(`/api/v1/insights?${params.toString()}`);
+}
+
+export function countUnreadInsights() {
+  return authRequest("/api/v1/insights/unread");
+}
+
+export function markInsightRead(id) {
+  return authRequest(`/api/v1/insights/${id}/read`, { method: "PATCH" });
+}
+
+export function markAllInsightsRead() {
+  return authRequest("/api/v1/insights/read-all", { method: "PATCH" });
+}
+
+export function getVelocityRanking(limit = 10) {
+  return authRequest(`/api/v1/analytics/velocity?limit=${limit}`);
+}
+
+export function getCategoryBreakdown(period = "month") {
+  return authRequest(`/api/v1/analytics/categories?period=${period}`);
+}

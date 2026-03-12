@@ -14,6 +14,7 @@ import SessionExpiredPage from "./pages/SessionExpired";
 import ConfiguracoesPage from "./pages/Configuracoes";
 import PDVPage from "./pages/PDV";
 import RelatoriosPage from "./pages/Relatorios";
+import InsightsPage from "./pages/Insights";
 import ErrorBoundary from "./components/ErrorBoundary";
 import ToastContainer from "./components/Toast";
 
@@ -65,6 +66,7 @@ export default function App() {
           <Route path="/configuracoes" element={<AuthShell><ErrorBoundary><ConfiguracoesPage /></ErrorBoundary></AuthShell>} />
           <Route path="/pdv" element={<AuthShell><ErrorBoundary><PDVPage /></ErrorBoundary></AuthShell>} />
           <Route path="/relatorios" element={<AuthShell><ErrorBoundary><RelatoriosPage /></ErrorBoundary></AuthShell>} />
+          <Route path="/insights" element={<AuthShell><ErrorBoundary><InsightsPage /></ErrorBoundary></AuthShell>} />
         </Routes>
       </SessionGuard>
     </BrowserRouter>
