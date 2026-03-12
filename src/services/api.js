@@ -154,6 +154,10 @@ export function getCompanyMembers() {
   return authRequest("/api/v1/companies/me/members");
 }
 
+export function getNCMCategories() {
+  return authRequest("/api/v1/ncm/categories");
+}
+
 export function getPaymentIntegrations() {
   return authRequest("/api/v1/integrations/payment");
 }

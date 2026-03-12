@@ -8,7 +8,7 @@ import DashboardHeader from "../Dashboard/components/DashboardHeader";
 import MetricCards from "./components/MetricCards";
 import ProductTable from "./components/ProductTable";
 import { isAuthenticated } from "../../hooks/useAuth";
-import { getProducts, updateProduct, updateStock } from "../../services/api";
+import { getProducts, updateProduct, updateStock, getNCMCategories } from "../../services/api";
 import QuickActionsBar from "../../components/layout/QuickActionsBar";
 
 const UNITS = ["UN", "KG", "L", "CX", "PCT", "DZ", "M", "G"];
@@ -58,7 +58,7 @@ const FieldLabel = ({ children }) => (
   </label>
 );
 
-const EditModal = ({ product, onClose, onSuccess }) => {
+const EditModal = ({ product, categories, onClose, onSuccess }) => {
   const [form, setForm] = useState({
     name: product.name || "",
     unit: product.unit || "UN",
@@ -66,6 +66,7 @@ const EditModal = ({ product, onClose, onSuccess }) => {
     cost_price: product.cost_price || "",
     barcode: product.barcode || "",
     min_quantity: product.inventory?.min_quantity ?? 0,
+    ncm_code: product.ncm_code || "",
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -82,6 +83,7 @@ const EditModal = ({ product, onClose, onSuccess }) => {
         cost_price: parseFloat(form.cost_price) || 0,
         barcode: form.barcode.trim(),
         min_quantity: parseInt(form.min_quantity) || 0,
+        ncm_code: form.ncm_code,
       });
       onSuccess();
     } catch (e) {
@@ -121,9 +123,20 @@ const EditModal = ({ product, onClose, onSuccess }) => {
             <input value={form.barcode} onChange={e => setForm(f => ({ ...f, barcode: e.target.value }))} style={inputSt} placeholder="EAN-13" />
           </div>
         </div>
-        <div style={{ marginBottom: 16 }}>
-          <FieldLabel>Estoque mínimo</FieldLabel>
-          <input type="number" min="0" value={form.min_quantity} onChange={e => setForm(f => ({ ...f, min_quantity: e.target.value }))} style={{ ...inputSt, width: "calc(50% - 6px)" }} />
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }}>
+          <div>
+            <FieldLabel>Estoque mínimo</FieldLabel>
+            <input type="number" min="0" value={form.min_quantity} onChange={e => setForm(f => ({ ...f, min_quantity: e.target.value }))} style={inputSt} />
+          </div>
+          <div>
+            <FieldLabel>Categoria</FieldLabel>
+            <select value={form.ncm_code} onChange={e => setForm(f => ({ ...f, ncm_code: e.target.value }))} style={{ ...inputSt, cursor: "pointer", appearance: "none" }}>
+              <option value="">Sem categoria</option>
+              {(categories || []).map(c => (
+                <option key={c.prefix} value={c.prefix}>{c.name}</option>
+              ))}
+            </select>
+          </div>
         </div>
         {error && <p style={{ fontSize: 12, color: "#EF4444", marginBottom: 12 }}>{error}</p>}
         <div style={{ display: "flex", gap: 10 }}>
@@ -249,6 +262,7 @@ const GerirEstoquePage = () => {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [modal, setModal] = useState({ type: null, product: null });
@@ -265,6 +279,7 @@ const GerirEstoquePage = () => {
   useEffect(() => {
     if (!isAuthenticated()) { navigate("/", { replace: true }); return; }
     fetchProducts();
+    getNCMCategories().then(setCategories).catch(() => {});
   }, []);
 
   const closeModal = () => setModal({ type: null, product: null });
@@ -366,12 +381,12 @@ const GerirEstoquePage = () => {
         ) : error ? (
           <WidgetError message={error} onRetry={fetchProducts} />
         ) : (
-          <ProductTable products={filtered} onAction={(type, product) => setModal({ type, product })} />
+          <ProductTable products={filtered} categories={categories} onAction={(type, product) => setModal({ type, product })} />
         )}
       </main>
 
       {/* Modais */}
-      {modal.type === "edit"   && <EditModal      product={modal.product} onClose={closeModal} onSuccess={handleSuccess} />}
+      {modal.type === "edit"   && <EditModal      product={modal.product} categories={categories} onClose={closeModal} onSuccess={handleSuccess} />}
       {modal.type === "add"    && <AddStockModal  product={modal.product} onClose={closeModal} onSuccess={handleSuccess} />}
       {modal.type === "adjust" && <AdjustStockModal product={modal.product} onClose={closeModal} onSuccess={handleSuccess} />}
 

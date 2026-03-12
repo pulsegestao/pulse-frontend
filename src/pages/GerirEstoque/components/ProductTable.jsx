@@ -50,7 +50,12 @@ const TH = ({ children, align = "left" }) => (
   </th>
 );
 
-const ProductTable = ({ products, onAction }) => {
+const ProductTable = ({ products, categories, onAction }) => {
+  const categoryName = (ncmCode) => {
+    if (!ncmCode || !categories?.length) return null;
+    const prefix = ncmCode.length >= 2 ? ncmCode.substring(0, 2) : ncmCode;
+    return categories.find(c => c.prefix === prefix)?.name || null;
+  };
   if (products.length === 0) {
     return (
       <div style={{
@@ -102,7 +107,7 @@ const ProductTable = ({ products, onAction }) => {
                       fontSize: 12, fontWeight: 600, color: C.mid,
                       background: C.gray, borderRadius: 6, padding: "3px 9px",
                     }}>
-                      {p.category_id ?? "Sem categoria"}
+                      {categoryName(p.ncm_code) ?? "Sem categoria"}
                     </span>
                   </td>
                   <td style={{ padding: "14px 16px", textAlign: "center" }}>
