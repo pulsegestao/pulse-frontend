@@ -98,38 +98,59 @@ const QtyBtn = ({ onClick, disabled, children }) => (
   </button>
 );
 
-const ProductCard = ({ product, onAdd }) => (
-  <button
-    onClick={() => onAdd(product)}
-    style={{
-      display: "flex", flexDirection: "column", gap: 8,
-      padding: "14px 16px", borderRadius: 12,
-      background: C.surface, border: `1.5px solid ${C.border}`,
-      cursor: "pointer", textAlign: "left", fontFamily: "inherit",
-      transition: "all 0.15s", width: "100%", boxSizing: "border-box",
-    }}
-    onMouseEnter={e => {
-      e.currentTarget.style.borderColor = C.blue + "55";
-      e.currentTarget.style.background = C.bluePale;
-      e.currentTarget.style.transform = "translateY(-1px)";
-    }}
-    onMouseLeave={e => {
-      e.currentTarget.style.borderColor = C.border;
-      e.currentTarget.style.background = C.surface;
-      e.currentTarget.style.transform = "none";
-    }}
-  >
-    <p style={{ fontSize: 13, fontWeight: 600, color: C.graphite, margin: 0, lineHeight: 1.35 }}>
-      {product.name}
-    </p>
-    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-      <span style={{ fontSize: 15, fontWeight: 800, color: C.green }}>{fmt(product.price)}</span>
-      <span style={{ padding: "2px 7px", borderRadius: 6, background: C.gray, fontSize: 10, fontWeight: 600, color: C.mid }}>
-        {product.unit}
-      </span>
-    </div>
-  </button>
-);
+const ProductCard = ({ product, onAdd }) => {
+  const outOfStock = product.stock <= 0;
+  return (
+    <button
+      onClick={() => !outOfStock && onAdd(product)}
+      disabled={outOfStock}
+      style={{
+        display: "flex", flexDirection: "column", gap: 8,
+        padding: "14px 16px", borderRadius: 12,
+        background: outOfStock ? C.gray : C.surface,
+        border: `1.5px solid ${outOfStock ? C.border : C.border}`,
+        cursor: outOfStock ? "not-allowed" : "pointer",
+        textAlign: "left", fontFamily: "inherit",
+        transition: "all 0.15s", width: "100%", boxSizing: "border-box",
+        opacity: outOfStock ? 0.55 : 1,
+        position: "relative",
+      }}
+      onMouseEnter={e => {
+        if (outOfStock) return;
+        e.currentTarget.style.borderColor = C.blue + "55";
+        e.currentTarget.style.background = C.bluePale;
+        e.currentTarget.style.transform = "translateY(-1px)";
+      }}
+      onMouseLeave={e => {
+        if (outOfStock) return;
+        e.currentTarget.style.borderColor = C.border;
+        e.currentTarget.style.background = C.surface;
+        e.currentTarget.style.transform = "none";
+      }}
+    >
+      {outOfStock && (
+        <span style={{
+          position: "absolute", top: 8, right: 8,
+          padding: "2px 7px", borderRadius: 6,
+          background: C.redPale, color: "#DC2626",
+          fontSize: 9, fontWeight: 800, letterSpacing: "0.3px",
+          textTransform: "uppercase",
+        }}>
+          Sem estoque
+        </span>
+      )}
+      <p style={{ fontSize: 13, fontWeight: 600, color: outOfStock ? C.mid : C.graphite, margin: 0, lineHeight: 1.35 }}>
+        {product.name}
+      </p>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <span style={{ fontSize: 15, fontWeight: 800, color: outOfStock ? C.mid : C.green }}>{fmt(product.price)}</span>
+        <span style={{ padding: "2px 7px", borderRadius: 6, background: C.gray, fontSize: 10, fontWeight: 600, color: C.mid }}>
+          {product.unit}
+        </span>
+      </div>
+    </button>
+  );
+};
 
 const CartItem = ({ item, onUpdateQty, onRemove }) => (
   <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 16px", borderBottom: `1px solid ${C.border}` }}>
@@ -750,7 +771,7 @@ const PDVPage = () => {
     inputRef.current?.focus();
     getProducts()
       .then(data => setProducts(
-        (data || []).filter(p => p.active).map(p => ({ id: p.id, name: p.name, price: p.sale_price, unit: p.unit || "UN" }))
+        (data || []).filter(p => p.active).map(p => ({ id: p.id, name: p.name, price: p.sale_price, unit: p.unit || "UN", stock: p.inventory?.quantity ?? 0 }))
       ))
       .catch(() => toast.error("Falha ao carregar produtos."))
       .finally(() => setProductsLoading(false));
