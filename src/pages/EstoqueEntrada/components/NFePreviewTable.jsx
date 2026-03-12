@@ -5,7 +5,7 @@ import C from "../../../theme/colors";
 const MODE_LINK = "link";
 const MODE_NEW = "new";
 
-const NFePreviewTable = ({ preview, products, onItemsChange }) => {
+const NFePreviewTable = ({ preview, products, onItemsChange, defaultMinStock = 0 }) => {
   const [overrides, setOverrides] = useState({});
   const [newProducts, setNewProducts] = useState({});
   const [modes, setModes] = useState({});
@@ -31,6 +31,7 @@ const NFePreviewTable = ({ preview, products, onItemsChange }) => {
           barcode: item?.ean && item.ean !== "SEM GTIN" ? item.ean : "",
           unit: item?.unit || "UN",
           cost_price: item?.unit_cost || 0,
+          min_quantity: defaultMinStock > 0 ? defaultMinStock : 0,
         },
       };
       setNewProducts(np);
@@ -73,6 +74,7 @@ const NFePreviewTable = ({ preview, products, onItemsChange }) => {
               unit: npData.unit || "UN",
               cost_price: Number(npData.cost_price) || item.unit_cost,
               sale_price: Number(npData.sale_price),
+              min_quantity: Number(npData.min_quantity) || 0,
             },
             quantity: Math.round(item.quantity),
             unit_cost: item.unit_cost,

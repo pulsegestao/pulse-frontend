@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { ArrowLeft, FileText, PenLine, Loader2 } from "lucide-react";
 import C from "../../theme/colors";
+import { friendlyError } from "../../utils/errorMessage";
 import { isAuthenticated } from "../../hooks/useAuth";
 import { getProducts, getCompanySettings, previewNFe, confirmNFe } from "../../services/api";
 import DashboardHeader from "../Dashboard/components/DashboardHeader";
@@ -167,6 +168,7 @@ export default function EstoqueEntradaPage() {
                           preview={preview}
                           products={products}
                           onItemsChange={setPreviewItems}
+                          defaultMinStock={defaultMinStock}
                         />
 
                         {confirmError && (

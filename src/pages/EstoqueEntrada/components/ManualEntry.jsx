@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Search, Plus, Trash2, PackagePlus, X } from "lucide-react";
 import C from "../../../theme/colors";
+import { friendlyError } from "../../../utils/errorMessage";
 
 const UNITS = ["UN", "KG", "L", "CX", "PCT", "DZ", "M", "G"];
 
