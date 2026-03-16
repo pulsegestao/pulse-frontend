@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Sparkles, CheckCheck, Loader2 } from "lucide-react";
+import { Activity, CheckCheck, Loader2 } from "lucide-react";
 import C from "../../theme/colors";
 import DashboardHeader from "../Dashboard/components/DashboardHeader";
 import QuickActionsBar from "../../components/layout/QuickActionsBar";
@@ -27,7 +27,7 @@ const InsightsPage = () => {
     try {
       await markAllInsightsRead();
       setSummaryKey(k => k + 1);
-      toast.success("Todos os insights foram marcados como lidos.");
+      toast.success("Todos os pulsos foram marcados como lidos.");
     } catch {
       toast.error("Falha ao marcar todos como lidos.");
     } finally {
@@ -55,17 +55,17 @@ const InsightsPage = () => {
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <div style={{
               width: 42, height: 42, borderRadius: 12,
-              background: C.purplePale,
+              background: C.bluePale,
               display: "flex", alignItems: "center", justifyContent: "center",
             }}>
-              <Sparkles size={20} color="#7C3AED" strokeWidth={2} />
+              <Activity size={20} color={C.blue} strokeWidth={2} />
             </div>
             <div>
               <p style={{ fontSize: 13, fontWeight: 600, color: C.mid, margin: 0 }}>
-                Análise inteligente
+                Sinta o pulso do seu negócio
               </p>
               <h1 style={{ fontSize: 22, fontWeight: 800, color: C.graphite, margin: 0, letterSpacing: "-0.3px" }}>
-                Pulse Insights
+                Pulso
               </h1>
             </div>
           </div>

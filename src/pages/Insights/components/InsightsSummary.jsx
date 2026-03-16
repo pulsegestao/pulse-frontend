@@ -83,7 +83,7 @@ const InsightsSummary = ({ refreshKey }) => {
         Icon={Bell}
         iconColor={C.blue}
         iconBg={C.bluePale}
-        label="Total de insights"
+        label="Total de pulsos"
         value={total}
       />
       <Card

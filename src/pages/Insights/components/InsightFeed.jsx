@@ -56,7 +56,7 @@ const InsightFeed = ({ onInsightRead }) => {
       setTotal(res.total ?? 0);
       setOffset(off);
     } catch (err) {
-      setError(friendlyError(err.message) || "Falha ao carregar insights.");
+      setError(friendlyError(err.message) || "Falha ao carregar pulsos.");
     } finally {
       setLoading(false);
       setLoadingMore(false);
@@ -155,10 +155,10 @@ const InsightFeed = ({ onInsightRead }) => {
           }}>
             <Inbox size={32} color={C.mid} strokeWidth={1.5} />
             <p style={{ fontSize: 14, color: C.mid, margin: 0, fontWeight: 600 }}>
-              Nenhum insight encontrado
+              Nenhum pulso encontrado
             </p>
             <p style={{ fontSize: 12, color: C.mid, margin: 0 }}>
-              Tente mudar os filtros ou aguarde o próximo ciclo de análise.
+              Tente mudar os filtros ou aguarde o próximo ciclo.
             </p>
           </div>
         ) : (

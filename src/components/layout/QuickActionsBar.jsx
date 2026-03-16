@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { LayoutDashboard, ShoppingCart, PackagePlus, Package, BarChart2, Sparkles } from "lucide-react";
+import { LayoutDashboard, ShoppingCart, PackagePlus, Package, BarChart2, Activity } from "lucide-react";
 import C from "../../theme/colors";
 
 const ITEMS = [
@@ -8,7 +8,7 @@ const ITEMS = [
   { label: "Entrada de estoque", Icon: PackagePlus,     href: "/estoque/entrada" },
   { label: "Gerir estoque",      Icon: Package,         href: "/gerir-estoque"   },
   { label: "Relatórios",         Icon: BarChart2,       href: "/relatorios"      },
-  { label: "Insights",           Icon: Sparkles,        href: "/insights"        },
+  { label: "Pulso",              Icon: Activity,        href: "/insights"        },
 ];
 
 const QuickActionsBar = () => {

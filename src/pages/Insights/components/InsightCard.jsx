@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { TrendingDown, TrendingUp, PackageX, Zap, AlertTriangle, DollarSign, Sparkles, Check } from "lucide-react";
+import { TrendingDown, TrendingUp, PackageX, Zap, AlertTriangle, DollarSign, Activity, Check } from "lucide-react";
 import C from "../../../theme/colors";
 import { markInsightRead } from "../../../services/api";
 import { friendlyError } from "../../../utils/errorMessage";
@@ -55,7 +55,7 @@ const InsightCard = ({ insight, onRead }) => {
   const [marking, setMarking] = useState(false);
   const [isRead, setIsRead] = useState(insight.read);
 
-  const typeConf = TYPE_CONFIG[insight.type] || { label: insight.type, Icon: Sparkles, color: C.mid, bg: C.gray };
+  const typeConf = TYPE_CONFIG[insight.type] || { label: insight.type, Icon: Activity, color: C.mid, bg: C.gray };
   const sevConf  = SEV_CONFIG[insight.severity]  || { label: insight.severity, color: C.mid, bg: C.gray };
   const { Icon } = typeConf;
 
