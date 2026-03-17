@@ -14,7 +14,7 @@ const testimonials = [
     name: "Renata Oliveira",
     role: "Proprietária da Adega Oliveira · São Paulo, SP",
     avatar: "RO",
-    avatarColor: C.green,
+    avatarColor: C.blueLight,
     text: "Sistema simples, sem complicação. Em menos de um dia já tava rodando na adega. A IA sugeriu eu repor uma cerveja que eu não tava dando atenção, e ela virou minha mais vendida da semana.",
     stars: 5,
   },

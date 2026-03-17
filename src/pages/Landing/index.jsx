@@ -11,7 +11,7 @@ import Pricing from "./sections/Pricing";
 import CTABanner from "./sections/CTABanner";
 
 const LandingPage = () => (
-  <>
+  <div className="landing-page">
     <Navbar />
     <main>
       <Hero />
@@ -25,7 +25,7 @@ const LandingPage = () => (
       <CTABanner />
     </main>
     <Footer />
-  </>
+  </div>
 );
 
 export default LandingPage;

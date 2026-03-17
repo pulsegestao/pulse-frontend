@@ -88,7 +88,7 @@ const SalesChart = () => {
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 20 }}>
         <div>
           <p style={{ fontSize: 13, fontWeight: 600, color: C.mid, margin: "0 0 4px" }}>Faturamento</p>
-          <p style={{ fontSize: 24, fontWeight: 800, color: C.graphite, margin: 0 }}>
+          <p style={{ fontSize: 24, fontWeight: 800, color: C.blue, margin: 0 }}>
             {loading ? "–" : fmtBRL(meta.total)}
           </p>
           {!loading && !error && (
@@ -106,7 +106,7 @@ const SalesChart = () => {
               style={{
                 padding: "5px 14px", borderRadius: 8, border: "none",
                 background: period === p ? C.surface : "transparent",
-                color: period === p ? C.graphite : C.mid,
+                color: period === p ? C.blue : C.mid,
                 fontSize: 12, fontWeight: period === p ? 700 : 500,
                 cursor: "pointer",
                 boxShadow: period === p ? "0 1px 4px rgba(0,0,0,0.08)" : "none",
@@ -137,12 +137,12 @@ const SalesChart = () => {
         <svg viewBox={`0 0 ${VW} ${VH}`} style={{ width: "100%", height: "auto", overflow: "visible" }}>
           <defs>
             <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={C.blue} stopOpacity="0.15" />
-              <stop offset="100%" stopColor={C.blue} stopOpacity="0" />
+              <stop offset="0%" style={{ stopColor: C.blue, stopOpacity: 0.15 }} />
+              <stop offset="100%" style={{ stopColor: C.blue, stopOpacity: 0 }} />
             </linearGradient>
             <linearGradient id="lineGrad" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stopColor={C.blue} />
-              <stop offset="100%" stopColor={C.blueLight} />
+              <stop offset="0%" style={{ stopColor: C.blue }} />
+              <stop offset="100%" style={{ stopColor: C.blueLight }} />
             </linearGradient>
           </defs>
 
@@ -150,8 +150,8 @@ const SalesChart = () => {
             const y = cy(v);
             return (
               <g key={v}>
-                <line x1={PAD.l} y1={y} x2={VW - PAD.r} y2={y} stroke={C.border} strokeWidth="1" strokeDasharray="4 4" />
-                <text x={PAD.l - 6} y={y} textAnchor="end" dominantBaseline="middle" fontSize="10" fill={C.mid} fontFamily="Plus Jakarta Sans, sans-serif">
+                <line x1={PAD.l} y1={y} x2={VW - PAD.r} y2={y} style={{ stroke: C.border }} strokeWidth="1" strokeDasharray="4 4" />
+                <text x={PAD.l - 6} y={y} textAnchor="end" dominantBaseline="middle" fontSize="10" style={{ fill: C.mid }} fontFamily="Plus Jakarta Sans, sans-serif">
                   {v >= 1000 ? `${(v / 1000).toFixed(v % 1000 === 0 ? 0 : 1)}K` : v}
                 </text>
               </g>
@@ -168,18 +168,18 @@ const SalesChart = () => {
             return (
               <g key={`${d.label}-${i}`} onMouseEnter={() => setHovered(i)} onMouseLeave={() => setHovered(null)} style={{ cursor: "default" }}>
                 {isHovered && (
-                  <line x1={x} y1={PAD.t} x2={x} y2={BOTTOM} stroke={C.blue} strokeWidth="1" strokeDasharray="3 3" opacity="0.5" />
+                  <line x1={x} y1={PAD.t} x2={x} y2={BOTTOM} style={{ stroke: C.blue }} strokeWidth="1" strokeDasharray="3 3" opacity="0.5" />
                 )}
-                <circle cx={x} cy={y} r={isHovered ? 6 : 4} stroke={C.blue} strokeWidth="2.5" style={{ fill: isHovered ? C.blue : C.surface, transition: "r 0.15s" }} />
+                <circle cx={x} cy={y} r={isHovered ? 6 : 4} strokeWidth="2.5" style={{ stroke: C.blue, fill: isHovered ? C.blue : C.surface, transition: "r 0.15s" }} />
                 {isHovered && (
                   <g>
-                    <rect x={x - 44} y={y - 34} width="88" height="24" rx="6" fill={C.graphite} />
+                    <rect x={x - 44} y={y - 34} width="88" height="24" rx="6" style={{ fill: C.graphite }} />
                     <text x={x} y={y - 18} textAnchor="middle" dominantBaseline="middle" fontSize="11" fontWeight="700" fill="white" fontFamily="Plus Jakarta Sans, sans-serif">
                       {fmtBRL(d.value)}
                     </text>
                   </g>
                 )}
-                <text x={x} y={VH - 6} textAnchor="middle" fontSize="10" fill={C.mid} fontFamily="Plus Jakarta Sans, sans-serif">
+                <text x={x} y={VH - 6} textAnchor="middle" fontSize="10" style={{ fill: C.mid }} fontFamily="Plus Jakarta Sans, sans-serif">
                   {d.label}
                 </text>
               </g>

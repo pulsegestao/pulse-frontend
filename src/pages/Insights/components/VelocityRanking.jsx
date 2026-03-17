@@ -81,9 +81,9 @@ const VelocityRanking = () => {
                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                     <span style={{
                       width: 20, height: 20, borderRadius: 6,
-                      background: C.gray,
+                      background: C.bluePale,
                       display: "flex", alignItems: "center", justifyContent: "center",
-                      fontSize: 10, fontWeight: 800, color: C.mid,
+                      fontSize: 10, fontWeight: 800, color: C.blue,
                       flexShrink: 0,
                     }}>
                       {idx + 1}

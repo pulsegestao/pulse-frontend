@@ -80,7 +80,7 @@ const DashboardHeader = () => {
             </svg>
           </div>
           <span className="syne" style={{ fontSize: 17, fontWeight: 800, color: C.blue, letterSpacing: "-0.2px" }}>
-            Pulse <span style={{ color: C.green }}>Gestão</span>
+            Pulse <span style={{ color: C.blueLight }}>Gestão</span>
           </span>
         </Link>
 
@@ -111,12 +111,12 @@ const DashboardHeader = () => {
 
         <div style={{ position: "relative" }}>
           <IconBtn>
-            <Bell size={17} color={C.mid} strokeWidth={2} />
+            <Bell size={17} color={C.blue} strokeWidth={2} />
           </IconBtn>
           <span style={{
             position: "absolute", top: 6, right: 6,
             width: 8, height: 8, borderRadius: "50%",
-            background: "#EF4444", border: `2px solid ${C.surface}`,
+            background: C.blue, border: `2px solid ${C.surface}`,
             display: "block",
           }} />
         </div>

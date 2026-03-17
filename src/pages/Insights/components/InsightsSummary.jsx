@@ -26,7 +26,7 @@ const Card = ({ Icon, iconColor, iconBg, label, value, badge }) => (
         <span style={{
           position: "absolute", top: -4, right: -4,
           minWidth: 16, height: 16, borderRadius: 8,
-          background: "#DC2626", color: "white",
+          background: C.blue, color: "white",
           fontSize: 10, fontWeight: 800,
           display: "flex", alignItems: "center", justifyContent: "center",
           padding: "0 3px",
@@ -37,7 +37,7 @@ const Card = ({ Icon, iconColor, iconBg, label, value, badge }) => (
     </div>
     <div>
       <p style={{ fontSize: 13, fontWeight: 600, color: C.mid, margin: 0 }}>{label}</p>
-      <p style={{ fontSize: 28, fontWeight: 800, color: C.graphite, margin: "2px 0 0", lineHeight: 1 }}>
+      <p style={{ fontSize: 28, fontWeight: 800, color: C.blue, margin: "2px 0 0", lineHeight: 1 }}>
         {value}
       </p>
     </div>

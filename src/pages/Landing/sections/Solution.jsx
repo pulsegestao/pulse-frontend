@@ -16,7 +16,7 @@ const Solution = () => {
     <section id="solução" style={{ background: C.white, padding: "100px 24px" }}>
       <div style={{ maxWidth: 1200, margin: "0 auto" }} ref={ref}>
         <div className={`fade-up ${visible ? "visible" : ""}`} style={{ textAlign: "center", marginBottom: 72 }}>
-          <div style={{ display: "inline-block", background: C.greenPale, color: C.green, borderRadius: 100, padding: "6px 18px", fontSize: 13, fontWeight: 600, marginBottom: 20 }}>
+          <div style={{ display: "inline-block", background: C.bluePale, color: C.blue, borderRadius: 100, padding: "6px 18px", fontSize: 13, fontWeight: 600, marginBottom: 20 }}>
             A solução
           </div>
           <h2 className="syne" style={{ fontSize: "clamp(28px, 4vw, 46px)", fontWeight: 800, color: C.graphite, marginBottom: 16, letterSpacing: "-0.5px" }}>
@@ -38,9 +38,9 @@ const Solution = () => {
               }}>
               <div style={{
                 width: 64, height: 64, borderRadius: 16, flexShrink: 0,
-                background: i < 2 ? `linear-gradient(135deg, ${C.blue}, ${C.blueLight})` : `linear-gradient(135deg, ${C.green}, ${C.greenLight})`,
+                background: `linear-gradient(135deg, ${C.blue}, ${C.blueLight})`,
                 display: "flex", alignItems: "center", justifyContent: "center",
-                boxShadow: `0 8px 20px ${i < 2 ? C.blue : C.green}30`,
+                boxShadow: `0 8px 20px ${C.blue}30`,
               }}>
                 <span style={{ fontSize: 22, fontWeight: 800, color: "white", fontFamily: "Syne, sans-serif" }}>{s.n}</span>
               </div>

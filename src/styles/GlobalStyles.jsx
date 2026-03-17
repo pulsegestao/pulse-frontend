@@ -1,11 +1,11 @@
 const GlobalStyles = () => (
   <style>{`
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Syne:wght@700;800&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800&family=Space+Grotesk:wght@500;600;700&display=swap');
 
     :root {
-      --c-blue:        #1E3A8A;
-      --c-blue-light:  #2952B3;
-      --c-blue-pale:   #EFF4FF;
+      --c-blue:        #0F766E;
+      --c-blue-light:  #0D9488;
+      --c-blue-pale:   #F0FDFA;
       --c-green:       #16A34A;
       --c-green-light: #22C55E;
       --c-green-pale:  #F0FDF4;
@@ -25,7 +25,7 @@ const GlobalStyles = () => (
     }
 
     [data-theme="dark"] {
-      --c-blue-pale:   #1A2744;
+      --c-blue-pale:   #042F2E;
       --c-green-pale:  #0E2318;
       --c-white:       #374151;
       --c-gray:        #1F2937;
@@ -55,6 +55,9 @@ const GlobalStyles = () => (
     }
 
     .syne { font-family: 'Syne', sans-serif; }
+
+    .landing-page { font-family: 'DM Sans', sans-serif; }
+    .landing-page .syne { font-family: 'Space Grotesk', sans-serif; }
 
     .fade-up {
       opacity: 0;

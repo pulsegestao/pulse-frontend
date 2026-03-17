@@ -23,7 +23,7 @@ const Pricing = () => {
     <section id="preços" style={{ padding: "100px 24px", background: C.white }}>
       <div style={{ maxWidth: 1200, margin: "0 auto" }} ref={ref}>
         <div className={`fade-up ${visible ? "visible" : ""}`} style={{ textAlign: "center", marginBottom: 52 }}>
-          <div style={{ display: "inline-block", background: C.greenPale, color: C.green, borderRadius: 100, padding: "6px 18px", fontSize: 13, fontWeight: 600, marginBottom: 20 }}>
+          <div style={{ display: "inline-block", background: C.bluePale, color: C.blue, borderRadius: 100, padding: "6px 18px", fontSize: 13, fontWeight: 600, marginBottom: 20 }}>
             Preço simples e justo
           </div>
           <h2 className="syne" style={{ fontSize: "clamp(28px, 4vw, 46px)", fontWeight: 800, color: C.graphite, marginBottom: 16, letterSpacing: "-0.5px" }}>
@@ -39,14 +39,14 @@ const Pricing = () => {
               onClick={() => setAnnual(false)}>Mensal</span>
             <span style={{ fontSize: 14, fontWeight: 600, color: annual ? C.blue : C.mid, cursor: "pointer", padding: "6px 18px", borderRadius: 100, background: annual ? "white" : "transparent", boxShadow: annual ? "0 2px 8px rgba(0,0,0,0.08)" : "none", transition: "all 0.2s" }}
               onClick={() => setAnnual(true)}>
-              Anual <span style={{ background: C.green, color: "white", borderRadius: 100, fontSize: 11, padding: "2px 8px", fontWeight: 700, marginLeft: 4 }}>-25%</span>
+              Anual <span style={{ background: C.blue, color: "white", borderRadius: 100, fontSize: 11, padding: "2px 8px", fontWeight: 700, marginLeft: 4 }}>-25%</span>
             </span>
           </div>
         </div>
 
         <div className={`fade-up d1 ${visible ? "visible" : ""}`} style={{ maxWidth: 520, margin: "0 auto" }}>
           <div style={{
-            background: `linear-gradient(145deg, ${C.blue}, #2563EB)`,
+            background: `linear-gradient(145deg, ${C.blue}, ${C.blueLight})`,
             borderRadius: 24, padding: "40px 40px 36px",
             boxShadow: `0 24px 60px ${C.blue}33`,
             position: "relative", overflow: "hidden",
@@ -72,7 +72,7 @@ const Pricing = () => {
               <div style={{ display: "flex", flexDirection: "column", gap: 14, marginBottom: 36 }}>
                 {planFeatures.map((f, i) => (
                   <div key={i} style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                    <div style={{ width: 20, height: 20, borderRadius: "50%", background: C.green, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    <div style={{ width: 20, height: 20, borderRadius: "50%", background: "rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                       <svg width="11" height="11" viewBox="0 0 12 12"><path d="M2 6l3 3 5-5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
                     </div>
                     <span style={{ color: "rgba(255,255,255,0.9)", fontSize: 15 }}>{f}</span>

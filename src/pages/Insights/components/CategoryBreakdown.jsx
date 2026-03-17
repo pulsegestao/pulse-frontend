@@ -12,7 +12,7 @@ const PERIODS = [
 
 const fmt = (n) => n.toLocaleString("pt-BR", { style: "currency", currency: "BRL", minimumFractionDigits: 0 });
 
-const BAR_COLORS = ["#1E3A8A", "#16A34A", "#7C3AED", "#D97706", "#EA580C", "#DC2626", "#0891B2"];
+const BAR_COLORS = ["#0F766E", "#0D9488", "#16A34A", "#D97706", "#EA580C", "#DC2626", "#0891B2"];
 
 const CategoryBreakdown = () => {
   const [period, setPeriod]   = useState("month");
@@ -51,10 +51,10 @@ const CategoryBreakdown = () => {
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <div style={{
             width: 36, height: 36, borderRadius: 10,
-            background: C.purplePale,
+            background: C.bluePale,
             display: "flex", alignItems: "center", justifyContent: "center",
           }}>
-            <PieChart size={18} color="#7C3AED" strokeWidth={2} />
+            <PieChart size={18} color={C.blue} strokeWidth={2} />
           </div>
           <div>
             <p style={{ fontSize: 12, fontWeight: 600, color: C.mid, margin: 0 }}>Receita</p>
@@ -77,7 +77,7 @@ const CategoryBreakdown = () => {
                   padding: "4px 10px", borderRadius: 6,
                   border: "none",
                   background: active ? C.surface : "transparent",
-                  color: active ? C.graphite : C.mid,
+                  color: active ? C.blue : C.mid,
                   fontSize: 11, fontWeight: active ? 700 : 500,
                   cursor: "pointer", fontFamily: "inherit",
                   boxShadow: active ? "0 1px 4px rgba(0,0,0,0.08)" : "none",

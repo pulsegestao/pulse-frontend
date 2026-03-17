@@ -49,7 +49,7 @@ const AISection = () => {
 
           {/* Right – explanation */}
           <div className={`fade-up d2 ${visible ? "visible" : ""}`} style={{ flex: "1 1 380px" }}>
-            <div style={{ display: "inline-block", background: `linear-gradient(135deg, ${C.blue}15, ${C.green}15)`, color: C.blue, borderRadius: 100, padding: "6px 18px", fontSize: 13, fontWeight: 600, marginBottom: 20 }}>
+            <div style={{ display: "inline-block", background: `linear-gradient(135deg, ${C.blue}15, ${C.blueLight}15)`, color: C.blue, borderRadius: 100, padding: "6px 18px", fontSize: 13, fontWeight: 600, marginBottom: 20 }}>
               Inteligência Artificial
             </div>
             <h2 className="syne" style={{ fontSize: "clamp(26px, 3.5vw, 42px)", fontWeight: 800, color: C.graphite, marginBottom: 20, letterSpacing: "-0.5px" }}>
@@ -63,8 +63,8 @@ const AISection = () => {
             <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
               {checkItems.map((t, i) => (
                 <div key={i} style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                  <div style={{ width: 22, height: 22, borderRadius: "50%", background: C.greenPale, border: `1.5px solid ${C.green}`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                    <svg width="12" height="12" viewBox="0 0 12 12"><path d="M2 6l3 3 5-5" stroke={C.green} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  <div style={{ width: 22, height: 22, borderRadius: "50%", background: C.bluePale, border: `1.5px solid ${C.blue}`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    <svg width="12" height="12" viewBox="0 0 12 12"><path d="M2 6l3 3 5-5" style={{ stroke: C.blue }} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
                   </div>
                   <span style={{ fontSize: 15, color: C.graphite }}>{t}</span>
                 </div>

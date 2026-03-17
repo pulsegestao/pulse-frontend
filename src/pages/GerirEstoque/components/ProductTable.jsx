@@ -142,8 +142,8 @@ const ProductTable = ({ products, categories, onAction }) => {
                   <td style={{ padding: "14px 16px" }}>
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
                       <ActionBtn icon={Pencil} title="Editar produto" color={C.blue} onClick={() => onAction("edit", p)} />
-                      <ActionBtn icon={PlusCircle} title="Adicionar estoque" color={C.green} onClick={() => onAction("add", p)} />
-                      <ActionBtn icon={SlidersHorizontal} title="Ajustar estoque" color="#7C3AED" onClick={() => onAction("adjust", p)} />
+                      <ActionBtn icon={PlusCircle} title="Adicionar estoque" color={C.blue} onClick={() => onAction("add", p)} />
+                      <ActionBtn icon={SlidersHorizontal} title="Ajustar estoque" color={C.blueLight} onClick={() => onAction("adjust", p)} />
                     </div>
                   </td>
                 </tr>

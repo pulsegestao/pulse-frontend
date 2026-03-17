@@ -65,7 +65,7 @@ const RelatoriosPage = () => {
                 style={{
                   padding: "6px 16px", borderRadius: 8, border: "none",
                   background: period === p ? C.surface : "transparent",
-                  color: period === p ? C.graphite : C.mid,
+                  color: period === p ? C.blue : C.mid,
                   fontSize: 13, fontWeight: period === p ? 700 : 500,
                   cursor: "pointer",
                   boxShadow: period === p ? "0 1px 4px rgba(0,0,0,0.08)" : "none",

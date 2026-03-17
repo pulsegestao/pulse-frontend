@@ -18,7 +18,7 @@ const SEV_CONFIG = {
   critical: { label: "Crítico", color: "#DC2626", bg: C.redPale    },
   high:     { label: "Alto",    color: "#EA580C", bg: C.orangePale },
   medium:   { label: "Médio",   color: "#D97706", bg: C.amberPale  },
-  low:      { label: "Baixo",   color: "#1E3A8A", bg: C.bluePale   },
+  low:      { label: "Baixo",   color: C.blue,    bg: C.bluePale   },
 };
 
 const MONTHS = ["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"];
@@ -102,7 +102,7 @@ const InsightCard = ({ insight, onRead }) => {
         <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
           <Badge label={sevConf.label} color={sevConf.color} bg={sevConf.bg} small />
           {!isRead && (
-            <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#DC2626", flexShrink: 0 }} />
+            <div style={{ width: 8, height: 8, borderRadius: "50%", background: C.blue, flexShrink: 0 }} />
           )}
         </div>
       </div>
@@ -135,8 +135,8 @@ const InsightCard = ({ insight, onRead }) => {
               cursor: marking ? "not-allowed" : "pointer",
               fontFamily: "inherit",
             }}
-            onMouseEnter={e => { if (!marking) { e.currentTarget.style.background = C.gray; e.currentTarget.style.color = C.graphite; } }}
-            onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = C.mid; }}
+            onMouseEnter={e => { if (!marking) { e.currentTarget.style.background = C.bluePale; e.currentTarget.style.color = C.blue; e.currentTarget.style.borderColor = C.blue + "44"; } }}
+            onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = C.mid; e.currentTarget.style.borderColor = C.border; }}
           >
             <Check size={11} strokeWidth={2.5} />
             {marking ? "Marcando..." : "Marcar como lido"}
