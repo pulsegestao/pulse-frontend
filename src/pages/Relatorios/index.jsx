@@ -6,6 +6,7 @@ import DashboardHeader from "../Dashboard/components/DashboardHeader";
 import ProductReport from "./components/ProductReport";
 import PaymentMethods from "./components/PaymentMethods";
 import DeadStock from "./components/DeadStock";
+import PrazoCard from "./components/PrazoCard";
 import { isAuthenticated } from "../../hooks/useAuth";
 import QuickActionsBar from "../../components/layout/QuickActionsBar";
 
@@ -81,6 +82,7 @@ const RelatoriosPage = () => {
           <ProductReport period={periodKey} />
           <PaymentMethods period={periodKey} />
           <DeadStock />
+          <PrazoCard />
         </div>
 
       </main>

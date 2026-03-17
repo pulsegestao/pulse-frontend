@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import {
   Search, X, Plus, Minus, Trash2, ShoppingCart,
   QrCode, CreditCard, Banknote, Wallet, Check, Package, LogOut,
-  Loader2, AlertCircle, Smartphone,
+  Loader2, AlertCircle, Smartphone, Clock, UserPlus,
 } from "lucide-react";
 import C from "../../theme/colors";
 import { isAuthenticated, getProfile } from "../../hooks/useAuth";
@@ -16,6 +16,8 @@ import {
   getPaymentIntentStatus,
   cancelPaymentIntent,
   registerSale,
+  searchCustomers,
+  createCustomer,
 } from "../../services/api";
 
 const fmt = (n) => `R$ ${n.toFixed(2).replace(".", ",")}`;
@@ -33,6 +35,8 @@ const PAYMENT_METHODS = [
   ...PAYMENT_METHODS_BASE,
   { id: "mixed", label: "Misto", icon: Wallet, color: "#7C3AED", bg: C.purplePale },
 ];
+
+const PRAZO_METHOD = { id: "prazo", label: "A Prazo", icon: Clock, color: "#B45309", bg: C.amberPale };
 
 // ── PDV Header (52px) ──────────────────────────────────────────────────────────
 
@@ -206,7 +210,7 @@ const PaymentBtn = ({ method, selected, onSelect }) => {
 
 // ── Payment Modal ──────────────────────────────────────────────────────────────
 
-const PaymentModal = ({ method, total, onClose, onSuccess }) => {
+const PaymentModal = ({ method, total, selectedCustomer, onClose, onSuccess }) => {
   const pollingRef = useRef(null);
   const finalEntriesRef = useRef(null);
 
@@ -242,12 +246,14 @@ const PaymentModal = ({ method, total, onClose, onSuccess }) => {
     ]).then(([ints, company]) => {
       setMpIntegration((ints || []).find(i => i.provider === "mercadopago") || null);
       setPixKey(company.pix_key || "");
-      if (method?.id !== "mixed") {
+      if (method?.id === "mixed") {
+        setPayPhase("planning");
+      } else if (method?.id === "prazo") {
+        setPayPhase("prazo_confirm");
+      } else {
         setExecEntries([{ id: 1, methodId: method?.id, amount: total, status: "pending", change: 0 }]);
         setExecIndex(0);
         setPayPhase("executing");
-      } else {
-        setPayPhase("planning");
       }
     }).finally(() => setLoading(false));
     return () => { if (pollingRef.current) clearInterval(pollingRef.current); };
@@ -520,6 +526,46 @@ const PaymentModal = ({ method, total, onClose, onSuccess }) => {
             </div>
           </>
 
+        ) : payPhase === "prazo_confirm" ? (
+          /* ── Prazo confirm ── */
+          <>
+            <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 20 }}>
+              <div style={{ width: 46, height: 46, borderRadius: 13, background: C.amberPale, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <Clock size={22} color="#B45309" strokeWidth={2} />
+              </div>
+              <div>
+                <p style={{ fontSize: 16, fontWeight: 800, color: C.graphite, margin: 0 }}>Venda a Prazo</p>
+                <p style={{ fontSize: 13, color: C.mid, margin: 0 }}>Total: <strong style={{ color: C.green }}>{fmt(total)}</strong></p>
+              </div>
+            </div>
+            {selectedCustomer ? (
+              <div style={{ padding: "12px 16px", borderRadius: 10, background: C.amberPale, marginBottom: 20, border: "1px solid #D9770633" }}>
+                <p style={{ fontSize: 13, fontWeight: 700, color: C.graphite, margin: "0 0 2px" }}>{selectedCustomer.name}</p>
+                {selectedCustomer.cpf && <p style={{ fontSize: 12, color: C.mid, margin: 0 }}>{selectedCustomer.cpf}</p>}
+              </div>
+            ) : (
+              <div style={{ padding: "12px 16px", borderRadius: 10, background: C.gray, marginBottom: 20 }}>
+                <p style={{ fontSize: 13, color: C.mid, margin: 0 }}>Sem cliente vinculado</p>
+              </div>
+            )}
+            <div style={{ display: "flex", gap: 10 }}>
+              <button onClick={onClose}
+                style={{ flex: 1, padding: "11px", borderRadius: 10, border: `1.5px solid ${C.border}`, background: "transparent", fontSize: 13, fontWeight: 700, color: C.graphite, cursor: "pointer", fontFamily: "inherit" }}
+                onMouseEnter={e => e.currentTarget.style.background = C.gray}
+                onMouseLeave={e => e.currentTarget.style.background = "transparent"}
+              >Cancelar</button>
+              <button
+                onClick={() => onSuccess([{ id: 1, methodId: "prazo", amount: total, status: "confirmed", change: 0 }])}
+                style={{ flex: 2, padding: "11px", borderRadius: 10, border: "none", background: "#B45309", color: "white", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}
+                onMouseEnter={e => e.currentTarget.style.opacity = "0.88"}
+                onMouseLeave={e => e.currentTarget.style.opacity = "1"}
+              >
+                <Clock size={15} strokeWidth={2} />
+                Confirmar venda a prazo
+              </button>
+            </div>
+          </>
+
         ) : (
           /* ── Executing (step-lock) ── */
           <>
@@ -756,6 +802,7 @@ const PDVPage = () => {
   const navigate  = useNavigate();
   const profile   = getProfile();
   const inputRef  = useRef(null);
+  const customerTimerRef = useRef(null);
   const toast     = useToast();
 
   const [products,        setProducts       ] = useState([]);
@@ -765,6 +812,16 @@ const PDVPage = () => {
   const [selectedPayment, setSelectedPayment] = useState(null);
   const [showModal,       setShowModal      ] = useState(false);
   const [confirmingClear, setConfirmingClear] = useState(false);
+
+  const [selectedCustomer,      setSelectedCustomer     ] = useState(null);
+  const [customerQuery,         setCustomerQuery        ] = useState("");
+  const [customerResults,       setCustomerResults      ] = useState([]);
+  const [customerDropdownOpen,  setCustomerDropdownOpen ] = useState(false);
+  const [showNewCustomerModal,  setShowNewCustomerModal ] = useState(false);
+  const [newCustName,           setNewCustName          ] = useState("");
+  const [newCustCPF,            setNewCustCPF           ] = useState("");
+  const [newCustPhone,          setNewCustPhone         ] = useState("");
+  const [savingCustomer,        setSavingCustomer       ] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated()) { navigate("/login", { replace: true }); return; }
@@ -776,6 +833,44 @@ const PDVPage = () => {
       .catch(() => toast.error("Falha ao carregar produtos."))
       .finally(() => setProductsLoading(false));
   }, []);
+
+  useEffect(() => {
+    if (selectedPayment?.id !== "prazo" || customerQuery.length < 1) {
+      setCustomerResults([]);
+      return;
+    }
+    if (customerTimerRef.current) clearTimeout(customerTimerRef.current);
+    customerTimerRef.current = setTimeout(() => {
+      searchCustomers(customerQuery).then(r => setCustomerResults(r || [])).catch(() => {});
+    }, 300);
+    return () => { if (customerTimerRef.current) clearTimeout(customerTimerRef.current); };
+  }, [customerQuery, selectedPayment]);
+
+  const handleSelectPayment = (method) => {
+    setSelectedPayment(method);
+    if (!method || method.id !== "prazo") {
+      setSelectedCustomer(null);
+      setCustomerQuery("");
+      setCustomerResults([]);
+    }
+  };
+
+  const handleSaveNewCustomer = async () => {
+    if (!newCustName.trim()) return;
+    setSavingCustomer(true);
+    try {
+      const c = await createCustomer({ name: newCustName.trim(), cpf: newCustCPF.trim(), phone: newCustPhone.trim(), email: "" });
+      setSelectedCustomer(c);
+      setShowNewCustomerModal(false);
+      setCustomerDropdownOpen(false);
+      setCustomerQuery("");
+      setNewCustName(""); setNewCustCPF(""); setNewCustPhone("");
+    } catch (e) {
+      toast.error("Não foi possível cadastrar o cliente.");
+    } finally {
+      setSavingCustomer(false);
+    }
+  };
 
   const addToCart = (product) => {
     setCart(prev => {
@@ -809,6 +904,8 @@ const PDVPage = () => {
   const clearCart = () => {
     setCart([]);
     setSelectedPayment(null);
+    setSelectedCustomer(null);
+    setCustomerQuery("");
     setConfirmingClear(false);
   };
 
@@ -937,10 +1034,71 @@ const PDVPage = () => {
               </p>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
                 {PAYMENT_METHODS.map(m => (
-                  <PaymentBtn key={m.id} method={m} selected={selectedPayment?.id === m.id} onSelect={setSelectedPayment} />
+                  <PaymentBtn key={m.id} method={m} selected={selectedPayment?.id === m.id} onSelect={handleSelectPayment} />
                 ))}
               </div>
+              <hr style={{ border: 0, borderTop: `1px solid ${C.border}`, margin: "12px 0" }} />
+              <button
+                onClick={() => handleSelectPayment(selectedPayment?.id === "prazo" ? null : PRAZO_METHOD)}
+                style={{
+                  width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                  padding: "7px 14px", borderRadius: 10,
+                  border: selectedPayment?.id === "prazo" ? `2px solid #B45309` : `1.5px solid ${C.border}`,
+                  background: selectedPayment?.id === "prazo" ? C.amberPale : "transparent",
+                  color: selectedPayment?.id === "prazo" ? "#B45309" : C.mid,
+                  fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "inherit",
+                  transition: "all 0.15s",
+                }}
+              >
+                <Clock size={13} strokeWidth={2} />
+                A Prazo
+              </button>
             </div>
+
+            {selectedPayment?.id === "prazo" && (
+              <div style={{ marginBottom: 14, position: "relative" }}>
+                <p style={{ fontSize: 11, fontWeight: 600, color: C.mid, margin: "0 0 6px", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                  Cliente
+                </p>
+                {selectedCustomer ? (
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 12px", background: C.amberPale, borderRadius: 9, border: "1px solid #D9770633" }}>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: C.graphite }}>{selectedCustomer.name}</span>
+                    <button onClick={() => { setSelectedCustomer(null); setCustomerQuery(""); }} style={{ background: "none", border: "none", cursor: "pointer", padding: 2 }}>
+                      <X size={13} color={C.mid} />
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <input
+                      value={customerQuery}
+                      onChange={e => { setCustomerQuery(e.target.value); setCustomerDropdownOpen(true); }}
+                      onFocus={() => setCustomerDropdownOpen(true)}
+                      placeholder="Buscar por nome ou CPF..."
+                      style={{ width: "100%", padding: "8px 12px", borderRadius: 9, border: `1.5px solid ${C.border}`, fontSize: 13, color: C.graphite, background: C.surface, outline: "none", fontFamily: "inherit", boxSizing: "border-box" }}
+                      onBlur={() => setTimeout(() => setCustomerDropdownOpen(false), 150)}
+                    />
+                    {customerDropdownOpen && customerQuery.length > 0 && (
+                      <div style={{ position: "absolute", top: "100%", left: 0, right: 0, background: C.surface, border: `1px solid ${C.border}`, borderRadius: 10, boxShadow: "0 4px 16px rgba(0,0,0,0.1)", zIndex: 20, maxHeight: 200, overflowY: "auto" }}>
+                        {customerResults.map(c => (
+                          <button key={c.id} onMouseDown={() => { setSelectedCustomer(c); setCustomerDropdownOpen(false); setCustomerQuery(""); }} style={{ display: "block", width: "100%", textAlign: "left", padding: "9px 14px", background: "none", border: "none", cursor: "pointer", fontSize: 13, color: C.graphite, fontFamily: "inherit" }}
+                            onMouseEnter={e => e.currentTarget.style.background = C.gray}
+                            onMouseLeave={e => e.currentTarget.style.background = "none"}
+                          >
+                            {c.name}{c.cpf ? ` · ${c.cpf}` : ""}
+                          </button>
+                        ))}
+                        <button onMouseDown={() => { setShowNewCustomerModal(true); setCustomerDropdownOpen(false); }} style={{ display: "flex", alignItems: "center", gap: 6, width: "100%", textAlign: "left", padding: "9px 14px", background: "none", border: "none", borderTop: `1px solid ${C.border}`, cursor: "pointer", fontSize: 13, fontWeight: 600, color: C.blue, fontFamily: "inherit" }}
+                          onMouseEnter={e => e.currentTarget.style.background = C.bluePale}
+                          onMouseLeave={e => e.currentTarget.style.background = "none"}
+                        >
+                          <UserPlus size={13} strokeWidth={2} /> Cadastrar cliente
+                        </button>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
 
             <button
               onClick={() => setShowModal(true)}
@@ -968,6 +1126,7 @@ const PDVPage = () => {
         <PaymentModal
           method={selectedPayment}
           total={total}
+          selectedCustomer={selectedCustomer}
           onClose={() => setShowModal(false)}
           onSuccess={(execEntries) => {
             const items = cart.map(i => ({ product_id: i.id, quantity: i.qty }));
@@ -976,12 +1135,50 @@ const PDVPage = () => {
               amount: parseFloat(e.amount),
               ...(e.transactionId && { transaction_id: e.transactionId }),
             }));
-            registerSale({ items, payments, discount: 0, note: "" })
+            const saleInput = {
+              items, payments, discount: 0, note: "",
+              ...(selectedCustomer?.id && { customer_id: selectedCustomer.id }),
+              ...(selectedCustomer?.name && { customer_name: selectedCustomer.name }),
+            };
+            registerSale(saleInput)
               .catch(() => toast.error("Venda paga mas não registrada. Verifique o histórico."));
             clearCart();
             setShowModal(false);
           }}
         />
+      )}
+
+      {showNewCustomerModal && (
+        <div onClick={() => setShowNewCustomerModal(false)} style={{ position: "fixed", inset: 0, zIndex: 300, background: "rgba(0,0,0,0.4)", backdropFilter: "blur(2px)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div onClick={e => e.stopPropagation()} style={{ background: C.surface, borderRadius: 16, padding: 28, width: 360, boxShadow: "0 12px 48px rgba(0,0,0,0.18)", border: `1px solid ${C.border}`, boxSizing: "border-box" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
+              <div style={{ width: 36, height: 36, borderRadius: 10, background: C.amberPale, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <UserPlus size={18} color="#B45309" strokeWidth={2} />
+              </div>
+              <p style={{ fontSize: 16, fontWeight: 800, color: C.graphite, margin: 0 }}>Novo Cliente</p>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              <div>
+                <label style={{ fontSize: 12, fontWeight: 600, color: C.graphite, display: "block", marginBottom: 4 }}>Nome *</label>
+                <input value={newCustName} onChange={e => setNewCustName(e.target.value)} placeholder="Nome completo" autoFocus style={{ width: "100%", padding: "9px 12px", borderRadius: 9, border: `1.5px solid ${C.border}`, fontSize: 14, color: C.graphite, background: C.surface, outline: "none", fontFamily: "inherit", boxSizing: "border-box" }} onFocus={e => e.target.style.borderColor = C.blue} onBlur={e => e.target.style.borderColor = C.border} />
+              </div>
+              <div>
+                <label style={{ fontSize: 12, fontWeight: 600, color: C.graphite, display: "block", marginBottom: 4 }}>CPF</label>
+                <input value={newCustCPF} onChange={e => setNewCustCPF(e.target.value)} placeholder="000.000.000-00" style={{ width: "100%", padding: "9px 12px", borderRadius: 9, border: `1.5px solid ${C.border}`, fontSize: 14, color: C.graphite, background: C.surface, outline: "none", fontFamily: "inherit", boxSizing: "border-box" }} onFocus={e => e.target.style.borderColor = C.blue} onBlur={e => e.target.style.borderColor = C.border} />
+              </div>
+              <div>
+                <label style={{ fontSize: 12, fontWeight: 600, color: C.graphite, display: "block", marginBottom: 4 }}>Telefone</label>
+                <input value={newCustPhone} onChange={e => setNewCustPhone(e.target.value)} placeholder="(00) 00000-0000" style={{ width: "100%", padding: "9px 12px", borderRadius: 9, border: `1.5px solid ${C.border}`, fontSize: 14, color: C.graphite, background: C.surface, outline: "none", fontFamily: "inherit", boxSizing: "border-box" }} onFocus={e => e.target.style.borderColor = C.blue} onBlur={e => e.target.style.borderColor = C.border} />
+              </div>
+            </div>
+            <div style={{ display: "flex", gap: 10, marginTop: 20 }}>
+              <button onClick={() => { setShowNewCustomerModal(false); setNewCustName(""); setNewCustCPF(""); setNewCustPhone(""); }} style={{ flex: 1, padding: "10px", borderRadius: 10, border: `1.5px solid ${C.border}`, background: "transparent", fontSize: 13, fontWeight: 700, color: C.mid, cursor: "pointer", fontFamily: "inherit" }}>Cancelar</button>
+              <button onClick={handleSaveNewCustomer} disabled={!newCustName.trim() || savingCustomer} style={{ flex: 2, padding: "10px", borderRadius: 10, border: "none", background: newCustName.trim() ? "#B45309" : C.border, color: newCustName.trim() ? "white" : C.mid, fontSize: 13, fontWeight: 700, cursor: newCustName.trim() ? "pointer" : "not-allowed", fontFamily: "inherit" }}>
+                {savingCustomer ? "Salvando..." : "Cadastrar"}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

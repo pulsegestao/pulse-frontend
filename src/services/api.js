@@ -257,3 +257,33 @@ export function getVelocityRanking(limit = 10) {
 export function getCategoryBreakdown(period = "month") {
   return authRequest(`/api/v1/analytics/categories?period=${period}`);
 }
+
+export function searchCustomers(q) {
+  return authRequest(`/api/v1/customers/search?q=${encodeURIComponent(q)}`);
+}
+
+export function createCustomer(input) {
+  return authRequest("/api/v1/customers/", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+export function getSalesPrazo(status = "pending") {
+  return authRequest(`/api/v1/sales/prazo?status=${status}`);
+}
+
+export function receiveSale(id) {
+  return authRequest(`/api/v1/sales/${id}/receive`, { method: "POST" });
+}
+
+export function returnSale(id, returnStock = false) {
+  return authRequest(`/api/v1/sales/${id}/return`, {
+    method: "POST",
+    body: JSON.stringify({ return_stock: returnStock }),
+  });
+}
+
+export function getPrazoReport() {
+  return authRequest("/api/v1/reports/prazo");
+}
