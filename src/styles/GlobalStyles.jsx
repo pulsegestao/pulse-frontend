@@ -25,7 +25,9 @@ const GlobalStyles = () => (
     }
 
     [data-theme="dark"] {
-      --c-blue-pale:   #042F2E;
+      --c-blue:        #2DD4BF;
+      --c-blue-light:  #5EEAD4;
+      --c-blue-pale:   #134E4A;
       --c-green-pale:  #0E2318;
       --c-white:       #374151;
       --c-gray:        #1F2937;

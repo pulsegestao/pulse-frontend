@@ -10,11 +10,11 @@ const PERIODS = ["Semana", "Mês", "Ano"];
 const PERIOD_KEY = { "Semana": "week", "Mês": "month", "Ano": "year" };
 
 const RANK_COLORS = [
-  { bg: C.bluePale, color: C.blue      },
-  { bg: C.bluePale, color: C.blueLight },
-  { bg: C.bluePale, color: "#14B8A6"   },
-  { bg: C.bluePale, color: "#2DD4BF"   },
-  { bg: C.bluePale, color: "#5EEAD4"   },
+  { bg: C.bluePale, color: C.blue },
+  { bg: C.bluePale, color: C.blue },
+  { bg: C.bluePale, color: C.blue },
+  { bg: C.bluePale, color: C.blue },
+  { bg: C.bluePale, color: C.blue },
 ];
 
 const TopProducts = () => {
