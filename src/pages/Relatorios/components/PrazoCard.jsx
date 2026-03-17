@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Loader2, Clock } from "lucide-react";
+import { Loader2, Clock, ArrowRight } from "lucide-react";
 import C from "../../../theme/colors";
 import { getPrazoReport } from "../../../services/api";
 import { friendlyError } from "../../../utils/errorMessage";
@@ -76,40 +76,52 @@ const PrazoCard = () => {
           <p style={{ fontSize: 12, color: C.mid, margin: 0 }}>Nenhuma venda a prazo pendente</p>
         </div>
       ) : (
-        <>
-          <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
-            {preview.map((s, i) => (
-              <div key={s.sale_id} style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                padding: "12px 0",
-                borderBottom: i < preview.length - 1 ? `1px solid ${C.border}` : "none",
-                gap: 12,
-              }}>
-                <span style={{
-                  fontSize: 13, fontWeight: 600, color: C.graphite,
-                  overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-                }}>{s.customer_name || "Sem cliente"}</span>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
-                  <span style={{ fontSize: 12, color: C.mid }}>{fmtDate(s.created_at)}</span>
-                  <span style={{ fontSize: 13, fontWeight: 700, color: C.graphite }}>{fmt(s.total_amount)}</span>
-                </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+          {preview.map((s, i) => (
+            <div key={s.sale_id} style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              padding: "12px 0",
+              borderBottom: i < preview.length - 1 ? `1px solid ${C.border}` : "none",
+              gap: 12,
+            }}>
+              <span style={{
+                fontSize: 13, fontWeight: 600, color: C.graphite,
+                overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+              }}>{s.customer_name || "Sem cliente"}</span>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+                <span style={{ fontSize: 12, color: C.mid }}>{fmtDate(s.created_at)}</span>
+                <span style={{ fontSize: 13, fontWeight: 700, color: C.graphite }}>{fmt(s.total_amount)}</span>
               </div>
-            ))}
-          </div>
-          <div style={{ marginTop: 16, borderTop: `1px solid ${C.border}`, paddingTop: 14 }}>
-            <button
-              onClick={() => navigate("/relatorios/prazo")}
-              style={{
-                background: "none", border: "none", cursor: "pointer",
-                fontSize: 13, fontWeight: 600, color: C.blue, padding: 0,
-              }}
-            >
-              Ver todos →
-            </button>
-          </div>
-        </>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {!loading && !error && (
+        <button
+          onClick={() => navigate("/relatorios/prazo")}
+          style={{
+            marginTop: 16,
+            display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+            padding: "10px",
+            borderRadius: 10,
+            border: `1.5px solid ${C.border}`,
+            background: "transparent",
+            color: C.blue,
+            fontSize: 13, fontWeight: 700,
+            cursor: "pointer",
+            fontFamily: "inherit",
+            transition: "all 0.15s",
+            width: "100%",
+          }}
+          onMouseEnter={e => { e.currentTarget.style.background = C.bluePale; e.currentTarget.style.borderColor = C.blue; }}
+          onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = C.border; }}
+        >
+          Gerenciar recebíveis
+          <ArrowRight size={14} strokeWidth={2.5} />
+        </button>
       )}
     </div>
   );

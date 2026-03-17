@@ -273,8 +273,11 @@ export function getSalesPrazo(status = "pending") {
   return authRequest(`/api/v1/sales/prazo?status=${status}`);
 }
 
-export function receiveSale(id) {
-  return authRequest(`/api/v1/sales/${id}/receive`, { method: "POST" });
+export function receiveSale(id, receivedVia = "confirmed") {
+  return authRequest(`/api/v1/sales/${id}/receive`, {
+    method: "POST",
+    body: JSON.stringify({ received_via: receivedVia }),
+  });
 }
 
 export function returnSale(id, returnStock = false) {
