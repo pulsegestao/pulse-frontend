@@ -3,23 +3,51 @@ import { ShoppingCart, Sparkles, PackagePlus, Package } from "lucide-react";
 import C from "../../../theme/colors";
 
 const ACTIONS = [
-  { label: "Registrar venda",    description: "Abrir PDV",            icon: ShoppingCart, href: "/pdv"             },
-  { label: "Pulse Insights",     description: "Relatórios e análises", icon: Sparkles,     href: "/relatorios"      },
-  { label: "Entrada de estoque", description: "Registrar entrada",     icon: PackagePlus,  href: "/estoque/entrada" },
-  { label: "Gerir produtos",     description: "Catálogo e estoque",    icon: Package,      href: "/gerir-estoque"   },
+  {
+    label: "Registrar venda",
+    description: "Abrir PDV",
+    icon: ShoppingCart,
+    color: C.blue,
+    bg: C.bluePale,
+    href: "/pdv",
+  },
+  {
+    label: "Pulse Insights",
+    description: "Relatórios e análises",
+    icon: Sparkles,
+    color: C.green,
+    bg: C.greenPale,
+    href: "/relatorios",
+  },
+  {
+    label: "Entrada de estoque",
+    description: "Registrar entrada",
+    icon: PackagePlus,
+    color: "#7C3AED",
+    bg: C.purplePale,
+    href: "/estoque/entrada",
+  },
+  {
+    label: "Gerir produtos",
+    description: "Catálogo e estoque",
+    icon: Package,
+    color: "#D97706",
+    bg: C.amberPale,
+    href: "/gerir-estoque",
+  },
 ];
 
-const ActionCard = ({ label, description, icon: Icon, onClick }) => (
+const ActionCard = ({ label, description, icon: Icon, color, bg, onClick }) => (
   <button
     onClick={onClick}
     style={{
       display: "flex",
       alignItems: "center",
       gap: 14,
-      padding: "14px 16px",
-      borderRadius: 12,
-      border: "1.5px solid rgba(255,255,255,0.18)",
-      background: "rgba(255,255,255,0.12)",
+      padding: "16px 18px",
+      borderRadius: 14,
+      border: `1.5px solid ${C.border}`,
+      background: C.surface,
       cursor: "pointer",
       textAlign: "left",
       fontFamily: "inherit",
@@ -27,27 +55,29 @@ const ActionCard = ({ label, description, icon: Icon, onClick }) => (
       width: "100%",
     }}
     onMouseEnter={e => {
-      e.currentTarget.style.background = "rgba(255,255,255,0.22)";
+      e.currentTarget.style.background = bg;
+      e.currentTarget.style.borderColor = color + "44";
       e.currentTarget.style.transform = "translateY(-1px)";
-      e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,0.12)";
+      e.currentTarget.style.boxShadow = `0 4px 16px ${color}18`;
     }}
     onMouseLeave={e => {
-      e.currentTarget.style.background = "rgba(255,255,255,0.12)";
+      e.currentTarget.style.background = C.surface;
+      e.currentTarget.style.borderColor = C.border;
       e.currentTarget.style.transform = "none";
       e.currentTarget.style.boxShadow = "none";
     }}
   >
     <div style={{
-      width: 40, height: 40, borderRadius: 10,
-      background: "rgba(255,255,255,0.18)",
+      width: 44, height: 44, borderRadius: 12,
+      background: bg,
       display: "flex", alignItems: "center", justifyContent: "center",
       flexShrink: 0,
     }}>
-      <Icon size={19} color="white" strokeWidth={2} />
+      <Icon size={20} color={color} strokeWidth={2} />
     </div>
     <div>
-      <p style={{ fontSize: 13, fontWeight: 700, color: "white", margin: 0, lineHeight: 1.3 }}>{label}</p>
-      <p style={{ fontSize: 11, color: "rgba(255,255,255,0.65)", margin: "2px 0 0" }}>{description}</p>
+      <p style={{ fontSize: 14, fontWeight: 700, color: C.graphite, margin: 0, lineHeight: 1.3 }}>{label}</p>
+      <p style={{ fontSize: 12, color: C.mid, margin: "2px 0 0" }}>{description}</p>
     </div>
   </button>
 );
@@ -57,14 +87,15 @@ const QuickActions = () => {
 
   return (
     <div style={{
-      background: `linear-gradient(135deg, ${C.blue}, ${C.blueLight})`,
+      background: C.surface,
       borderRadius: 16,
       padding: "24px",
-      boxShadow: `0 4px 20px ${C.blue}44`,
+      boxShadow: "0 1px 12px rgba(0,0,0,0.06)",
+      border: `1px solid ${C.border}`,
     }}>
       <div style={{ marginBottom: 20 }}>
-        <p style={{ fontSize: 13, fontWeight: 600, color: "rgba(255,255,255,0.65)", margin: "0 0 4px" }}>Navegação rápida</p>
-        <p style={{ fontSize: 18, fontWeight: 800, color: "white", margin: 0 }}>Ações rápidas</p>
+        <p style={{ fontSize: 13, fontWeight: 600, color: C.mid, margin: "0 0 4px" }}>Navegação rápida</p>
+        <p style={{ fontSize: 18, fontWeight: 800, color: C.graphite, margin: 0 }}>Ações rápidas</p>
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
