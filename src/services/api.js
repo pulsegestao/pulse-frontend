@@ -341,6 +341,10 @@ export function deletePromotion(id) {
   });
 }
 
+export function getCategories() {
+  return authRequest("/api/v1/categories");
+}
+
 export function evaluateCart(input) {
   return authRequest("/api/v1/promotions/evaluate", {
     method: "POST",

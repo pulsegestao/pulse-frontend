@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import {
   Tag, Plus, Loader2, PackageX, Pencil, Trash2, Calendar, Zap,
   ArrowLeft, TrendingUp, DollarSign, ShoppingCart, Activity,
+  Search, X, Package,
 } from "lucide-react";
 import C from "../../theme/colors";
 import DashboardHeader from "../Dashboard/components/DashboardHeader";
@@ -12,7 +13,7 @@ import { useToast } from "../../hooks/useToast";
 import { friendlyError } from "../../utils/errorMessage";
 import {
   getPromotions, createPromotion, updatePromotion, deletePromotion, getInsights,
-  getActivePromotions,
+  getActivePromotions, getProducts, getCategories,
 } from "../../services/api";
 
 const STATUS_LABELS = {
@@ -435,7 +436,7 @@ const PromoCard = ({ promo, onEdit, onDelete, deleting }) => {
 const INITIAL_FORM = {
   name: "", description: "",
   start_date: "", end_date: "",
-  rule_type: "product", product_ids: "", category_ids: "",
+  rule_type: "product", selected_products: [], selected_categories: [],
   min_quantity: "", min_value: "",
   days_of_week: [], time_start: "", time_end: "",
   action_type: "percent_off", action_value: "",
@@ -453,8 +454,8 @@ const PromoModal = ({ editing, onClose, onSaved, toast }) => {
         start_date: editing.start_date ? editing.start_date.slice(0, 10) : "",
         end_date: editing.end_date ? editing.end_date.slice(0, 10) : "",
         rule_type: rule.type || "product",
-        product_ids: (rule.product_ids || []).join(", "),
-        category_ids: (rule.category_ids || []).join(", "),
+        selected_products: (rule.product_ids || []).map(id => ({ id, name: id })),
+        selected_categories: (rule.category_ids || []).map(id => ({ id, name: id })),
         min_quantity: rule.min_quantity || "",
         min_value: rule.min_value || "",
         days_of_week: rule.days_of_week || [],
@@ -469,19 +470,82 @@ const PromoModal = ({ editing, onClose, onSaved, toast }) => {
         status: editing.status || "active",
       };
     }
-    return { ...INITIAL_FORM };
+    return { ...INITIAL_FORM, selected_products: [], selected_categories: [] };
   });
   const [saving, setSaving] = useState(false);
+  const [allProducts, setAllProducts] = useState([]);
+  const [allCategories, setAllCategories] = useState([]);
+  const [productSearch, setProductSearch] = useState("");
+  const [categorySearch, setCategorySearch] = useState("");
+  const [showProductPicker, setShowProductPicker] = useState(false);
+  const [showCategoryPicker, setShowCategoryPicker] = useState(false);
+
+  useEffect(() => {
+    Promise.all([
+      getProducts().catch(() => []),
+      getCategories().catch(() => []),
+    ]).then(([prodData, catData]) => {
+      const prodList = (prodData || []).filter(p => p.active).map(p => ({ id: p.id, name: p.name }));
+      setAllProducts(prodList);
+      const catList = (catData || []).map(c => ({ id: c.id, name: c.name }));
+      setAllCategories(catList);
+      if (editing) {
+        const rule = editing.rules?.[0] || {};
+        const prodIds = rule.product_ids || [];
+        if (prodIds.length) {
+          const matched = prodIds.map(id => prodList.find(p => p.id === id) || { id, name: id });
+          setForm(prev => ({ ...prev, selected_products: matched }));
+        }
+        const catIds = rule.category_ids || [];
+        if (catIds.length) {
+          const matched = catIds.map(id => catList.find(c => c.id === id) || { id, name: id });
+          setForm(prev => ({ ...prev, selected_categories: matched }));
+        }
+      }
+    });
+  }, []);
 
   const set = (key, val) => setForm(prev => ({ ...prev, [key]: val }));
+
+  const toggleProduct = (product) => {
+    setForm(prev => {
+      const exists = prev.selected_products.some(p => p.id === product.id);
+      return {
+        ...prev,
+        selected_products: exists
+          ? prev.selected_products.filter(p => p.id !== product.id)
+          : [...prev.selected_products, product],
+      };
+    });
+  };
+
+  const filteredPickerProducts = productSearch.length > 0
+    ? allProducts.filter(p => p.name.toLowerCase().includes(productSearch.toLowerCase()))
+    : allProducts;
+
+  const toggleCategory = (cat) => {
+    setForm(prev => {
+      const exists = prev.selected_categories.some(c => c.id === cat.id);
+      return {
+        ...prev,
+        selected_categories: exists
+          ? prev.selected_categories.filter(c => c.id !== cat.id)
+          : [...prev.selected_categories, cat],
+      };
+    });
+  };
+
+  const filteredPickerCategories = categorySearch.length > 0
+    ? allCategories.filter(c => c.name.toLowerCase().includes(categorySearch.toLowerCase()))
+    : allCategories;
 
   const buildPayload = () => {
     const rule = { type: form.rule_type };
     if (form.rule_type === "product") {
-      rule.product_ids = form.product_ids.split(",").map(s => s.trim()).filter(Boolean);
+      rule.product_ids = form.selected_products.map(p => p.id);
     }
     if (form.rule_type === "category") {
-      rule.category_ids = form.category_ids.split(",").map(s => s.trim()).filter(Boolean);
+      rule.category_ids = form.selected_categories.map(c => c.id);
     }
     if (form.rule_type === "min_quantity") {
       rule.min_quantity = parseInt(form.min_quantity) || 0;
@@ -610,14 +674,168 @@ const PromoModal = ({ editing, onClose, onSaved, toast }) => {
 
           {form.rule_type === "product" && (
             <div>
-              <label style={labelStyle}>IDs dos produtos (separados por vírgula)</label>
-              <input style={inputStyle} value={form.product_ids} onChange={e => set("product_ids", e.target.value)} placeholder="id1, id2, id3" />
+              <label style={labelStyle}>Produtos</label>
+              {form.selected_products.length > 0 && (
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 10 }}>
+                  {form.selected_products.map(p => (
+                    <span key={p.id} style={{
+                      display: "inline-flex", alignItems: "center", gap: 5,
+                      padding: "4px 10px", borderRadius: 8,
+                      background: C.bluePale, border: `1px solid ${C.blue}33`,
+                      fontSize: 12, fontWeight: 600, color: C.graphite,
+                    }}>
+                      {p.name}
+                      <button onClick={() => toggleProduct(p)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex" }}>
+                        <X size={12} color={C.mid} strokeWidth={2.5} />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+              <button
+                onClick={() => setShowProductPicker(!showProductPicker)}
+                style={{
+                  width: "100%", padding: "9px 14px", borderRadius: 10,
+                  border: `1.5px dashed ${C.border}`, background: "transparent",
+                  fontSize: 12, fontWeight: 700, color: C.mid, cursor: "pointer",
+                  fontFamily: "inherit", display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                }}
+              >
+                <Plus size={13} strokeWidth={2.5} />
+                {form.selected_products.length > 0 ? "Adicionar mais produtos" : "Selecionar produtos"}
+              </button>
+              {showProductPicker && (
+                <div style={{
+                  marginTop: 8, border: `1px solid ${C.border}`, borderRadius: 12,
+                  background: C.surface, overflow: "hidden",
+                }}>
+                  <div style={{ padding: "8px 10px", borderBottom: `1px solid ${C.border}`, position: "relative" }}>
+                    <Search size={14} color={C.mid} strokeWidth={2} style={{ position: "absolute", left: 18, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
+                    <input
+                      value={productSearch}
+                      onChange={e => setProductSearch(e.target.value)}
+                      placeholder="Buscar produto..."
+                      autoFocus
+                      style={{
+                        ...inputStyle, paddingLeft: 32, border: "none",
+                        background: "transparent", margin: 0,
+                      }}
+                    />
+                  </div>
+                  <div style={{ maxHeight: 200, overflowY: "auto" }}>
+                    {filteredPickerProducts.length === 0 ? (
+                      <div style={{ padding: "20px 14px", textAlign: "center" }}>
+                        <Package size={20} color={C.border} strokeWidth={1.5} style={{ display: "block", margin: "0 auto 6px" }} />
+                        <p style={{ fontSize: 12, color: C.mid, margin: 0 }}>Nenhum produto encontrado</p>
+                      </div>
+                    ) : filteredPickerProducts.map(p => {
+                      const selected = form.selected_products.some(s => s.id === p.id);
+                      return (
+                        <button
+                          key={p.id}
+                          onClick={() => toggleProduct(p)}
+                          style={{
+                            width: "100%", padding: "9px 14px", border: "none",
+                            borderBottom: `1px solid ${C.border}`,
+                            background: selected ? C.bluePale : "transparent",
+                            cursor: "pointer", fontFamily: "inherit",
+                            display: "flex", alignItems: "center", justifyContent: "space-between",
+                            transition: "background 0.1s",
+                          }}
+                          onMouseEnter={e => { if (!selected) e.currentTarget.style.background = C.gray; }}
+                          onMouseLeave={e => { if (!selected) e.currentTarget.style.background = "transparent"; }}
+                        >
+                          <span style={{ fontSize: 13, fontWeight: selected ? 700 : 500, color: C.graphite }}>{p.name}</span>
+                          {selected && <span style={{ fontSize: 11, fontWeight: 800, color: C.blue }}>&#10003;</span>}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
           )}
           {form.rule_type === "category" && (
             <div>
-              <label style={labelStyle}>IDs das categorias (separados por vírgula)</label>
-              <input style={inputStyle} value={form.category_ids} onChange={e => set("category_ids", e.target.value)} placeholder="id1, id2" />
+              <label style={labelStyle}>Categorias</label>
+              {form.selected_categories.length > 0 && (
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 10 }}>
+                  {form.selected_categories.map(c => (
+                    <span key={c.id} style={{
+                      display: "inline-flex", alignItems: "center", gap: 5,
+                      padding: "4px 10px", borderRadius: 8,
+                      background: C.greenPale, border: `1px solid ${C.green}33`,
+                      fontSize: 12, fontWeight: 600, color: C.graphite,
+                    }}>
+                      {c.name}
+                      <button onClick={() => toggleCategory(c)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex" }}>
+                        <X size={12} color={C.mid} strokeWidth={2.5} />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+              <button
+                onClick={() => setShowCategoryPicker(!showCategoryPicker)}
+                style={{
+                  width: "100%", padding: "9px 14px", borderRadius: 10,
+                  border: `1.5px dashed ${C.border}`, background: "transparent",
+                  fontSize: 12, fontWeight: 700, color: C.mid, cursor: "pointer",
+                  fontFamily: "inherit", display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                }}
+              >
+                <Plus size={13} strokeWidth={2.5} />
+                {form.selected_categories.length > 0 ? "Adicionar mais categorias" : "Selecionar categorias"}
+              </button>
+              {showCategoryPicker && (
+                <div style={{
+                  marginTop: 8, border: `1px solid ${C.border}`, borderRadius: 12,
+                  background: C.surface, overflow: "hidden",
+                }}>
+                  <div style={{ padding: "8px 10px", borderBottom: `1px solid ${C.border}`, position: "relative" }}>
+                    <Search size={14} color={C.mid} strokeWidth={2} style={{ position: "absolute", left: 18, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
+                    <input
+                      value={categorySearch}
+                      onChange={e => setCategorySearch(e.target.value)}
+                      placeholder="Buscar categoria..."
+                      autoFocus
+                      style={{
+                        ...inputStyle, paddingLeft: 32, border: "none",
+                        background: "transparent", margin: 0,
+                      }}
+                    />
+                  </div>
+                  <div style={{ maxHeight: 200, overflowY: "auto" }}>
+                    {filteredPickerCategories.length === 0 ? (
+                      <div style={{ padding: "20px 14px", textAlign: "center" }}>
+                        <Package size={20} color={C.border} strokeWidth={1.5} style={{ display: "block", margin: "0 auto 6px" }} />
+                        <p style={{ fontSize: 12, color: C.mid, margin: 0 }}>Nenhuma categoria encontrada</p>
+                      </div>
+                    ) : filteredPickerCategories.map(c => {
+                      const selected = form.selected_categories.some(s => s.id === c.id);
+                      return (
+                        <button
+                          key={c.id}
+                          onClick={() => toggleCategory(c)}
+                          style={{
+                            width: "100%", padding: "9px 14px", border: "none",
+                            borderBottom: `1px solid ${C.border}`,
+                            background: selected ? C.greenPale : "transparent",
+                            cursor: "pointer", fontFamily: "inherit",
+                            display: "flex", alignItems: "center", justifyContent: "space-between",
+                            transition: "background 0.1s",
+                          }}
+                          onMouseEnter={e => { if (!selected) e.currentTarget.style.background = C.gray; }}
+                          onMouseLeave={e => { if (!selected) e.currentTarget.style.background = "transparent"; }}
+                        >
+                          <span style={{ fontSize: 13, fontWeight: selected ? 700 : 500, color: C.graphite }}>{c.name}</span>
+                          {selected && <span style={{ fontSize: 11, fontWeight: 800, color: C.green }}>&#10003;</span>}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
           )}
           {form.rule_type === "min_quantity" && (
