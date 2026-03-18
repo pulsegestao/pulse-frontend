@@ -24,11 +24,19 @@ import {
 const fmt = (n) => `R$ ${n.toFixed(2).replace(".", ",")}`;
 
 const getProductPromo = (product, promos) => {
+  const now = new Date();
+  const day = now.getDay();
+  const time = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
   for (const promo of promos) {
     let matches = true;
     for (const rule of promo.rules || []) {
       if (rule.type === "product" && !(rule.product_ids || []).includes(product.id)) { matches = false; break; }
       if (rule.type === "category" && (!product.category_id || !(rule.category_ids || []).includes(product.category_id))) { matches = false; break; }
+      if (rule.type === "schedule") {
+        if (!(rule.days_of_week || []).includes(day)) { matches = false; break; }
+        if (rule.time_start && time < rule.time_start) { matches = false; break; }
+        if (rule.time_end && time > rule.time_end) { matches = false; break; }
+      }
     }
     if (!matches) continue;
     if (promo.max_uses > 0 && promo.current_uses >= promo.max_uses) continue;
