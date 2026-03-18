@@ -7,6 +7,7 @@ import ProductReport from "./components/ProductReport";
 import PaymentMethods from "./components/PaymentMethods";
 import DeadStock from "./components/DeadStock";
 import PrazoCard from "./components/PrazoCard";
+import CategoryBreakdown from "./components/CategoryBreakdown";
 import { isAuthenticated } from "../../hooks/useAuth";
 import QuickActionsBar from "../../components/layout/QuickActionsBar";
 
@@ -80,6 +81,7 @@ const RelatoriosPage = () => {
 
         <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
           <ProductReport period={periodKey} />
+          <CategoryBreakdown period={periodKey} />
           <PaymentMethods period={periodKey} />
           <DeadStock />
           <PrazoCard />

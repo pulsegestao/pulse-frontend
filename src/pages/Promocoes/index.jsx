@@ -105,22 +105,11 @@ const PromocoesPage = () => {
     (async () => {
       setInsightsLoading(true);
       try {
-        const active = await getActivePromotions();
-        const activeList = Array.isArray(active) ? active : [];
-        const productIds = new Set();
-        for (const promo of activeList) {
-          for (const rule of (promo.rules || [])) {
-            if (rule.type === "product" && rule.product_ids) {
-              rule.product_ids.forEach(id => productIds.add(id));
-            }
-          }
-        }
-        if (productIds.size > 0) {
-          const res = await getInsights({ product_ids: [...productIds].join(","), limit: 5 });
-          setInsights(res?.data || []);
-        } else {
-          setInsights([]);
-        }
+        const res = await getInsights({
+          type: "promo_high_performance,promo_low_adoption,promo_stock_risk,promo_suggestion",
+          limit: 10,
+        });
+        setInsights(res?.data || []);
       } catch {
         setInsights([]);
       } finally {
@@ -1174,9 +1163,23 @@ const PromoModal = ({ editing, onClose, onSaved, toast }) => {
           <h2 style={{ fontSize: 18, fontWeight: 800, color: C.graphite, margin: 0 }}>
             {editing ? "Editar Promoção" : "Nova Promoção"}
           </h2>
-          <span style={{ fontSize: 12, fontWeight: 700, color: C.mid }}>
-            Etapa {step} de 4
-          </span>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <span style={{ fontSize: 12, fontWeight: 700, color: C.mid }}>
+              Etapa {step} de 4
+            </span>
+            <button
+              onClick={onClose}
+              style={{
+                background: "none", border: "none", cursor: "pointer", padding: 4,
+                borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center",
+                color: C.mid, transition: "color 0.15s",
+              }}
+              onMouseEnter={e => e.currentTarget.style.color = C.graphite}
+              onMouseLeave={e => e.currentTarget.style.color = C.mid}
+            >
+              <X size={20} strokeWidth={2} />
+            </button>
+          </div>
         </div>
 
         <WizardStepper current={step} />
