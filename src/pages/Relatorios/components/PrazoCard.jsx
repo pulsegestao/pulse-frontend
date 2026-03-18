@@ -1,15 +1,16 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Loader2, Clock, ArrowRight } from "lucide-react";
+import { Loader2, Clock, ArrowRight, Download } from "lucide-react";
 import C from "../../../theme/colors";
 import { getPrazoReport } from "../../../services/api";
 import { friendlyError } from "../../../utils/errorMessage";
 import WidgetError from "../../../components/WidgetError";
+import { generateReport, buildSection, reportFileName } from "../../../utils/exportPDF";
 
 const fmt = (v) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 const fmtDate = (d) => new Date(d).toLocaleDateString("pt-BR", { day: "2-digit", month: "short" });
 
-const PrazoCard = () => {
+const PrazoCard = ({ companyName }) => {
   const navigate = useNavigate();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -51,14 +52,31 @@ const PrazoCard = () => {
             <p style={{ fontSize: 16, fontWeight: 800, color: C.graphite, margin: 0 }}>Recebíveis</p>
           </div>
         </div>
-        {!loading && !error && data?.total_pending > 0 && (
-          <span style={{
-            fontSize: 12, fontWeight: 700,
-            color: "#D97706", background: C.amberPale,
-            padding: "4px 10px", borderRadius: 8,
-            flexShrink: 0,
-          }}>{fmt(data.total_pending)}</span>
-        )}
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          {!loading && !error && sales.length > 0 && (
+            <button
+              onClick={() => generateReport(companyName, null, [buildSection.prazo(data)], reportFileName("recebiveis", null))}
+              title="Exportar seção"
+              style={{
+                background: "none", border: "none", cursor: "pointer", padding: 6,
+                borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center",
+                color: C.mid, transition: "color 0.15s",
+              }}
+              onMouseEnter={e => e.currentTarget.style.color = C.blue}
+              onMouseLeave={e => e.currentTarget.style.color = C.mid}
+            >
+              <Download size={16} strokeWidth={2} />
+            </button>
+          )}
+          {!loading && !error && data?.total_pending > 0 && (
+            <span style={{
+              fontSize: 12, fontWeight: 700,
+              color: "#D97706", background: C.amberPale,
+              padding: "4px 10px", borderRadius: 8,
+              flexShrink: 0,
+            }}>{fmt(data.total_pending)}</span>
+          )}
+        </div>
       </div>
 
       {loading ? (

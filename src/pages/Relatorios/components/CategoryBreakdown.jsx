@@ -1,14 +1,15 @@
 import { useState, useEffect } from "react";
-import { PieChart, Loader2 } from "lucide-react";
+import { PieChart, Loader2, Download } from "lucide-react";
 import C from "../../../theme/colors";
 import { getCategoryBreakdown } from "../../../services/api";
 import WidgetError from "../../../components/WidgetError";
+import { generateReport, buildSection, reportFileName } from "../../../utils/exportPDF";
 
 const fmt = (n) => n.toLocaleString("pt-BR", { style: "currency", currency: "BRL", minimumFractionDigits: 0 });
 
 const BAR_COLORS = ["#0F766E", "#0D9488", "#16A34A", "#D97706", "#EA580C", "#DC2626", "#0891B2"];
 
-const CategoryBreakdown = ({ period }) => {
+const CategoryBreakdown = ({ period, companyName }) => {
   const [items, setItems]     = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError]     = useState("");
@@ -38,18 +39,35 @@ const CategoryBreakdown = ({ period }) => {
       padding: "22px 24px",
       boxShadow: "0 1px 12px rgba(0,0,0,0.05)",
     }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
-        <div style={{
-          width: 36, height: 36, borderRadius: 10,
-          background: C.bluePale,
-          display: "flex", alignItems: "center", justifyContent: "center",
-        }}>
-          <PieChart size={18} color={C.blue} strokeWidth={2} />
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{
+            width: 36, height: 36, borderRadius: 10,
+            background: C.bluePale,
+            display: "flex", alignItems: "center", justifyContent: "center",
+          }}>
+            <PieChart size={18} color={C.blue} strokeWidth={2} />
+          </div>
+          <div>
+            <p style={{ fontSize: 12, fontWeight: 600, color: C.mid, margin: 0 }}>Receita</p>
+            <p style={{ fontSize: 16, fontWeight: 800, color: C.graphite, margin: 0 }}>Por Categoria</p>
+          </div>
         </div>
-        <div>
-          <p style={{ fontSize: 12, fontWeight: 600, color: C.mid, margin: 0 }}>Receita</p>
-          <p style={{ fontSize: 16, fontWeight: 800, color: C.graphite, margin: 0 }}>Por Categoria</p>
-        </div>
+        {!loading && items.length > 0 && (
+          <button
+            onClick={() => generateReport(companyName, period, [buildSection.categories(items)], reportFileName("categorias", period))}
+            title="Exportar seção"
+            style={{
+              background: "none", border: "none", cursor: "pointer", padding: 6,
+              borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center",
+              color: C.mid, transition: "color 0.15s",
+            }}
+            onMouseEnter={e => e.currentTarget.style.color = C.blue}
+            onMouseLeave={e => e.currentTarget.style.color = C.mid}
+          >
+            <Download size={16} strokeWidth={2} />
+          </button>
+        )}
       </div>
 
       {loading && (

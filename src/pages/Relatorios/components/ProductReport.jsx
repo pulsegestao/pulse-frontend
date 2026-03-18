@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
-import { Loader2, TrendingUp } from "lucide-react";
+import { Loader2, TrendingUp, Download } from "lucide-react";
 import C from "../../../theme/colors";
 import { getProductReport } from "../../../services/api";
 import { friendlyError } from "../../../utils/errorMessage";
 import WidgetError from "../../../components/WidgetError";
+import { generateReport, buildSection, reportFileName } from "../../../utils/exportPDF";
 
 const fmt = (v) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
@@ -19,7 +20,7 @@ function marginBg(pct) {
   return "#FEF2F2";
 }
 
-const ProductReport = ({ period }) => {
+const ProductReport = ({ period, companyName }) => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -43,18 +44,35 @@ const ProductReport = ({ period }) => {
       boxShadow: "0 1px 12px rgba(0,0,0,0.06)",
       border: `1px solid ${C.border}`,
     }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
-        <div style={{
-          width: 36, height: 36, borderRadius: 10,
-          background: C.bluePale,
-          display: "flex", alignItems: "center", justifyContent: "center",
-        }}>
-          <TrendingUp size={18} color={C.blue} strokeWidth={2} />
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{
+            width: 36, height: 36, borderRadius: 10,
+            background: C.bluePale,
+            display: "flex", alignItems: "center", justifyContent: "center",
+          }}>
+            <TrendingUp size={18} color={C.blue} strokeWidth={2} />
+          </div>
+          <div>
+            <p style={{ fontSize: 13, fontWeight: 600, color: C.mid, margin: 0 }}>Por receita e margem</p>
+            <p style={{ fontSize: 16, fontWeight: 800, color: C.graphite, margin: 0 }}>Desempenho de produtos</p>
+          </div>
         </div>
-        <div>
-          <p style={{ fontSize: 13, fontWeight: 600, color: C.mid, margin: 0 }}>Por receita e margem</p>
-          <p style={{ fontSize: 16, fontWeight: 800, color: C.graphite, margin: 0 }}>Desempenho de produtos</p>
-        </div>
+        {!loading && data.length > 0 && (
+          <button
+            onClick={() => generateReport(companyName, period, [buildSection.products(data)], reportFileName("produtos", period))}
+            title="Exportar seção"
+            style={{
+              background: "none", border: "none", cursor: "pointer", padding: 6,
+              borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center",
+              color: C.mid, transition: "color 0.15s",
+            }}
+            onMouseEnter={e => e.currentTarget.style.color = C.blue}
+            onMouseLeave={e => e.currentTarget.style.color = C.mid}
+          >
+            <Download size={16} strokeWidth={2} />
+          </button>
+        )}
       </div>
 
       {loading ? (
