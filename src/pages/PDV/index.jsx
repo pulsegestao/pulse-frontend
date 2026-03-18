@@ -61,6 +61,7 @@ const evaluateCartPromos = (cartItems, promos) => {
   const result = {};
   for (const item of cartItems) {
     let bestDiscount = 0, bestPromo = null, bestLabel = "", bestEffective = item.price;
+    let pendingHint = null;
     for (const promo of promos) {
       let ok = true;
       for (const r of promo.rules || []) {
@@ -89,6 +90,10 @@ const evaluateCartPromos = (cartItems, promos) => {
           break;
         case "buy_x_pay_y": {
           const bx = a.buy_x || 3, py = a.pay_y || 2;
+          if (item.qty < bx) {
+            if (!pendingHint) pendingHint = { label: `Leve ${bx} Pague ${py}`, needsMore: bx - item.qty };
+            continue;
+          }
           const paid = Math.floor(item.qty / bx) * py + (item.qty % bx);
           eff = (item.price * paid) / item.qty;
           lbl = `Leve ${bx} Pague ${py}`;
@@ -104,6 +109,8 @@ const evaluateCartPromos = (cartItems, promos) => {
     }
     if (bestPromo) {
       result[item.id] = { promoName: bestPromo.name, label: bestLabel, originalPrice: item.price, effectivePrice: bestEffective, discountTotal: bestDiscount };
+    } else if (pendingHint) {
+      result[item.id] = { ...pendingHint, originalPrice: item.price, effectivePrice: item.price, discountTotal: 0 };
     }
   }
   return result;
@@ -267,7 +274,18 @@ const CartItem = ({ item, onUpdateQty, onRemove, promo }) => (
       <p style={{ fontSize: 13, fontWeight: 600, color: C.graphite, margin: "0 0 2px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
         {item.name}
       </p>
-      {promo ? (
+      {promo && promo.needsMore > 0 ? (
+        <>
+          <p style={{ fontSize: 12, color: C.mid, margin: 0 }}>
+            {fmt(item.price)} × {item.qty} ={" "}
+            <span style={{ color: C.green, fontWeight: 700 }}>{fmt(item.price * item.qty)}</span>
+          </p>
+          <p style={{ fontSize: 10, fontWeight: 700, color: "#D97706", margin: "2px 0 0", display: "flex", alignItems: "center", gap: 3 }}>
+            <Tag size={9} strokeWidth={2.5} />
+            {promo.label} · adicione +{promo.needsMore} para ativar
+          </p>
+        </>
+      ) : promo ? (
         <>
           <p style={{ fontSize: 12, color: C.mid, margin: 0 }}>
             <span style={{ textDecoration: "line-through" }}>{fmt(item.price)}</span>
