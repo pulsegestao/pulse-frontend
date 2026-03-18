@@ -311,3 +311,39 @@ export function returnSale(id, returnStock = false) {
 export function getPrazoReport() {
   return authRequest("/api/v1/reports/prazo");
 }
+
+export function getPromotions(status = "") {
+  const params = status ? `?status=${status}` : "";
+  return authRequest(`/api/v1/promotions/${params}`);
+}
+
+export function getActivePromotions() {
+  return authRequest("/api/v1/promotions/active");
+}
+
+export function createPromotion(input) {
+  return authRequest("/api/v1/promotions/", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+export function updatePromotion(id, input) {
+  return authRequest(`/api/v1/promotions/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(input),
+  });
+}
+
+export function deletePromotion(id) {
+  return authRequest(`/api/v1/promotions/${id}`, {
+    method: "DELETE",
+  });
+}
+
+export function evaluateCart(input) {
+  return authRequest("/api/v1/promotions/evaluate", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}

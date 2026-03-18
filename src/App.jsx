@@ -17,6 +17,7 @@ import RelatoriosPage from "./pages/Relatorios";
 import InsightsPage from "./pages/Insights";
 import VendasPrazoPage from "./pages/VendasPrazo";
 import NotificacoesPage from "./pages/Notificacoes";
+import PromocoesPage from "./pages/Promocoes";
 import ErrorBoundary from "./components/ErrorBoundary";
 import ToastContainer from "./components/Toast";
 
@@ -71,6 +72,7 @@ export default function App() {
           <Route path="/insights" element={<AuthShell><ErrorBoundary><InsightsPage /></ErrorBoundary></AuthShell>} />
           <Route path="/notificacoes" element={<AuthShell><ErrorBoundary><NotificacoesPage /></ErrorBoundary></AuthShell>} />
           <Route path="/relatorios/prazo" element={<AuthShell><ErrorBoundary><VendasPrazoPage /></ErrorBoundary></AuthShell>} />
+          <Route path="/promocoes" element={<AuthShell><ErrorBoundary><PromocoesPage /></ErrorBoundary></AuthShell>} />
         </Routes>
       </SessionGuard>
     </BrowserRouter>
