@@ -250,6 +250,27 @@ export function markAllInsightsRead() {
   return authRequest("/api/v1/insights/read-all", { method: "PATCH" });
 }
 
+export function getNotifications({ type, read, limit = 10, offset = 0 } = {}) {
+  const params = new URLSearchParams();
+  if (type) params.set("type", type);
+  if (read !== undefined && read !== null) params.set("read", String(read));
+  params.set("limit", limit);
+  params.set("offset", offset);
+  return authRequest(`/api/v1/notifications?${params.toString()}`);
+}
+
+export function countUnreadNotifications() {
+  return authRequest("/api/v1/notifications/unread");
+}
+
+export function markNotificationRead(id) {
+  return authRequest(`/api/v1/notifications/${id}/read`, { method: "PATCH" });
+}
+
+export function markAllNotificationsRead() {
+  return authRequest("/api/v1/notifications/read-all", { method: "PATCH" });
+}
+
 export function getVelocityRanking(limit = 10) {
   return authRequest(`/api/v1/analytics/velocity?limit=${limit}`);
 }
