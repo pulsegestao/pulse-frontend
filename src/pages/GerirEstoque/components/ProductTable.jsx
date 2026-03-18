@@ -50,7 +50,12 @@ const TH = ({ children, align = "left" }) => (
   </th>
 );
 
-const ProductTable = ({ products, onAction }) => {
+const ProductTable = ({ products, categories, onAction }) => {
+  const categoryName = (ncmCode) => {
+    if (!ncmCode || !categories?.length) return null;
+    const prefix = ncmCode.length >= 2 ? ncmCode.substring(0, 2) : ncmCode;
+    return categories.find(c => c.prefix === prefix)?.name || null;
+  };
   if (products.length === 0) {
     return (
       <div style={{
@@ -102,7 +107,7 @@ const ProductTable = ({ products, onAction }) => {
                       fontSize: 12, fontWeight: 600, color: C.mid,
                       background: C.gray, borderRadius: 6, padding: "3px 9px",
                     }}>
-                      {p.category_id ?? "Sem categoria"}
+                      {categoryName(p.ncm_code) ?? "Sem categoria"}
                     </span>
                   </td>
                   <td style={{ padding: "14px 16px", textAlign: "center" }}>
@@ -137,8 +142,8 @@ const ProductTable = ({ products, onAction }) => {
                   <td style={{ padding: "14px 16px" }}>
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
                       <ActionBtn icon={Pencil} title="Editar produto" color={C.blue} onClick={() => onAction("edit", p)} />
-                      <ActionBtn icon={PlusCircle} title="Adicionar estoque" color={C.green} onClick={() => onAction("add", p)} />
-                      <ActionBtn icon={SlidersHorizontal} title="Ajustar estoque" color="#7C3AED" onClick={() => onAction("adjust", p)} />
+                      <ActionBtn icon={PlusCircle} title="Adicionar estoque" color={C.blue} onClick={() => onAction("add", p)} />
+                      <ActionBtn icon={SlidersHorizontal} title="Ajustar estoque" color={C.blueLight} onClick={() => onAction("adjust", p)} />
                     </div>
                   </td>
                 </tr>

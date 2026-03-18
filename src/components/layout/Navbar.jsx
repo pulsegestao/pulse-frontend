@@ -36,7 +36,7 @@ const Navbar = () => {
             </svg>
           </div>
           <span className="syne" style={{ fontSize: 20, fontWeight: 800, color: C.blue, letterSpacing: "-0.3px" }}>
-            Pulse <span style={{ color: C.green }}>Gestão</span>
+            Pulse <span style={{ color: C.blueLight }}>Gestão</span>
           </span>
         </div>
 

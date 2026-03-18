@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Search, Plus, Trash2, PackagePlus, X } from "lucide-react";
 import C from "../../../theme/colors";
+import { friendlyError } from "../../../utils/errorMessage";
 
 const UNITS = ["UN", "KG", "L", "CX", "PCT", "DZ", "M", "G"];
 
@@ -27,9 +28,10 @@ const Label = ({ children, required }) => (
 const emptyNew = (defaultMinStock = 0) => ({
   name: "", unit: "UN", sale_price: "", cost_price: "", barcode: "", quantity: "",
   min_quantity: defaultMinStock > 0 ? String(defaultMinStock) : "",
+  ncm_code: "",
 });
 
-const ManualEntry = ({ products, onProductCreated, defaultMinStock = 0 }) => {
+const ManualEntry = ({ products, categories, onProductCreated, defaultMinStock = 0 }) => {
   const [search, setSearch] = useState("");
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -112,6 +114,7 @@ const ManualEntry = ({ products, onProductCreated, defaultMinStock = 0 }) => {
         barcode: newProduct.barcode.trim(),
         quantity: qty,
         min_quantity: parseInt(newProduct.min_quantity) || 0,
+        ncm_code: newProduct.ncm_code || "",
         sku: "",
         description: "",
       });
@@ -343,7 +346,7 @@ const ManualEntry = ({ products, onProductCreated, defaultMinStock = 0 }) => {
             </div>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 14 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 10 }}>
             <div>
               <Label>Preço de custo (R$)</Label>
               <input
@@ -365,6 +368,20 @@ const ManualEntry = ({ products, onProductCreated, defaultMinStock = 0 }) => {
                 placeholder="0000000000000"
               />
             </div>
+          </div>
+
+          <div style={{ marginBottom: 14 }}>
+            <Label>Categoria</Label>
+            <select
+              value={newProduct.ncm_code}
+              onChange={(e) => setNewProduct(p => ({ ...p, ncm_code: e.target.value }))}
+              style={{ ...inputSt(false), cursor: "pointer", appearance: "none" }}
+            >
+              <option value="">Sem categoria</option>
+              {(categories || []).map(c => (
+                <option key={c.prefix} value={c.prefix}>{c.name}</option>
+              ))}
+            </select>
           </div>
 
           {createApiError && (

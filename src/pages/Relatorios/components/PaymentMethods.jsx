@@ -12,6 +12,7 @@ const METHOD_LABELS = {
   debit: "Débito",
   credit: "Crédito",
   pix: "PIX",
+  prazo: "A Prazo",
 };
 
 const METHOD_COLORS = {
@@ -19,6 +20,7 @@ const METHOD_COLORS = {
   debit: C.blue,
   credit: "#7C3AED",
   pix: "#D97706",
+  prazo: "#B45309",
 };
 
 const METHOD_BG = {
@@ -26,6 +28,7 @@ const METHOD_BG = {
   debit: C.bluePale,
   credit: C.purplePale,
   pix: C.amberPale,
+  prazo: C.amberPale,
 };
 
 const PaymentMethods = ({ period }) => {

@@ -11,14 +11,14 @@ const MiniChart = () => (
   <svg viewBox="0 0 100 100" style={{ width: "100%", height: 80 }} preserveAspectRatio="none">
     <defs>
       <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stopColor={C.blue} stopOpacity="0.25" />
-        <stop offset="100%" stopColor={C.blue} stopOpacity="0" />
+        <stop offset="0%" style={{ stopColor: C.blue, stopOpacity: 0.25 }} />
+        <stop offset="100%" style={{ stopColor: C.blue, stopOpacity: 0 }} />
       </linearGradient>
     </defs>
     <polygon points={fill} fill="url(#chartGrad)" />
-    <polyline points={points} fill="none" stroke={C.blue} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <polyline points={points} fill="none" style={{ stroke: C.blue }} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     {data.map((v, i) => (
-      <circle key={i} cx={i * w} cy={100 - (v / max) * 80} r="2" fill={C.blue} />
+      <circle key={i} cx={i * w} cy={100 - (v / max) * 80} r="2" style={{ fill: C.blue }} />
     ))}
   </svg>
 );

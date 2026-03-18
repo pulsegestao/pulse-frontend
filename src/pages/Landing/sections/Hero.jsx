@@ -26,7 +26,7 @@ const Hero = () => {
       <div style={{
         position: "absolute", right: -200, top: "20%",
         width: 600, height: 600, borderRadius: "50%",
-        background: `radial-gradient(circle, ${C.green}0A, transparent 70%)`,
+        background: `radial-gradient(circle, ${C.blue}0A, transparent 70%)`,
         zIndex: 0,
       }} />
 
@@ -47,7 +47,7 @@ const Hero = () => {
             }}>
               Seu estoque<br />
               <span style={{ color: C.blue }}>trabalhando</span><br />
-              <span style={{ color: C.green }}>para você.</span>
+              <span style={{ color: C.blueLight }}>para você.</span>
             </h1>
 
             <p className={`fade-up d2 ${visible ? "visible" : ""}`} style={{
@@ -84,7 +84,7 @@ const Hero = () => {
             {/* Social proof */}
             <div className={`fade-up d4 ${visible ? "visible" : ""}`} style={{ display: "flex", alignItems: "center", gap: 20, marginTop: 40 }}>
               <div style={{ display: "flex" }}>
-                {[C.blue, C.green, "#7C3AED", "#DB2777", "#D97706"].map((color, i) => (
+                {[C.blue, C.blueLight, "#7C3AED", "#DB2777", "#D97706"].map((color, i) => (
                   <div key={i} style={{
                     width: 34, height: 34, borderRadius: "50%",
                     background: color,

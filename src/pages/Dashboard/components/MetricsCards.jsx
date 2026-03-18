@@ -36,7 +36,7 @@ const MetricCard = ({ label, value, unit, delta, positive, icon: Icon, iconColor
     </div>
     <div>
       <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
-        <span style={{ fontSize: 30, fontWeight: 800, color: C.graphite, lineHeight: 1 }}>
+        <span style={{ fontSize: 30, fontWeight: 800, color: C.blue, lineHeight: 1 }}>
           {value}
         </span>
         {unit && (
@@ -81,8 +81,8 @@ const MetricsCards = () => {
       delta: "realizadas hoje",
       positive: summary != null && summary.sales_count_today > 0 ? true : null,
       icon: ShoppingCart,
-      iconColor: C.green,
-      iconBg: C.greenPale,
+      iconColor: C.blue,
+      iconBg: C.bluePale,
     },
     {
       label: "Itens em estoque",
@@ -91,8 +91,8 @@ const MetricsCards = () => {
       delta: "cadastrados",
       positive: null,
       icon: Package,
-      iconColor: "#7C3AED",
-      iconBg: C.purplePale,
+      iconColor: C.blueLight,
+      iconBg: C.bluePale,
     },
     {
       label: "Atenção ao estoque",
@@ -101,8 +101,8 @@ const MetricsCards = () => {
       delta: "abaixo do mínimo",
       positive: lowStockCount === 0 ? null : (lowStockCount > 0 ? false : null),
       icon: AlertTriangle,
-      iconColor: "#D97706",
-      iconBg: C.amberPale,
+      iconColor: C.blue,
+      iconBg: C.bluePale,
     },
   ];
 

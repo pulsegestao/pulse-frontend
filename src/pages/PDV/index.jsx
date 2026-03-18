@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import {
   Search, X, Plus, Minus, Trash2, ShoppingCart,
   QrCode, CreditCard, Banknote, Wallet, Check, Package, LogOut,
-  Loader2, AlertCircle, Smartphone,
+  Loader2, AlertCircle, Smartphone, Clock, UserPlus, Tag,
 } from "lucide-react";
 import C from "../../theme/colors";
 import { isAuthenticated, getProfile } from "../../hooks/useAuth";
@@ -16,9 +16,90 @@ import {
   getPaymentIntentStatus,
   cancelPaymentIntent,
   registerSale,
+  searchCustomers,
+  createCustomer,
+  getActivePromotions,
 } from "../../services/api";
 
 const fmt = (n) => `R$ ${n.toFixed(2).replace(".", ",")}`;
+
+const getProductPromo = (product, promos) => {
+  for (const promo of promos) {
+    let matches = true;
+    for (const rule of promo.rules || []) {
+      if (rule.type === "product" && !(rule.product_ids || []).includes(product.id)) { matches = false; break; }
+      if (rule.type === "category" && (!product.category_id || !(rule.category_ids || []).includes(product.category_id))) { matches = false; break; }
+    }
+    if (!matches) continue;
+    if (promo.max_uses > 0 && promo.current_uses >= promo.max_uses) continue;
+    const a = promo.action || {};
+    switch (a.type) {
+      case "percent_off": return { label: `${a.value}% OFF`, previewPrice: product.price * (1 - a.value / 100) };
+      case "fixed_off": return { label: `-R$${a.value.toFixed(2).replace(".", ",")}`, previewPrice: Math.max(0, product.price - a.value) };
+      case "buy_x_pay_y": return { label: `Leve ${a.buy_x} Pague ${a.pay_y}`, previewPrice: null };
+      case "combo_price": return { label: "Combo", previewPrice: null };
+      default: return { label: promo.name, previewPrice: null };
+    }
+  }
+  return null;
+};
+
+const evaluateCartPromos = (cartItems, promos) => {
+  if (!promos.length) return {};
+  const subtotal = cartItems.reduce((s, i) => s + i.price * i.qty, 0);
+  const now = new Date();
+  const day = now.getDay();
+  const time = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+  const result = {};
+  for (const item of cartItems) {
+    let bestDiscount = 0, bestPromo = null, bestLabel = "", bestEffective = item.price;
+    for (const promo of promos) {
+      let ok = true;
+      for (const r of promo.rules || []) {
+        if (r.type === "product" && !(r.product_ids || []).includes(item.id)) { ok = false; break; }
+        if (r.type === "category" && (!item.category_id || !(r.category_ids || []).includes(item.category_id))) { ok = false; break; }
+        if (r.type === "min_quantity" && item.qty < (r.min_quantity || 0)) { ok = false; break; }
+        if (r.type === "min_value" && subtotal < (r.min_value || 0)) { ok = false; break; }
+        if (r.type === "schedule") {
+          if (!(r.days_of_week || []).includes(day)) { ok = false; break; }
+          if (r.time_start && time < r.time_start) { ok = false; break; }
+          if (r.time_end && time > r.time_end) { ok = false; break; }
+        }
+      }
+      if (!ok) continue;
+      if (promo.max_uses > 0 && promo.current_uses >= promo.max_uses) continue;
+      const a = promo.action || {};
+      let eff = item.price, lbl = "";
+      switch (a.type) {
+        case "percent_off":
+          eff = item.price * (1 - (a.value || 0) / 100);
+          lbl = `${a.value}% OFF`;
+          break;
+        case "fixed_off":
+          eff = Math.max(0, item.price - (a.value || 0));
+          lbl = `-R$${(a.value || 0).toFixed(2).replace(".", ",")}`;
+          break;
+        case "buy_x_pay_y": {
+          const bx = a.buy_x || 3, py = a.pay_y || 2;
+          const paid = Math.floor(item.qty / bx) * py + (item.qty % bx);
+          eff = (item.price * paid) / item.qty;
+          lbl = `Leve ${bx} Pague ${py}`;
+          break;
+        }
+        case "combo_price":
+          eff = (a.value || 0) / item.qty;
+          lbl = `Combo ${fmt(a.value || 0)}`;
+          break;
+      }
+      const disc = (item.price - eff) * item.qty;
+      if (disc > bestDiscount) { bestDiscount = disc; bestPromo = promo; bestLabel = lbl; bestEffective = eff; }
+    }
+    if (bestPromo) {
+      result[item.id] = { promoName: bestPromo.name, label: bestLabel, originalPrice: item.price, effectivePrice: bestEffective, discountTotal: bestDiscount };
+    }
+  }
+  return result;
+};
 
 // ── Constants ──────────────────────────────────────────────────────────────────
 
@@ -33,6 +114,8 @@ const PAYMENT_METHODS = [
   ...PAYMENT_METHODS_BASE,
   { id: "mixed", label: "Misto", icon: Wallet, color: "#7C3AED", bg: C.purplePale },
 ];
+
+const PRAZO_METHOD = { id: "prazo", label: "A Prazo", icon: Clock, color: "#B45309", bg: C.amberPale };
 
 // ── PDV Header (52px) ──────────────────────────────────────────────────────────
 
@@ -98,49 +181,103 @@ const QtyBtn = ({ onClick, disabled, children }) => (
   </button>
 );
 
-const ProductCard = ({ product, onAdd }) => (
-  <button
-    onClick={() => onAdd(product)}
-    style={{
-      display: "flex", flexDirection: "column", gap: 8,
-      padding: "14px 16px", borderRadius: 12,
-      background: C.surface, border: `1.5px solid ${C.border}`,
-      cursor: "pointer", textAlign: "left", fontFamily: "inherit",
-      transition: "all 0.15s", width: "100%", boxSizing: "border-box",
-    }}
-    onMouseEnter={e => {
-      e.currentTarget.style.borderColor = C.blue + "55";
-      e.currentTarget.style.background = C.bluePale;
-      e.currentTarget.style.transform = "translateY(-1px)";
-    }}
-    onMouseLeave={e => {
-      e.currentTarget.style.borderColor = C.border;
-      e.currentTarget.style.background = C.surface;
-      e.currentTarget.style.transform = "none";
-    }}
-  >
-    <p style={{ fontSize: 13, fontWeight: 600, color: C.graphite, margin: 0, lineHeight: 1.35 }}>
-      {product.name}
-    </p>
-    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-      <span style={{ fontSize: 15, fontWeight: 800, color: C.green }}>{fmt(product.price)}</span>
-      <span style={{ padding: "2px 7px", borderRadius: 6, background: C.gray, fontSize: 10, fontWeight: 600, color: C.mid }}>
-        {product.unit}
-      </span>
-    </div>
-  </button>
-);
+const ProductCard = ({ product, onAdd, promo }) => {
+  const outOfStock = product.stock <= 0;
+  return (
+    <button
+      onClick={() => !outOfStock && onAdd(product)}
+      disabled={outOfStock}
+      style={{
+        display: "flex", flexDirection: "column", gap: 8,
+        padding: "14px 16px", borderRadius: 12,
+        background: outOfStock ? C.gray : C.surface,
+        border: `1.5px solid ${outOfStock ? C.border : promo ? C.green + "44" : C.border}`,
+        cursor: outOfStock ? "not-allowed" : "pointer",
+        textAlign: "left", fontFamily: "inherit",
+        transition: "all 0.15s", width: "100%", boxSizing: "border-box",
+        opacity: outOfStock ? 0.55 : 1,
+        position: "relative",
+      }}
+      onMouseEnter={e => {
+        if (outOfStock) return;
+        e.currentTarget.style.borderColor = C.blue + "55";
+        e.currentTarget.style.background = C.bluePale;
+        e.currentTarget.style.transform = "translateY(-1px)";
+      }}
+      onMouseLeave={e => {
+        if (outOfStock) return;
+        e.currentTarget.style.borderColor = promo ? C.green + "44" : C.border;
+        e.currentTarget.style.background = C.surface;
+        e.currentTarget.style.transform = "none";
+      }}
+    >
+      {outOfStock ? (
+        <span style={{
+          position: "absolute", top: 8, right: 8,
+          padding: "2px 7px", borderRadius: 6,
+          background: C.redPale, color: "#DC2626",
+          fontSize: 9, fontWeight: 800, letterSpacing: "0.3px",
+          textTransform: "uppercase",
+        }}>
+          Sem estoque
+        </span>
+      ) : promo && (
+        <span style={{
+          position: "absolute", top: 8, right: 8,
+          padding: "2px 7px", borderRadius: 6,
+          background: C.greenPale, color: C.green,
+          fontSize: 9, fontWeight: 800, letterSpacing: "0.3px",
+          display: "flex", alignItems: "center", gap: 3,
+        }}>
+          <Tag size={9} strokeWidth={2.5} />
+          {promo.label}
+        </span>
+      )}
+      <p style={{ fontSize: 13, fontWeight: 600, color: outOfStock ? C.mid : C.graphite, margin: 0, lineHeight: 1.35 }}>
+        {product.name}
+      </p>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        {promo && promo.previewPrice != null && !outOfStock ? (
+          <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
+            <span style={{ fontSize: 15, fontWeight: 800, color: C.green }}>{fmt(promo.previewPrice)}</span>
+            <span style={{ fontSize: 11, fontWeight: 600, color: C.mid, textDecoration: "line-through" }}>{fmt(product.price)}</span>
+          </div>
+        ) : (
+          <span style={{ fontSize: 15, fontWeight: 800, color: outOfStock ? C.mid : C.green }}>{fmt(product.price)}</span>
+        )}
+        <span style={{ padding: "2px 7px", borderRadius: 6, background: C.gray, fontSize: 10, fontWeight: 600, color: C.mid }}>
+          {product.unit}
+        </span>
+      </div>
+    </button>
+  );
+};
 
-const CartItem = ({ item, onUpdateQty, onRemove }) => (
+const CartItem = ({ item, onUpdateQty, onRemove, promo }) => (
   <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 16px", borderBottom: `1px solid ${C.border}` }}>
     <div style={{ flex: 1, minWidth: 0 }}>
       <p style={{ fontSize: 13, fontWeight: 600, color: C.graphite, margin: "0 0 2px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
         {item.name}
       </p>
-      <p style={{ fontSize: 12, color: C.mid, margin: 0 }}>
-        {fmt(item.price)} × {item.qty} ={" "}
-        <span style={{ color: C.green, fontWeight: 700 }}>{fmt(item.price * item.qty)}</span>
-      </p>
+      {promo ? (
+        <>
+          <p style={{ fontSize: 12, color: C.mid, margin: 0 }}>
+            <span style={{ textDecoration: "line-through" }}>{fmt(item.price)}</span>
+            {" "}<span style={{ color: C.green, fontWeight: 700 }}>{fmt(promo.effectivePrice)}</span>
+            {" "}× {item.qty} ={" "}
+            <span style={{ color: C.green, fontWeight: 700 }}>{fmt(promo.effectivePrice * item.qty)}</span>
+          </p>
+          <p style={{ fontSize: 10, fontWeight: 700, color: C.green, margin: "2px 0 0", display: "flex", alignItems: "center", gap: 3 }}>
+            <Tag size={9} strokeWidth={2.5} />
+            {promo.label}
+          </p>
+        </>
+      ) : (
+        <p style={{ fontSize: 12, color: C.mid, margin: 0 }}>
+          {fmt(item.price)} × {item.qty} ={" "}
+          <span style={{ color: C.green, fontWeight: 700 }}>{fmt(item.price * item.qty)}</span>
+        </p>
+      )}
     </div>
     <div style={{ display: "flex", alignItems: "center", gap: 4, flexShrink: 0 }}>
       <QtyBtn onClick={() => onUpdateQty(item.id, -1)} disabled={item.qty <= 1}>
@@ -149,8 +286,8 @@ const CartItem = ({ item, onUpdateQty, onRemove }) => (
       <span style={{ width: 26, textAlign: "center", fontSize: 13, fontWeight: 700, color: C.graphite }}>
         {item.qty}
       </span>
-      <QtyBtn onClick={() => onUpdateQty(item.id, 1)}>
-        <Plus size={12} strokeWidth={2.5} color={C.graphite} />
+      <QtyBtn onClick={() => onUpdateQty(item.id, 1)} disabled={item.qty >= item.stock}>
+        <Plus size={12} strokeWidth={2.5} color={item.qty >= item.stock ? C.border : C.graphite} />
       </QtyBtn>
       <button
         onClick={() => onRemove(item.id)}
@@ -185,7 +322,7 @@ const PaymentBtn = ({ method, selected, onSelect }) => {
 
 // ── Payment Modal ──────────────────────────────────────────────────────────────
 
-const PaymentModal = ({ method, total, onClose, onSuccess }) => {
+const PaymentModal = ({ method, total, selectedCustomer, onClose, onSuccess }) => {
   const pollingRef = useRef(null);
   const finalEntriesRef = useRef(null);
 
@@ -221,12 +358,14 @@ const PaymentModal = ({ method, total, onClose, onSuccess }) => {
     ]).then(([ints, company]) => {
       setMpIntegration((ints || []).find(i => i.provider === "mercadopago") || null);
       setPixKey(company.pix_key || "");
-      if (method?.id !== "mixed") {
+      if (method?.id === "mixed") {
+        setPayPhase("planning");
+      } else if (method?.id === "prazo") {
+        setPayPhase("prazo_confirm");
+      } else {
         setExecEntries([{ id: 1, methodId: method?.id, amount: total, status: "pending", change: 0 }]);
         setExecIndex(0);
         setPayPhase("executing");
-      } else {
-        setPayPhase("planning");
       }
     }).finally(() => setLoading(false));
     return () => { if (pollingRef.current) clearInterval(pollingRef.current); };
@@ -499,6 +638,46 @@ const PaymentModal = ({ method, total, onClose, onSuccess }) => {
             </div>
           </>
 
+        ) : payPhase === "prazo_confirm" ? (
+          /* ── Prazo confirm ── */
+          <>
+            <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 20 }}>
+              <div style={{ width: 46, height: 46, borderRadius: 13, background: C.amberPale, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <Clock size={22} color="#B45309" strokeWidth={2} />
+              </div>
+              <div>
+                <p style={{ fontSize: 16, fontWeight: 800, color: C.graphite, margin: 0 }}>Venda a Prazo</p>
+                <p style={{ fontSize: 13, color: C.mid, margin: 0 }}>Total: <strong style={{ color: C.green }}>{fmt(total)}</strong></p>
+              </div>
+            </div>
+            {selectedCustomer ? (
+              <div style={{ padding: "12px 16px", borderRadius: 10, background: C.amberPale, marginBottom: 20, border: "1px solid #D9770633" }}>
+                <p style={{ fontSize: 13, fontWeight: 700, color: C.graphite, margin: "0 0 2px" }}>{selectedCustomer.name}</p>
+                {selectedCustomer.cpf && <p style={{ fontSize: 12, color: C.mid, margin: 0 }}>{selectedCustomer.cpf}</p>}
+              </div>
+            ) : (
+              <div style={{ padding: "12px 16px", borderRadius: 10, background: C.gray, marginBottom: 20 }}>
+                <p style={{ fontSize: 13, color: C.mid, margin: 0 }}>Sem cliente vinculado</p>
+              </div>
+            )}
+            <div style={{ display: "flex", gap: 10 }}>
+              <button onClick={onClose}
+                style={{ flex: 1, padding: "11px", borderRadius: 10, border: `1.5px solid ${C.border}`, background: "transparent", fontSize: 13, fontWeight: 700, color: C.graphite, cursor: "pointer", fontFamily: "inherit" }}
+                onMouseEnter={e => e.currentTarget.style.background = C.gray}
+                onMouseLeave={e => e.currentTarget.style.background = "transparent"}
+              >Cancelar</button>
+              <button
+                onClick={() => onSuccess([{ id: 1, methodId: "prazo", amount: total, status: "confirmed", change: 0 }])}
+                style={{ flex: 2, padding: "11px", borderRadius: 10, border: "none", background: "#B45309", color: "white", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}
+                onMouseEnter={e => e.currentTarget.style.opacity = "0.88"}
+                onMouseLeave={e => e.currentTarget.style.opacity = "1"}
+              >
+                <Clock size={15} strokeWidth={2} />
+                Confirmar venda a prazo
+              </button>
+            </div>
+          </>
+
         ) : (
           /* ── Executing (step-lock) ── */
           <>
@@ -735,31 +914,96 @@ const PDVPage = () => {
   const navigate  = useNavigate();
   const profile   = getProfile();
   const inputRef  = useRef(null);
+  const customerTimerRef = useRef(null);
   const toast     = useToast();
 
   const [products,        setProducts       ] = useState([]);
   const [productsLoading, setProductsLoading] = useState(true);
+  const [activePromos,    setActivePromos   ] = useState([]);
   const [search,          setSearch         ] = useState("");
   const [cart,            setCart           ] = useState([]);
   const [selectedPayment, setSelectedPayment] = useState(null);
   const [showModal,       setShowModal      ] = useState(false);
   const [confirmingClear, setConfirmingClear] = useState(false);
 
+  const [selectedCustomer,      setSelectedCustomer     ] = useState(null);
+  const [customerQuery,         setCustomerQuery        ] = useState("");
+  const [customerResults,       setCustomerResults      ] = useState([]);
+  const [customerDropdownOpen,  setCustomerDropdownOpen ] = useState(false);
+  const [showNewCustomerModal,  setShowNewCustomerModal ] = useState(false);
+  const [newCustName,           setNewCustName          ] = useState("");
+  const [newCustCPF,            setNewCustCPF           ] = useState("");
+  const [newCustPhone,          setNewCustPhone         ] = useState("");
+  const [savingCustomer,        setSavingCustomer       ] = useState(false);
+
   useEffect(() => {
     if (!isAuthenticated()) { navigate("/login", { replace: true }); return; }
     inputRef.current?.focus();
-    getProducts()
-      .then(data => setProducts(
-        (data || []).filter(p => p.active).map(p => ({ id: p.id, name: p.name, price: p.sale_price, unit: p.unit || "UN" }))
-      ))
+    Promise.all([
+      getProducts(),
+      getActivePromotions().catch(() => []),
+    ])
+      .then(([data, promos]) => {
+        setProducts(
+          (data || []).filter(p => p.active).map(p => ({
+            id: p.id, name: p.name, price: p.sale_price, unit: p.unit || "UN",
+            stock: p.inventory?.quantity ?? 0, category_id: p.category_id || "",
+          }))
+        );
+        setActivePromos(promos || []);
+      })
       .catch(() => toast.error("Falha ao carregar produtos."))
       .finally(() => setProductsLoading(false));
   }, []);
 
+  useEffect(() => {
+    if (selectedPayment?.id !== "prazo" || customerQuery.length < 1) {
+      setCustomerResults([]);
+      return;
+    }
+    if (customerTimerRef.current) clearTimeout(customerTimerRef.current);
+    customerTimerRef.current = setTimeout(() => {
+      searchCustomers(customerQuery).then(r => setCustomerResults(r || [])).catch(() => {});
+    }, 300);
+    return () => { if (customerTimerRef.current) clearTimeout(customerTimerRef.current); };
+  }, [customerQuery, selectedPayment]);
+
+  const handleSelectPayment = (method) => {
+    setSelectedPayment(method);
+    if (!method || method.id !== "prazo") {
+      setSelectedCustomer(null);
+      setCustomerQuery("");
+      setCustomerResults([]);
+    }
+  };
+
+  const handleSaveNewCustomer = async () => {
+    if (!newCustName.trim()) return;
+    setSavingCustomer(true);
+    try {
+      const c = await createCustomer({ name: newCustName.trim(), cpf: newCustCPF.trim(), phone: newCustPhone.trim(), email: "" });
+      setSelectedCustomer(c);
+      setShowNewCustomerModal(false);
+      setCustomerDropdownOpen(false);
+      setCustomerQuery("");
+      setNewCustName(""); setNewCustCPF(""); setNewCustPhone("");
+    } catch (e) {
+      toast.error("Não foi possível cadastrar o cliente.");
+    } finally {
+      setSavingCustomer(false);
+    }
+  };
+
   const addToCart = (product) => {
     setCart(prev => {
       const existing = prev.find(i => i.id === product.id);
-      if (existing) return prev.map(i => i.id === product.id ? { ...i, qty: i.qty + 1 } : i);
+      if (existing) {
+        if (existing.qty >= product.stock) {
+          toast.warning(`Estoque esgotado para ${product.name}.`);
+          return prev;
+        }
+        return prev.map(i => i.id === product.id ? { ...i, qty: i.qty + 1 } : i);
+      }
       return [...prev, { ...product, qty: 1 }];
     });
     setSearch("");
@@ -767,7 +1011,14 @@ const PDVPage = () => {
   };
 
   const updateQty = (id, delta) => {
-    setCart(prev => prev.map(i => i.id === id ? { ...i, qty: Math.max(1, i.qty + delta) } : i));
+    setCart(prev => prev.map(i => {
+      if (i.id !== id) return i;
+      if (delta > 0 && i.qty >= i.stock) {
+        toast.warning(`Estoque esgotado para ${i.name}.`);
+        return i;
+      }
+      return { ...i, qty: Math.max(1, i.qty + delta) };
+    }));
   };
 
   const removeItem = (id) => setCart(prev => prev.filter(i => i.id !== id));
@@ -775,6 +1026,8 @@ const PDVPage = () => {
   const clearCart = () => {
     setCart([]);
     setSelectedPayment(null);
+    setSelectedCustomer(null);
+    setCustomerQuery("");
     setConfirmingClear(false);
   };
 
@@ -786,9 +1039,12 @@ const PDVPage = () => {
     if (e.key === "Enter" && filteredProducts.length === 1) addToCart(filteredProducts[0]);
   };
 
-  const total      = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
-  const totalQty   = cart.reduce((sum, i) => sum + i.qty, 0);
-  const canFinalize = cart.length > 0 && selectedPayment !== null;
+  const promoMap     = evaluateCartPromos(cart, activePromos);
+  const subtotal     = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
+  const promoDiscount = Object.values(promoMap).reduce((s, p) => s + p.discountTotal, 0);
+  const total        = subtotal - promoDiscount;
+  const totalQty     = cart.reduce((sum, i) => sum + i.qty, 0);
+  const canFinalize  = cart.length > 0 && selectedPayment !== null;
 
   return (
     <div style={{ minHeight: "100vh", background: C.pageBg }}>
@@ -844,7 +1100,7 @@ const PDVPage = () => {
               </div>
             ) : (
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 10 }}>
-                {filteredProducts.map(p => <ProductCard key={p.id} product={p} onAdd={addToCart} />)}
+                {filteredProducts.map(p => <ProductCard key={p.id} product={p} onAdd={addToCart} promo={getProductPromo(p, activePromos)} />)}
               </div>
             )}
           </div>
@@ -885,11 +1141,26 @@ const PDVPage = () => {
                 <p style={{ fontSize: 12, margin: "4px 0 0" }}>Selecione produtos ao lado</p>
               </div>
             ) : (
-              cart.map(item => <CartItem key={item.id} item={item} onUpdateQty={updateQty} onRemove={removeItem} />)
+              cart.map(item => <CartItem key={item.id} item={item} onUpdateQty={updateQty} onRemove={removeItem} promo={promoMap[item.id]} />)
             )}
           </div>
 
           <div style={{ padding: "16px 20px", borderTop: `2px solid ${C.border}` }}>
+            {promoDiscount > 0 && (
+              <>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
+                  <span style={{ fontSize: 12, color: C.mid }}>Subtotal</span>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: C.mid }}>{fmt(subtotal)}</span>
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                  <span style={{ fontSize: 12, color: C.green, display: "flex", alignItems: "center", gap: 4 }}>
+                    <Tag size={10} strokeWidth={2} />
+                    Descontos promo
+                  </span>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: C.green }}>-{fmt(promoDiscount)}</span>
+                </div>
+              </>
+            )}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
               <span style={{ fontSize: 15, fontWeight: 700, color: C.graphite }}>Total</span>
               <span style={{ fontSize: 26, fontWeight: 800, color: cart.length > 0 ? C.green : C.mid }}>
@@ -903,10 +1174,71 @@ const PDVPage = () => {
               </p>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
                 {PAYMENT_METHODS.map(m => (
-                  <PaymentBtn key={m.id} method={m} selected={selectedPayment?.id === m.id} onSelect={setSelectedPayment} />
+                  <PaymentBtn key={m.id} method={m} selected={selectedPayment?.id === m.id} onSelect={handleSelectPayment} />
                 ))}
               </div>
+              <hr style={{ border: 0, borderTop: `1px solid ${C.border}`, margin: "12px 0" }} />
+              <button
+                onClick={() => handleSelectPayment(selectedPayment?.id === "prazo" ? null : PRAZO_METHOD)}
+                style={{
+                  width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                  padding: "7px 14px", borderRadius: 10,
+                  border: selectedPayment?.id === "prazo" ? `2px solid #B45309` : `1.5px solid ${C.border}`,
+                  background: selectedPayment?.id === "prazo" ? C.amberPale : "transparent",
+                  color: selectedPayment?.id === "prazo" ? "#B45309" : C.mid,
+                  fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "inherit",
+                  transition: "all 0.15s",
+                }}
+              >
+                <Clock size={13} strokeWidth={2} />
+                A Prazo
+              </button>
             </div>
+
+            {selectedPayment?.id === "prazo" && (
+              <div style={{ marginBottom: 14, position: "relative" }}>
+                <p style={{ fontSize: 11, fontWeight: 600, color: C.mid, margin: "0 0 6px", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                  Cliente
+                </p>
+                {selectedCustomer ? (
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 12px", background: C.amberPale, borderRadius: 9, border: "1px solid #D9770633" }}>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: C.graphite }}>{selectedCustomer.name}</span>
+                    <button onClick={() => { setSelectedCustomer(null); setCustomerQuery(""); }} style={{ background: "none", border: "none", cursor: "pointer", padding: 2 }}>
+                      <X size={13} color={C.mid} />
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <input
+                      value={customerQuery}
+                      onChange={e => { setCustomerQuery(e.target.value); setCustomerDropdownOpen(true); }}
+                      onFocus={() => setCustomerDropdownOpen(true)}
+                      placeholder="Buscar por nome ou CPF..."
+                      style={{ width: "100%", padding: "8px 12px", borderRadius: 9, border: `1.5px solid ${C.border}`, fontSize: 13, color: C.graphite, background: C.surface, outline: "none", fontFamily: "inherit", boxSizing: "border-box" }}
+                      onBlur={() => setTimeout(() => setCustomerDropdownOpen(false), 150)}
+                    />
+                    {customerDropdownOpen && customerQuery.length > 0 && (
+                      <div style={{ position: "absolute", top: "100%", left: 0, right: 0, background: C.surface, border: `1px solid ${C.border}`, borderRadius: 10, boxShadow: "0 4px 16px rgba(0,0,0,0.1)", zIndex: 20, maxHeight: 200, overflowY: "auto" }}>
+                        {customerResults.map(c => (
+                          <button key={c.id} onMouseDown={() => { setSelectedCustomer(c); setCustomerDropdownOpen(false); setCustomerQuery(""); }} style={{ display: "block", width: "100%", textAlign: "left", padding: "9px 14px", background: "none", border: "none", cursor: "pointer", fontSize: 13, color: C.graphite, fontFamily: "inherit" }}
+                            onMouseEnter={e => e.currentTarget.style.background = C.gray}
+                            onMouseLeave={e => e.currentTarget.style.background = "none"}
+                          >
+                            {c.name}{c.cpf ? ` · ${c.cpf}` : ""}
+                          </button>
+                        ))}
+                        <button onMouseDown={() => { setShowNewCustomerModal(true); setCustomerDropdownOpen(false); }} style={{ display: "flex", alignItems: "center", gap: 6, width: "100%", textAlign: "left", padding: "9px 14px", background: "none", border: "none", borderTop: `1px solid ${C.border}`, cursor: "pointer", fontSize: 13, fontWeight: 600, color: C.blue, fontFamily: "inherit" }}
+                          onMouseEnter={e => e.currentTarget.style.background = C.bluePale}
+                          onMouseLeave={e => e.currentTarget.style.background = "none"}
+                        >
+                          <UserPlus size={13} strokeWidth={2} /> Cadastrar cliente
+                        </button>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
 
             <button
               onClick={() => setShowModal(true)}
@@ -934,20 +1266,62 @@ const PDVPage = () => {
         <PaymentModal
           method={selectedPayment}
           total={total}
+          selectedCustomer={selectedCustomer}
           onClose={() => setShowModal(false)}
-          onSuccess={(execEntries) => {
+          onSuccess={async (execEntries) => {
             const items = cart.map(i => ({ product_id: i.id, quantity: i.qty }));
             const payments = (execEntries || []).map(e => ({
               method: e.methodId === "card" ? "credit" : e.methodId,
               amount: parseFloat(e.amount),
               ...(e.transactionId && { transaction_id: e.transactionId }),
             }));
-            registerSale({ items, payments, discount: 0, note: "" })
-              .catch(() => toast.error("Venda paga mas não registrada. Verifique o histórico."));
+            const saleInput = {
+              items, payments, discount: 0, note: "",
+              ...(selectedCustomer?.id && { customer_id: selectedCustomer.id }),
+              ...(selectedCustomer?.name && { customer_name: selectedCustomer.name }),
+            };
+            try {
+              await registerSale(saleInput);
+            } catch {
+              toast.error("Venda paga mas não registrada. Verifique o histórico.");
+            }
             clearCart();
             setShowModal(false);
           }}
         />
+      )}
+
+      {showNewCustomerModal && (
+        <div onClick={() => setShowNewCustomerModal(false)} style={{ position: "fixed", inset: 0, zIndex: 300, background: "rgba(0,0,0,0.4)", backdropFilter: "blur(2px)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div onClick={e => e.stopPropagation()} style={{ background: C.surface, borderRadius: 16, padding: 28, width: 360, boxShadow: "0 12px 48px rgba(0,0,0,0.18)", border: `1px solid ${C.border}`, boxSizing: "border-box" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
+              <div style={{ width: 36, height: 36, borderRadius: 10, background: C.amberPale, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <UserPlus size={18} color="#B45309" strokeWidth={2} />
+              </div>
+              <p style={{ fontSize: 16, fontWeight: 800, color: C.graphite, margin: 0 }}>Novo Cliente</p>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              <div>
+                <label style={{ fontSize: 12, fontWeight: 600, color: C.graphite, display: "block", marginBottom: 4 }}>Nome *</label>
+                <input value={newCustName} onChange={e => setNewCustName(e.target.value)} placeholder="Nome completo" autoFocus style={{ width: "100%", padding: "9px 12px", borderRadius: 9, border: `1.5px solid ${C.border}`, fontSize: 14, color: C.graphite, background: C.surface, outline: "none", fontFamily: "inherit", boxSizing: "border-box" }} onFocus={e => e.target.style.borderColor = C.blue} onBlur={e => e.target.style.borderColor = C.border} />
+              </div>
+              <div>
+                <label style={{ fontSize: 12, fontWeight: 600, color: C.graphite, display: "block", marginBottom: 4 }}>CPF</label>
+                <input value={newCustCPF} onChange={e => setNewCustCPF(e.target.value)} placeholder="000.000.000-00" style={{ width: "100%", padding: "9px 12px", borderRadius: 9, border: `1.5px solid ${C.border}`, fontSize: 14, color: C.graphite, background: C.surface, outline: "none", fontFamily: "inherit", boxSizing: "border-box" }} onFocus={e => e.target.style.borderColor = C.blue} onBlur={e => e.target.style.borderColor = C.border} />
+              </div>
+              <div>
+                <label style={{ fontSize: 12, fontWeight: 600, color: C.graphite, display: "block", marginBottom: 4 }}>Telefone</label>
+                <input value={newCustPhone} onChange={e => setNewCustPhone(e.target.value)} placeholder="(00) 00000-0000" style={{ width: "100%", padding: "9px 12px", borderRadius: 9, border: `1.5px solid ${C.border}`, fontSize: 14, color: C.graphite, background: C.surface, outline: "none", fontFamily: "inherit", boxSizing: "border-box" }} onFocus={e => e.target.style.borderColor = C.blue} onBlur={e => e.target.style.borderColor = C.border} />
+              </div>
+            </div>
+            <div style={{ display: "flex", gap: 10, marginTop: 20 }}>
+              <button onClick={() => { setShowNewCustomerModal(false); setNewCustName(""); setNewCustCPF(""); setNewCustPhone(""); }} style={{ flex: 1, padding: "10px", borderRadius: 10, border: `1.5px solid ${C.border}`, background: "transparent", fontSize: 13, fontWeight: 700, color: C.mid, cursor: "pointer", fontFamily: "inherit" }}>Cancelar</button>
+              <button onClick={handleSaveNewCustomer} disabled={!newCustName.trim() || savingCustomer} style={{ flex: 2, padding: "10px", borderRadius: 10, border: "none", background: newCustName.trim() ? "#B45309" : C.border, color: newCustName.trim() ? "white" : C.mid, fontSize: 13, fontWeight: 700, cursor: newCustName.trim() ? "pointer" : "not-allowed", fontFamily: "inherit" }}>
+                {savingCustomer ? "Salvando..." : "Cadastrar"}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

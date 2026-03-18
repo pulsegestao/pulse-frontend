@@ -8,6 +8,7 @@ import LowStockTable from "./components/LowStockTable";
 import TopProducts from "./components/TopProducts";
 import QuickActions from "./components/QuickActions";
 import { isAuthenticated, getProfile } from "../../hooks/useAuth";
+import QuickActionsBar from "../../components/layout/QuickActionsBar";
 
 const getGreeting = () => {
   const h = new Date().getHours();
@@ -34,11 +35,12 @@ const DashboardPage = () => {
   return (
   <div style={{ minHeight: "100vh", background: C.pageBg }}>
     <DashboardHeader />
+      <QuickActionsBar />
 
     <main style={{
       maxWidth: 1280,
       margin: "0 auto",
-      padding: "80px 24px 48px",
+      padding: "124px 24px 48px",
     }}>
       {/* Greeting */}
       <div style={{ marginBottom: 28, paddingTop: 8 }}>

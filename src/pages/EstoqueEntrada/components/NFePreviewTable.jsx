@@ -5,7 +5,7 @@ import C from "../../../theme/colors";
 const MODE_LINK = "link";
 const MODE_NEW = "new";
 
-const NFePreviewTable = ({ preview, products, onItemsChange }) => {
+const NFePreviewTable = ({ preview, products, categories, onItemsChange, defaultMinStock = 0 }) => {
   const [overrides, setOverrides] = useState({});
   const [newProducts, setNewProducts] = useState({});
   const [modes, setModes] = useState({});
@@ -23,6 +23,7 @@ const NFePreviewTable = ({ preview, products, onItemsChange }) => {
       delete ov[idx];
       setOverrides(ov);
       const item = (preview.items || [])[idx];
+      const ncmPrefix = item?.ncm && item.ncm.length >= 2 ? item.ncm.substring(0, 2) : "";
       const np = {
         ...newProducts,
         [idx]: {
@@ -31,6 +32,8 @@ const NFePreviewTable = ({ preview, products, onItemsChange }) => {
           barcode: item?.ean && item.ean !== "SEM GTIN" ? item.ean : "",
           unit: item?.unit || "UN",
           cost_price: item?.unit_cost || 0,
+          min_quantity: defaultMinStock > 0 ? defaultMinStock : 0,
+          ncm_code: ncmPrefix,
         },
       };
       setNewProducts(np);
@@ -71,8 +74,10 @@ const NFePreviewTable = ({ preview, products, onItemsChange }) => {
               name: npData.name,
               barcode: npData.barcode || "",
               unit: npData.unit || "UN",
+              ncm_code: npData.ncm_code || "",
               cost_price: Number(npData.cost_price) || item.unit_cost,
               sale_price: Number(npData.sale_price),
+              min_quantity: Number(npData.min_quantity) || 0,
             },
             quantity: Math.round(item.quantity),
             unit_cost: item.unit_cost,
@@ -139,6 +144,9 @@ const NFePreviewTable = ({ preview, products, onItemsChange }) => {
                     {item.name}
                     <span style={{ display: "block", fontSize: 11, color: C.mid, fontWeight: 400 }}>
                       EAN: {item.ean || "—"}
+                      {item.ncm && (
+                        <span style={{ marginLeft: 8 }}>· NCM: {item.ncm}</span>
+                      )}
                     </span>
                   </td>
 
@@ -177,6 +185,21 @@ const NFePreviewTable = ({ preview, products, onItemsChange }) => {
                               style={inputStyle}
                             />
                           </div>
+                        </div>
+                        <div>
+                          <label style={{ fontSize: 10, color: C.mid, display: "block", marginBottom: 2 }}>
+                            Categoria
+                          </label>
+                          <select
+                            value={np.ncm_code || ""}
+                            onChange={(e) => handleNewProductField(idx, "ncm_code", e.target.value)}
+                            style={{ ...inputStyle, cursor: "pointer", appearance: "none" }}
+                          >
+                            <option value="">Sem categoria</option>
+                            {(categories || []).map(c => (
+                              <option key={c.prefix} value={c.prefix}>{c.name}</option>
+                            ))}
+                          </select>
                         </div>
                         <button
                           onClick={() => setMode(idx, MODE_LINK)}

@@ -6,7 +6,9 @@ import DashboardHeader from "../Dashboard/components/DashboardHeader";
 import ProductReport from "./components/ProductReport";
 import PaymentMethods from "./components/PaymentMethods";
 import DeadStock from "./components/DeadStock";
+import PrazoCard from "./components/PrazoCard";
 import { isAuthenticated } from "../../hooks/useAuth";
+import QuickActionsBar from "../../components/layout/QuickActionsBar";
 
 const PERIODS = ["Semana", "Mês", "Ano"];
 const PERIOD_KEY = { "Semana": "week", "Mês": "month", "Ano": "year" };
@@ -25,7 +27,8 @@ const RelatoriosPage = () => {
   return (
     <div style={{ background: C.pageBg, minHeight: "100vh" }}>
       <DashboardHeader />
-      <main style={{ padding: "80px 24px 48px", maxWidth: 1100, margin: "0 auto" }}>
+      <QuickActionsBar />
+      <main style={{ padding: "124px 24px 48px", maxWidth: 1100, margin: "0 auto" }}>
 
         <div style={{
           display: "flex",
@@ -62,7 +65,7 @@ const RelatoriosPage = () => {
                 style={{
                   padding: "6px 16px", borderRadius: 8, border: "none",
                   background: period === p ? C.surface : "transparent",
-                  color: period === p ? C.graphite : C.mid,
+                  color: period === p ? C.blue : C.mid,
                   fontSize: 13, fontWeight: period === p ? 700 : 500,
                   cursor: "pointer",
                   boxShadow: period === p ? "0 1px 4px rgba(0,0,0,0.08)" : "none",
@@ -79,6 +82,7 @@ const RelatoriosPage = () => {
           <ProductReport period={periodKey} />
           <PaymentMethods period={periodKey} />
           <DeadStock />
+          <PrazoCard />
         </div>
 
       </main>

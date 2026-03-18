@@ -154,6 +154,10 @@ export function getCompanyMembers() {
   return authRequest("/api/v1/companies/me/members");
 }
 
+export function getNCMCategories() {
+  return authRequest("/api/v1/ncm/categories");
+}
+
 export function getPaymentIntegrations() {
   return authRequest("/api/v1/integrations/payment");
 }
@@ -223,4 +227,127 @@ export function getPaymentMethods(period = "month") {
 
 export function getDeadStock() {
   return authRequest("/api/v1/reports/dead-stock");
+}
+export function getInsights({ type, severity, read, limit = 10, offset = 0 } = {}) {
+  const params = new URLSearchParams();
+  if (type)     params.set("type", type);
+  if (severity) params.set("severity", severity);
+  if (read !== undefined && read !== null) params.set("read", String(read));
+  params.set("limit", limit);
+  params.set("offset", offset);
+  return authRequest(`/api/v1/insights?${params.toString()}`);
+}
+
+export function countUnreadInsights() {
+  return authRequest("/api/v1/insights/unread");
+}
+
+export function markInsightRead(id) {
+  return authRequest(`/api/v1/insights/${id}/read`, { method: "PATCH" });
+}
+
+export function markAllInsightsRead() {
+  return authRequest("/api/v1/insights/read-all", { method: "PATCH" });
+}
+
+export function getNotifications({ type, read, limit = 10, offset = 0 } = {}) {
+  const params = new URLSearchParams();
+  if (type) params.set("type", type);
+  if (read !== undefined && read !== null) params.set("read", String(read));
+  params.set("limit", limit);
+  params.set("offset", offset);
+  return authRequest(`/api/v1/notifications?${params.toString()}`);
+}
+
+export function countUnreadNotifications() {
+  return authRequest("/api/v1/notifications/unread");
+}
+
+export function markNotificationRead(id) {
+  return authRequest(`/api/v1/notifications/${id}/read`, { method: "PATCH" });
+}
+
+export function markAllNotificationsRead() {
+  return authRequest("/api/v1/notifications/read-all", { method: "PATCH" });
+}
+
+export function getVelocityRanking(limit = 10) {
+  return authRequest(`/api/v1/analytics/velocity?limit=${limit}`);
+}
+
+export function getCategoryBreakdown(period = "month") {
+  return authRequest(`/api/v1/analytics/categories?period=${period}`);
+}
+
+export function searchCustomers(q) {
+  return authRequest(`/api/v1/customers/search?q=${encodeURIComponent(q)}`);
+}
+
+export function createCustomer(input) {
+  return authRequest("/api/v1/customers/", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+export function getSalesPrazo(status = "pending") {
+  return authRequest(`/api/v1/sales/prazo?status=${status}`);
+}
+
+export function receiveSale(id, receivedVia = "confirmed") {
+  return authRequest(`/api/v1/sales/${id}/receive`, {
+    method: "POST",
+    body: JSON.stringify({ received_via: receivedVia }),
+  });
+}
+
+export function returnSale(id, returnStock = false) {
+  return authRequest(`/api/v1/sales/${id}/return`, {
+    method: "POST",
+    body: JSON.stringify({ return_stock: returnStock }),
+  });
+}
+
+export function getPrazoReport() {
+  return authRequest("/api/v1/reports/prazo");
+}
+
+export function getPromotions(status = "") {
+  const params = status ? `?status=${status}` : "";
+  return authRequest(`/api/v1/promotions/${params}`);
+}
+
+export function getActivePromotions() {
+  return authRequest("/api/v1/promotions/active");
+}
+
+export function createPromotion(input) {
+  return authRequest("/api/v1/promotions/", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+export function updatePromotion(id, input) {
+  return authRequest(`/api/v1/promotions/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(input),
+  });
+}
+
+export function deletePromotion(id) {
+  return authRequest(`/api/v1/promotions/${id}`, {
+    method: "DELETE",
+  });
+}
+
+export function getCategories() {
+  return authRequest("/api/v1/categories");
+}
+
+export function evaluateCart(input) {
+  return authRequest("/api/v1/promotions/evaluate", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
 }

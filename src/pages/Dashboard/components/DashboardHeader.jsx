@@ -1,9 +1,11 @@
-import { useState, useEffect } from "react";
-import { BarChart2, Bell, LayoutDashboard, LogOut, Moon, Settings, Sun } from "lucide-react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useState, useEffect, useCallback } from "react";
+import { Bell, LogOut, Moon, Settings, Sun } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 import C from "../../../theme/colors";
 import { getProfile, removeToken } from "../../../hooks/useAuth";
 import { useTheme } from "../../../hooks/useTheme";
+import { countUnreadNotifications } from "../../../services/api";
+import NotificationDropdown from "./NotificationDropdown";
 
 const getInitials = (name) =>
   name.split(" ").filter(Boolean).slice(0, 2).map(w => w[0].toUpperCase()).join("");
@@ -31,14 +33,8 @@ const IconBtn = ({ children, onClick, title }) => (
   </button>
 );
 
-const NAV_ITEMS = [
-  { href: "/dashboard",  label: "Dashboard",  icon: LayoutDashboard },
-  { href: "/relatorios", label: "Relatórios", icon: BarChart2 },
-];
-
 const DashboardHeader = () => {
   const navigate = useNavigate();
-  const { pathname } = useLocation();
   const [profile, setProfile] = useState(getProfile);
   const userName = profile?.userName || "Usuário";
   const companyName = profile?.companyName || "Minha Empresa";
@@ -46,12 +42,31 @@ const DashboardHeader = () => {
   const { dark, toggle } = useTheme();
 
   const [confirmingLogout, setConfirmingLogout] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  const fetchUnread = useCallback(() => {
+    countUnreadNotifications()
+      .then((data) => setUnreadCount(data?.unread_count ?? 0))
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     const handler = () => setProfile(getProfile());
     window.addEventListener("pulse:profile-updated", handler);
     return () => window.removeEventListener("pulse:profile-updated", handler);
   }, []);
+
+  useEffect(() => {
+    fetchUnread();
+    const interval = setInterval(fetchUnread, 60000);
+    const handler = () => fetchUnread();
+    window.addEventListener("pulse:notifications-updated", handler);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("pulse:notifications-updated", handler);
+    };
+  }, [fetchUnread]);
 
   const handleLogout = () => {
     removeToken();
@@ -86,7 +101,7 @@ const DashboardHeader = () => {
             </svg>
           </div>
           <span className="syne" style={{ fontSize: 17, fontWeight: 800, color: C.blue, letterSpacing: "-0.2px" }}>
-            Pulse <span style={{ color: C.green }}>Gestão</span>
+            Pulse <span style={{ color: C.blueLight }}>Gestão</span>
           </span>
         </Link>
 
@@ -102,33 +117,6 @@ const DashboardHeader = () => {
         </div>
       </div>
 
-      {/* Center: nav */}
-      <nav style={{ display: "flex", alignItems: "center", gap: 2 }}>
-        {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
-          const active = pathname === href;
-          return (
-            <Link
-              key={href}
-              to={href}
-              style={{
-                display: "flex", alignItems: "center", gap: 6,
-                padding: "7px 12px", borderRadius: 9,
-                background: active ? C.bluePale : "transparent",
-                color: active ? C.blue : C.mid,
-                fontSize: 13, fontWeight: active ? 700 : 500,
-                textDecoration: "none",
-                transition: "all 0.15s",
-              }}
-              onMouseEnter={e => { if (!active) e.currentTarget.style.background = C.gray; }}
-              onMouseLeave={e => { if (!active) e.currentTarget.style.background = "transparent"; }}
-            >
-              <Icon size={15} strokeWidth={2} />
-              <span className="nav-label">{label}</span>
-            </Link>
-          );
-        })}
-      </nav>
-
       {/* Right: actions */}
       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
         <IconBtn onClick={() => navigate("/configuracoes")} title="Configurações">
@@ -143,15 +131,27 @@ const DashboardHeader = () => {
         </IconBtn>
 
         <div style={{ position: "relative" }}>
-          <IconBtn>
-            <Bell size={17} color={C.mid} strokeWidth={2} />
+          <IconBtn onClick={() => setDropdownOpen(prev => !prev)} title="Notificações">
+            <Bell size={17} color={C.blue} strokeWidth={2} />
           </IconBtn>
-          <span style={{
-            position: "absolute", top: 6, right: 6,
-            width: 8, height: 8, borderRadius: "50%",
-            background: "#EF4444", border: `2px solid ${C.surface}`,
-            display: "block",
-          }} />
+          {unreadCount > 0 && (
+            <span style={{
+              position: "absolute", top: 2, right: 2,
+              minWidth: 16, height: 16, borderRadius: 8,
+              background: C.blue, border: `2px solid ${C.surface}`,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontSize: 9, fontWeight: 800, color: "white",
+              padding: "0 3px", lineHeight: 1,
+            }}>
+              {unreadCount > 9 ? "9+" : unreadCount}
+            </span>
+          )}
+          {dropdownOpen && (
+            <NotificationDropdown
+              onClose={() => setDropdownOpen(false)}
+              onUpdate={fetchUnread}
+            />
+          )}
         </div>
 
         <div style={{ width: 1, height: 26, background: C.border, margin: "0 4px" }} />

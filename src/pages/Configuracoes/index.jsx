@@ -10,6 +10,7 @@ import EquipeTab from "./tabs/EquipeTab";
 import PreferenciasTab from "./tabs/PreferenciasTab";
 import SegurancaTab from "./tabs/SegurancaTab";
 import IntegracoesTab from "./tabs/IntegracoesTab";
+import QuickActionsBar from "../../components/layout/QuickActionsBar";
 
 const ALL_TABS = [
   { id: "perfil",       label: "Perfil",        icon: User,              roles: ["owner", "manager", "employee"] },
@@ -51,8 +52,9 @@ const ConfiguracoesPage = () => {
   return (
     <div style={{ minHeight: "100vh", background: C.pageBg }}>
       <DashboardHeader />
+      <QuickActionsBar />
 
-      <main style={{ maxWidth: 1100, margin: "0 auto", padding: "80px 24px 48px" }}>
+      <main style={{ maxWidth: 1100, margin: "0 auto", padding: "124px 24px 48px" }}>
         <div style={{ paddingTop: 8, marginBottom: 28, display: "flex", alignItems: "center", gap: 14 }}>
           <Link to="/dashboard" style={{
             display: "flex", alignItems: "center", justifyContent: "center",

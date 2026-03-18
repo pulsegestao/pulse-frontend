@@ -2,12 +2,14 @@ import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { ArrowLeft, FileText, PenLine, Loader2 } from "lucide-react";
 import C from "../../theme/colors";
+import { friendlyError } from "../../utils/errorMessage";
 import { isAuthenticated } from "../../hooks/useAuth";
-import { getProducts, getCompanySettings, previewNFe, confirmNFe } from "../../services/api";
+import { getProducts, getCompanySettings, previewNFe, confirmNFe, getNCMCategories } from "../../services/api";
 import DashboardHeader from "../Dashboard/components/DashboardHeader";
 import NFeUpload from "./components/NFeUpload";
 import NFePreviewTable from "./components/NFePreviewTable";
 import ManualEntry from "./components/ManualEntry";
+import QuickActionsBar from "../../components/layout/QuickActionsBar";
 
 const TAB_NFE = "nfe";
 const TAB_MANUAL = "manual";
@@ -16,6 +18,7 @@ export default function EstoqueEntradaPage() {
   const navigate = useNavigate();
   const [tab, setTab] = useState(TAB_NFE);
   const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [defaultMinStock, setDefaultMinStock] = useState(0);
   const [nfeFile, setNfeFile] = useState(null);
   const [preview, setPreview] = useState(null);
@@ -31,6 +34,7 @@ export default function EstoqueEntradaPage() {
     if (!isAuthenticated()) { navigate("/", { replace: true }); return; }
     getProducts().then(setProducts).catch(() => {});
     getCompanySettings().then(d => setDefaultMinStock(d.default_min_stock || 0)).catch(() => {});
+    getNCMCategories().then(setCategories).catch(() => {});
   }, []);
 
   const handleFile = async (file) => {
@@ -83,8 +87,9 @@ export default function EstoqueEntradaPage() {
   return (
     <div style={{ minHeight: "100vh", background: C.pageBg }}>
       <DashboardHeader />
+      <QuickActionsBar />
 
-      <main style={{ maxWidth: 960, margin: "0 auto", padding: "80px 24px 48px" }}>
+      <main style={{ maxWidth: 960, margin: "0 auto", padding: "124px 24px 48px" }}>
         {/* Page header */}
         <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 28, paddingTop: 8 }}>
           <Link to="/dashboard" style={{
@@ -164,7 +169,9 @@ export default function EstoqueEntradaPage() {
                         <NFePreviewTable
                           preview={preview}
                           products={products}
+                          categories={categories}
                           onItemsChange={setPreviewItems}
+                          defaultMinStock={defaultMinStock}
                         />
 
                         {confirmError && (
@@ -202,7 +209,7 @@ export default function EstoqueEntradaPage() {
 
             {/* ── Tab Manual ── */}
             {tab === TAB_MANUAL && (
-              <ManualEntry products={products} onProductCreated={(p) => setProducts(prev => [...prev, p])} defaultMinStock={defaultMinStock} />
+              <ManualEntry products={products} categories={categories} onProductCreated={(p) => setProducts(prev => [...prev, p])} defaultMinStock={defaultMinStock} />
             )}
           </div>
         </div>

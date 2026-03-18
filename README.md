@@ -1,6 +1,6 @@
 # Pulse Gestão — Frontend
 
-Interface web do **Pulse Gestão**, plataforma de controle de estoque com PDV integrado e inteligência artificial para pequenos negócios brasileiros.
+Interface web do **Pulse Gestão**, plataforma de controle de estoque com PDV integrado, relatórios analíticos e inteligência artificial para pequenos negócios brasileiros.
 
 ---
 
@@ -47,16 +47,23 @@ O servidor de desenvolvimento sobe em `http://localhost:5173` por padrão.
 
 | Rota | Componente | Acesso | Descrição |
 |---|---|---|---|
-| `/` | `pages/Landing` | público | Landing page completa |
+| `/` | `pages/Landing` | público | Landing page completa com seções de marketing |
 | `/login` | `pages/Login` | público | Autenticação |
-| `/cadastro` | `pages/Cadastro` | público | Registro em 2 etapas |
-| `/verify-email` | `pages/VerifyEmail` | público | Confirmação de conta |
-| `/dashboard` | `pages/Dashboard` | autenticado | Painel principal com KPIs |
+| `/cadastro` | `pages/Cadastro` | público | Registro em 2 etapas (usuário + empresa) |
+| `/verify-email` | `pages/VerifyEmail` | público | Confirmação de conta via token do email |
+| `/esqueci-senha` | `pages/EsqueciSenha` | público | Solicitação de redefinição de senha |
+| `/redefinir-senha` | `pages/RedefinirSenha` | público | Redefinição via token do email |
+| `/dashboard` | `pages/Dashboard` | autenticado | Painel principal com KPIs e gráficos |
+| `/pdv` | `pages/PDV` | autenticado | Ponto de Venda com múltiplos métodos de pagamento |
 | `/gerir-estoque` | `pages/GerirEstoque` | autenticado | CRUD de produtos |
-| `/estoque-entrada` | `pages/EstoqueEntrada` | autenticado | Entrada manual ou via CSV |
-| `/configuracoes` | `pages/Configuracoes` | autenticado | Perfil, empresa, equipe e preferências |
+| `/estoque/entrada` | `pages/EstoqueEntrada` | autenticado | Entrada manual ou via NF-e XML |
+| `/relatorios` | `pages/Relatorios` | autenticado | Relatórios analíticos por período |
+| `/relatorios/prazo` | `pages/VendasPrazo` | autenticado | Gestão de recebíveis (vendas a prazo) |
+| `/insights` | `pages/Insights` | autenticado | Feed de alertas e analytics de produto |
+| `/configuracoes` | `pages/Configuracoes` | autenticado | Perfil, empresa, equipe, segurança e integrações |
+| `/sessao-expirada` | `pages/SessionExpired` | autenticado | Tela de sessão expirada |
 
-Rotas autenticadas são protegidas por `AuthShell` — redireciona para `/login` se não houver token JWT válido.
+Rotas autenticadas são envolvidas por `<AuthShell>` — redireciona para `/login` em caso de sessão inativa.
 
 ---
 
@@ -66,8 +73,9 @@ Rotas autenticadas são protegidas por `AuthShell` — redireciona para `/login`
 src/
 ├── components/
 │   ├── layout/
-│   │   ├── Navbar.jsx            # Navbar fixa com scroll detection (landing)
-│   │   └── Footer.jsx            # Rodapé (landing)
+│   │   ├── Navbar.jsx            # Navbar com scroll detection (landing)
+│   │   ├── Footer.jsx            # Rodapé (landing)
+│   │   └── QuickActionsBar.jsx   # Barra de ações rápidas nas páginas internas
 │   ├── ui/
 │   │   ├── DashboardMockup.jsx   # Preview visual do dashboard (landing)
 │   │   └── MiniChart.jsx         # Gráfico SVG decorativo (landing)
@@ -76,27 +84,51 @@ src/
 │   └── WidgetError.jsx           # Estado de erro para cards/widgets com retry
 │
 ├── hooks/
-│   ├── useInView.js              # IntersectionObserver para animações de scroll
-│   ├── useAuth.js                # getProfile(), getToken(), removeToken()
-│   ├── useTheme.js               # { dark, toggle } com persistência localStorage
-│   └── useToast.js               # { success, error, warning, info } via CustomEvent
+│   ├── useAuth.js                # getProfile(), isAuthenticated(), getToken(), removeToken()
+│   ├── useTheme.js               # { dark, toggle } com persistência em localStorage
+│   ├── useToast.js               # { success, error, warning, info } via CustomEvent
+│   └── useInView.js              # IntersectionObserver para animações de scroll (landing)
 │
 ├── pages/
 │   ├── Landing/
+│   │   ├── index.jsx
+│   │   └── sections/             # Hero, Features, Problem, Solution, Pricing,
+│   │                               Testimonials, CTABanner, AISection, StatsTicker
 │   ├── Login/
 │   ├── Cadastro/
-│   │   └── steps/               # StepOne.jsx, StepTwo.jsx
+│   │   └── steps/                # StepOne.jsx (dados pessoais), StepTwo.jsx (empresa)
 │   ├── VerifyEmail/
+│   ├── EsqueciSenha/
+│   ├── RedefinirSenha/
+│   ├── SessionExpired/
 │   ├── Dashboard/
-│   │   └── components/          # DashboardHeader, MetricsCards, SalesChart,
-│   │                              LowStockTable, TopProducts, QuickActions
+│   │   └── components/           # DashboardHeader, MetricsCards, SalesChart,
+│   │                               LowStockTable, TopProducts, QuickActions
+│   ├── PDV/                      # Ponto de Venda
+│   │   └── index.jsx             # Busca de produto, carrinho, múltiplos métodos
+│   │                               (dinheiro/troco, pix, débito, crédito, a prazo),
+│   │                               cliente vinculado, integração com maquininha MP
 │   ├── GerirEstoque/
+│   │   └── components/           # MetricCards, ProductTable
 │   ├── EstoqueEntrada/
-│   │   └── components/          # ManualEntry, CsvPreview
+│   │   └── components/           # NFeUpload, NFePreviewTable, ManualEntry
+│   ├── Relatorios/
+│   │   └── components/           # ProductReport, PaymentMethods, DeadStock, PrazoCard
+│   ├── VendasPrazo/
+│   │   └── index.jsx             # Tabs Pendentes / Recebidas / Devolvidas,
+│   │                               modal de recebimento com PIX, dinheiro, cartão e maquininha
+│   ├── Insights/
+│   │   └── components/           # InsightFeed, InsightsSummary, InsightCard,
+│   │                               VelocityRanking, CategoryBreakdown
 │   └── Configuracoes/
-│       ├── index.jsx            # Layout com sidebar de abas + ?tab= routing
-│       └── tabs/                # PerfilTab, EmpresaTab, EquipeTab,
-│                                  PreferenciasTab, SegurancaTab
+│       ├── index.jsx             # Layout com sidebar de abas + ?tab= routing
+│       └── tabs/
+│           ├── PerfilTab.jsx     # Nome e avatar do usuário
+│           ├── EmpresaTab.jsx    # Nome, tipo, CNPJ e chave PIX
+│           ├── EquipeTab.jsx     # Membros da empresa com roles
+│           ├── SegurancaTab.jsx  # Alteração de senha
+│           ├── PreferenciasTab.jsx # Tema (claro/escuro)
+│           └── IntegracoesTab.jsx  # Integrações de pagamento (MercadoPago)
 │
 ├── services/
 │   └── api.js                   # authRequest() + todas as funções de API
@@ -110,9 +142,30 @@ src/
 ├── utils/
 │   └── errorMessage.js          # friendlyError() — sanitiza erros técnicos
 │
-├── App.jsx                      # BrowserRouter + Routes + AuthShell
+├── App.jsx                      # BrowserRouter + Routes + AuthShell + SessionGuard
 └── main.jsx                     # Entry point
 ```
+
+---
+
+## API (`src/services/api.js`)
+
+Todas as chamadas passam por `authRequest(path, options?)`, que injeta o JWT, lança erro em resposta não-ok e dispara o evento `pulse:session-expired` em caso de 401.
+
+| Grupo | Funções |
+|---|---|
+| **Auth** | `registerUser` · `loginUser` · `verifyEmail` · `checkEmail` · `forgotPassword` · `resetPassword` |
+| **Produtos** | `getProducts` · `createProduct` · `updateProduct` · `getLowStock` · `updateStock(id, input)` |
+| **NF-e** | `previewNFe(formData)` · `confirmNFe(items)` |
+| **Clientes** | `searchCustomers(q)` · `createCustomer(input)` |
+| **Vendas** | `registerSale(input)` · `getSalesPrazo(status)` · `receiveSale(id, receivedVia)` · `returnSale(id, returnStock)` |
+| **Dashboard** | `getDashboardSummary` · `getRevenueChart(period)` · `getTopProducts(period)` |
+| **Relatórios** | `getProductReport(period)` · `getPaymentMethods(period)` · `getDeadStock` · `getPrazoReport` |
+| **Insights** | `getInsights({type, severity, read, limit, offset})` · `countUnreadInsights` · `markInsightRead(id)` · `markAllInsightsRead` |
+| **Analytics** | `getCategoryBreakdown(period)` · `getVelocityRanking(limit)` |
+| **Configurações** | `getMe` · `updateMe(input)` · `getCompanySettings` · `updateCompanySettings(input)` · `getCompanyMembers` |
+| **Integrações** | `getPaymentIntegrations` · `savePaymentIntegration(data)` · `deletePaymentIntegration(provider)` · `testPaymentIntegration(provider)` · `createPaymentIntent(data)` · `getPaymentIntentStatus(id)` · `cancelPaymentIntent(id)` |
+| **NCM** | `getNCMCategories` |
 
 ---
 
@@ -120,24 +173,25 @@ src/
 
 ### Cores
 
-Todos os valores de cor são importados de `src/theme/colors.js` como o objeto `C`. Os tokens são CSS custom properties — suportam dark mode automaticamente.
+Todos os valores de cor são importados de `src/theme/colors.js` como o objeto `C`. Os tokens são CSS custom properties — o dark mode é suportado automaticamente via `[data-theme="dark"]`.
 
 ```js
-import C from "../theme/colors";
+import C from "../../theme/colors";
 
-color: C.blue        // primária
-color: C.green       // sucesso / confirmação
-color: C.graphite    // texto principal
-color: C.mid         // texto secundário
-color: C.border      // bordas e divisores
-color: C.surface     // fundo de cards e modais
-color: C.pageBg      // fundo de página
-color: C.gray        // fundos suaves / hover
-color: C.bluePale    // fundos com destaque azul
-color: C.greenPale   // fundos com destaque verde
+color: C.blue          // primária — ações e links
+color: C.green         // sucesso, confirmação, positivo
+color: C.graphite      // texto principal
+color: C.mid           // texto secundário / labels
+color: C.border        // bordas e divisores
+color: C.surface       // fundo de cards, modais e painéis
+color: C.pageBg        // fundo da página
+color: C.gray          // fundos suaves e estados de hover
+color: C.bluePale      // destaque azul suave (ativo, selecionado)
+color: C.greenPale     // destaque verde suave (confirmação)
+color: C.amberPale     // destaque âmbar (pendente, atenção)
 ```
 
-**Nunca** hardcodar hex em `background` ou `color`. Usar sempre `C.*`.
+**Nunca** usar hex literal em `background` ou `color`. Usar sempre `C.*`.
 
 ### Tipografia
 
@@ -148,29 +202,31 @@ color: C.greenPale   // fundos com destaque verde
 
 ### Ícones
 
-Exclusivamente via `lucide-react`. Nunca usar emojis como ícones de UI.
+Exclusivamente via `lucide-react`. Nunca usar emojis como elementos de UI.
 
 ```jsx
 import { Package, TrendingUp } from "lucide-react";
 
-// Decorativo (grande)
+// Decorativo (grande, contexto visual)
 <Package size={24} color={C.blue} strokeWidth={1.5} />
 
-// Funcional (UI)
+// Funcional (UI, botões, ações)
 <TrendingUp size={18} color={C.blue} strokeWidth={2} />
 
-// Inline (texto)
+// Inline (texto, badges)
 <Package size={14} color={C.mid} strokeWidth={2} />
 ```
 
-### Dark mode
+---
 
-Controlado via `data-theme="dark"` no `<html>`. Toggle pelo botão lua/sol no `DashboardHeader`.
+## Layout por tipo de página
 
-```js
-import { useTheme } from "../hooks/useTheme";
-const { dark, toggle } = useTheme();
-```
+| Tipo | Estrutura |
+|---|---|
+| **Landing** | `Navbar` + seções + `Footer`; animações `useInView` com classes `fade-up d1..d6` |
+| **Auth** (login, cadastro, senha) | Sem Navbar; gradiente `bluePale → gray → white`; card centralizado `maxWidth: 460` |
+| **Autenticadas** | Sem Navbar; `DashboardHeader` fixo (`h=64`); fundo `C.pageBg`; `main padding: "80px 24px 48px"` |
+| **Nível 2+** (configurações, estoque, relatórios) | Botão voltar `ArrowLeft` 36×36px, borda `C.border`, navega para tela pai |
 
 ---
 
@@ -178,22 +234,20 @@ const { dark, toggle } = useTheme();
 
 O usuário **nunca** deve ver mensagens técnicas de backend ou stack traces.
 
-Use sempre `friendlyError(err.message)` antes de exibir qualquer mensagem de erro.
-
-### Quando usar cada padrão
+Use sempre `friendlyError(err.message)` antes de exibir qualquer erro ao usuário.
 
 | Situação | Solução |
 |---|---|
-| Widget/card falha ao carregar dado no mount | `<WidgetError message={error} onRetry={load} />` |
-| Ação do usuário falha (salvar, deletar) | `toast.error("mensagem")` via `useToast()` |
-| Ação do usuário tem sucesso | `toast.success("mensagem")` via `useToast()` |
+| Widget/card falha ao carregar no mount | `<WidgetError message={error} onRetry={load} />` |
+| Ação do usuário falha (salvar, deletar) | `toast.error(friendlyError(e.message))` |
+| Ação do usuário tem sucesso | `toast.success("mensagem")` |
 | Erro de validação de formulário | Banner inline contextual ao campo |
-| Crash inesperado de JS | `<ErrorBoundary>` captura automaticamente |
-
-### Toast
+| Crash inesperado de JavaScript | `<ErrorBoundary>` captura e exibe tela amigável |
 
 ```js
-import { useToast } from "../hooks/useToast";
+import { useToast } from "../../hooks/useToast";
+import { friendlyError } from "../../utils/errorMessage";
+
 const toast = useToast();
 toast.success("Produto salvo.");
 toast.error(friendlyError(e.message));
@@ -205,12 +259,24 @@ Toasts aparecem no canto superior direito, somem em 5s, máximo 3 simultâneos.
 
 ## Autenticação
 
-O JWT é armazenado em `localStorage` via `useAuth.js`. O `AuthShell` em `App.jsx` verifica o token antes de renderizar qualquer rota protegida.
+O JWT é armazenado em `localStorage` (padrão) ou `sessionStorage` (opção "lembrar de mim" desativada). O `SessionGuard` em `App.jsx` escuta o evento `pulse:session-expired` e redireciona para `/sessao-expirada` quando o token expira.
 
 ```js
-import { getProfile, getToken, removeToken } from "../hooks/useAuth";
+import { getProfile, isAuthenticated } from "../../hooks/useAuth";
 
-const profile = getProfile(); // { userId, userName, companyId, companyName, role }
+const { userId, userName, companyId, companyName, role } = getProfile();
+```
+
+---
+
+## Dark mode
+
+Controlado via `data-theme="dark"` no elemento raiz. Toggle pelo botão no `DashboardHeader`. Estado persiste em `localStorage("pulse_theme")`.
+
+```js
+import { useTheme } from "../../hooks/useTheme";
+
+const { dark, toggle } = useTheme();
 ```
 
 ---

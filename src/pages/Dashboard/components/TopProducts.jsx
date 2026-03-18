@@ -10,11 +10,11 @@ const PERIODS = ["Semana", "Mês", "Ano"];
 const PERIOD_KEY = { "Semana": "week", "Mês": "month", "Ano": "year" };
 
 const RANK_COLORS = [
-  { bg: C.orangePale, color: "#D97706" },
-  { bg: C.greenPale,  color: C.green   },
-  { bg: C.bluePale,   color: C.blue    },
-  { bg: C.purplePale, color: "#7C3AED" },
-  { bg: C.pinkPale,   color: "#DB2777" },
+  { bg: C.bluePale, color: C.blue },
+  { bg: C.bluePale, color: C.blue },
+  { bg: C.bluePale, color: C.blue },
+  { bg: C.bluePale, color: C.blue },
+  { bg: C.bluePale, color: C.blue },
 ];
 
 const TopProducts = () => {
@@ -58,7 +58,7 @@ const TopProducts = () => {
               style={{
                 padding: "5px 14px", borderRadius: 8, border: "none",
                 background: period === p ? C.surface : "transparent",
-                color: period === p ? C.graphite : C.mid,
+                color: period === p ? C.blue : C.mid,
                 fontSize: 12, fontWeight: period === p ? 700 : 500,
                 cursor: "pointer",
                 boxShadow: period === p ? "0 1px 4px rgba(0,0,0,0.08)" : "none",
