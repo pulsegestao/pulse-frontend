@@ -14,7 +14,7 @@ import {
 
 const TABS = [
   { key: "all",     label: "Todas" },
-  { key: "unread",  label: "N\u00e3o lidas" },
+  { key: "unread",  label: "Não lidas" },
   { key: "stock",   label: "Estoque" },
   { key: "insights", label: "Insights" },
 ];
@@ -35,11 +35,11 @@ function timeAgo(dateStr) {
   const diff = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diff / 60000);
   if (mins < 1) return "agora";
-  if (mins < 60) return `${mins}m atr\u00e1s`;
+  if (mins < 60) return `${mins}m atrás`;
   const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours}h atr\u00e1s`;
+  if (hours < 24) return `${hours}h atrás`;
   const days = Math.floor(hours / 24);
-  if (days < 30) return `${days}d atr\u00e1s`;
+  if (days < 30) return `${days}d atrás`;
   return new Date(dateStr).toLocaleDateString("pt-BR");
 }
 
@@ -63,7 +63,7 @@ const NotificacoesPage = () => {
   const buildFilter = useCallback(() => {
     const filter = { limit: PAGE_SIZE, offset: 0 };
     if (tab === "unread") filter.read = false;
-    if (tab === "stock") filter.type = "low_stock";
+    if (tab === "stock") filter.type = "stock";
     if (tab === "insights") filter.type = "new_insights";
     return filter;
   }, [tab]);
@@ -117,7 +117,7 @@ const NotificacoesPage = () => {
       await markAllNotificationsRead();
       setItems(prev => prev.map(n => ({ ...n, read: true })));
       window.dispatchEvent(new Event("pulse:notifications-updated"));
-      toast.success("Todas as notifica\u00e7\u00f5es foram marcadas como lidas.");
+      toast.success("Todas as notificações foram marcadas como lidas.");
     } catch {
       toast.error("Falha ao marcar todas como lidas.");
     } finally {
@@ -161,7 +161,7 @@ const NotificacoesPage = () => {
               <Bell size={20} color={C.blue} strokeWidth={2} />
             </div>
             <h1 style={{ fontSize: 22, fontWeight: 800, color: C.graphite, margin: 0, letterSpacing: "-0.3px" }}>
-              Notifica\u00e7\u00f5es
+              Notificações
             </h1>
           </div>
 
@@ -219,10 +219,10 @@ const NotificacoesPage = () => {
           }}>
             <BellOff size={36} color={C.mid} style={{ marginBottom: 12 }} />
             <p style={{ fontSize: 15, fontWeight: 700, color: C.graphite, margin: "0 0 4px" }}>
-              Nenhuma notifica\u00e7\u00e3o
+              Nenhuma notificação
             </p>
             <p style={{ fontSize: 13, color: C.mid, margin: 0 }}>
-              {tab === "unread" ? "Todas as notifica\u00e7\u00f5es foram lidas." : "Nenhuma notifica\u00e7\u00e3o encontrada nesta categoria."}
+              {tab === "unread" ? "Todas as notificações foram lidas." : "Nenhuma notificação encontrada nesta categoria."}
             </p>
           </div>
         ) : (

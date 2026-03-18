@@ -79,7 +79,7 @@ const NotificationDropdown = ({ onClose, onUpdate }) => {
         display: "flex", alignItems: "center", justifyContent: "space-between",
         padding: "14px 18px 10px", borderBottom: `1px solid ${C.border}`,
       }}>
-        <span style={{ fontSize: 14, fontWeight: 800, color: C.graphite }}>Notifica\u00e7\u00f5es</span>
+        <span style={{ fontSize: 14, fontWeight: 800, color: C.graphite }}>Notificações</span>
         <button
           onClick={handleMarkAll}
           style={{
@@ -101,7 +101,7 @@ const NotificationDropdown = ({ onClose, onUpdate }) => {
       ) : items.length === 0 ? (
         <div style={{ textAlign: "center", padding: "32px 18px", color: C.mid }}>
           <BellOff size={28} color={C.mid} style={{ marginBottom: 8 }} />
-          <p style={{ fontSize: 13, margin: 0 }}>Nenhuma notifica\u00e7\u00e3o</p>
+          <p style={{ fontSize: 13, margin: 0 }}>Nenhuma notificação</p>
         </div>
       ) : (
         <>
@@ -163,7 +163,7 @@ const NotificationDropdown = ({ onClose, onUpdate }) => {
             onMouseEnter={e => e.currentTarget.style.background = C.gray}
             onMouseLeave={e => e.currentTarget.style.background = "transparent"}
           >
-            Ver todas as notifica\u00e7\u00f5es
+            Ver todas as notificações
           </div>
         </>
       )}
