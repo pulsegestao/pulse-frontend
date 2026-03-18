@@ -1128,7 +1128,7 @@ const PDVPage = () => {
           total={total}
           selectedCustomer={selectedCustomer}
           onClose={() => setShowModal(false)}
-          onSuccess={(execEntries) => {
+          onSuccess={async (execEntries) => {
             const items = cart.map(i => ({ product_id: i.id, quantity: i.qty }));
             const payments = (execEntries || []).map(e => ({
               method: e.methodId === "card" ? "credit" : e.methodId,
@@ -1140,8 +1140,11 @@ const PDVPage = () => {
               ...(selectedCustomer?.id && { customer_id: selectedCustomer.id }),
               ...(selectedCustomer?.name && { customer_name: selectedCustomer.name }),
             };
-            registerSale(saleInput)
-              .catch(() => toast.error("Venda paga mas não registrada. Verifique o histórico."));
+            try {
+              await registerSale(saleInput);
+            } catch {
+              toast.error("Venda paga mas não registrada. Verifique o histórico.");
+            }
             clearCart();
             setShowModal(false);
           }}
