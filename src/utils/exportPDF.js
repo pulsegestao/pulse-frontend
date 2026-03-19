@@ -105,6 +105,38 @@ function addSectionTitle(doc, title, y, subtitle, fontName) {
 }
 
 export const buildSection = {
+  summary(data, changePct) {
+    const change = changePct ?? data?.revenue_change_pct ?? 0;
+    const changeLabel = change === 0
+      ? "Estável"
+      : `${change > 0 ? "+" : ""}${change.toFixed(1).replace(".", ",")}% vs período anterior`;
+    return {
+      title: "Resumo Financeiro",
+      head: [["Indicador", "Valor"]],
+      body: [
+        ["Receita total", fmt(data?.revenue)],
+        ["Custo total", fmt(data?.cost)],
+        ["Lucro bruto", fmt(data?.profit)],
+        ["Margem bruta", `${(data?.margin_pct || 0).toFixed(1)}%`],
+        ["Número de transações", `${data?.tx_count ?? 0} vendas`],
+        ["Ticket médio", fmt(data?.avg_ticket)],
+        ["Variação vs período anterior", changeLabel],
+      ],
+      columnStyles: { 1: { halign: "right", cellWidth: 50 } },
+    };
+  },
+
+  revenue(chartData, total) {
+    const rows = (chartData || []).map((d) => [d.label, fmt(d.total ?? d.value)]);
+    return {
+      title: "Evolução do Faturamento",
+      head: [["Período", "Receita"]],
+      body: rows,
+      foot: total > 0 ? [["Total", fmt(total)]] : undefined,
+      columnStyles: { 1: { halign: "right", cellWidth: 50 } },
+    };
+  },
+
   products(data) {
     return {
       title: "Desempenho de Produtos",

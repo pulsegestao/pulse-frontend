@@ -16,6 +16,7 @@ import { useToast } from "../../hooks/useToast";
 import { friendlyError } from "../../utils/errorMessage";
 import QuickActionsBar from "../../components/layout/QuickActionsBar";
 import {
+  getReportSummary, getRevenueChart,
   getProductReport, getCategoryBreakdown,
   getPaymentMethods, getDeadStock, getPrazoReport, getLowStock,
 } from "../../services/api";
@@ -41,7 +42,9 @@ const RelatoriosPage = () => {
   const handleExportFull = async () => {
     setExporting(true);
     try {
-      const [products, categories, payments, deadStock, prazo, lowStock] = await Promise.all([
+      const [summary, revenue, products, categories, payments, deadStock, prazo, lowStock] = await Promise.all([
+        getReportSummary(periodKey).catch(() => null),
+        getRevenueChart(periodKey).catch(() => null),
         getProductReport(periodKey).catch(() => []),
         getCategoryBreakdown(periodKey).catch(() => []),
         getPaymentMethods(periodKey).catch(() => []),
@@ -50,11 +53,13 @@ const RelatoriosPage = () => {
         getLowStock().catch(() => []),
       ]);
       generateReport(companyName, periodKey, [
+        buildSection.summary(summary),
+        buildSection.revenue(revenue?.data, revenue?.total),
         buildSection.products(products),
         buildSection.categories(categories),
         buildSection.payments(payments),
-        buildSection.deadStock(deadStock),
         buildSection.lowStock(lowStock),
+        buildSection.deadStock(deadStock),
         buildSection.prazo(prazo),
       ], reportFileName("relatorio", periodKey));
       toast.success("PDF exportado com sucesso.");
