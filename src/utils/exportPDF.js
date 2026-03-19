@@ -169,6 +169,25 @@ export const buildSection = {
     };
   },
 
+  lowStock(data) {
+    return {
+      title: "Estoque Abaixo do Mínimo",
+      subtitle: "Produtos que precisam de reposição",
+      head: [["Produto", "Atual", "Mínimo", "Déficit"]],
+      body: (data || []).map((p) => [
+        p.name,
+        `${p.inventory.quantity} un.`,
+        `${p.inventory.min_quantity} un.`,
+        `-${p.inventory.min_quantity - p.inventory.quantity} un.`,
+      ]),
+      columnStyles: {
+        1: { halign: "right", cellWidth: 24 },
+        2: { halign: "right", cellWidth: 24 },
+        3: { halign: "right", cellWidth: 24 },
+      },
+    };
+  },
+
   prazo(data) {
     const sales = data?.sales || [];
     const total = data?.total_pending || 0;

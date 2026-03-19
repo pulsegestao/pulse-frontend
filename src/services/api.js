@@ -217,6 +217,10 @@ export function getTopProducts(period = "week") {
   return authRequest(`/api/v1/dashboard/top-products?period=${period}`);
 }
 
+export function getReportSummary(period = "month") {
+  return authRequest(`/api/v1/reports/summary?period=${period}`);
+}
+
 export function getProductReport(period = "month") {
   return authRequest(`/api/v1/reports/products?period=${period}`);
 }

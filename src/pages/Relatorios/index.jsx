@@ -3,17 +3,21 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Download, Loader2 } from "lucide-react";
 import C from "../../theme/colors";
 import DashboardHeader from "../Dashboard/components/DashboardHeader";
+import SummaryCard from "./components/SummaryCard";
+import RevenueChart from "./components/RevenueChart";
 import ProductReport from "./components/ProductReport";
+import CategoryBreakdown from "./components/CategoryBreakdown";
 import PaymentMethods from "./components/PaymentMethods";
 import DeadStock from "./components/DeadStock";
+import LowStockCard from "./components/LowStockCard";
 import PrazoCard from "./components/PrazoCard";
-import CategoryBreakdown from "./components/CategoryBreakdown";
 import { isAuthenticated, getProfile } from "../../hooks/useAuth";
 import { useToast } from "../../hooks/useToast";
 import { friendlyError } from "../../utils/errorMessage";
 import QuickActionsBar from "../../components/layout/QuickActionsBar";
 import {
-  getProductReport, getCategoryBreakdown, getPaymentMethods, getDeadStock, getPrazoReport,
+  getProductReport, getCategoryBreakdown,
+  getPaymentMethods, getDeadStock, getPrazoReport, getLowStock,
 } from "../../services/api";
 import { generateReport, buildSection, reportFileName } from "../../utils/exportPDF";
 
@@ -37,18 +41,20 @@ const RelatoriosPage = () => {
   const handleExportFull = async () => {
     setExporting(true);
     try {
-      const [products, categories, payments, deadStock, prazo] = await Promise.all([
+      const [products, categories, payments, deadStock, prazo, lowStock] = await Promise.all([
         getProductReport(periodKey).catch(() => []),
         getCategoryBreakdown(periodKey).catch(() => []),
         getPaymentMethods(periodKey).catch(() => []),
         getDeadStock().catch(() => []),
         getPrazoReport().catch(() => ({})),
+        getLowStock().catch(() => []),
       ]);
       generateReport(companyName, periodKey, [
         buildSection.products(products),
         buildSection.categories(categories),
         buildSection.payments(payments),
         buildSection.deadStock(deadStock),
+        buildSection.lowStock(lowStock),
         buildSection.prazo(prazo),
       ], reportFileName("relatorio", periodKey));
       toast.success("PDF exportado com sucesso.");
@@ -136,9 +142,12 @@ const RelatoriosPage = () => {
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+          <SummaryCard period={periodKey} />
+          <RevenueChart period={periodKey} companyName={companyName} />
           <ProductReport period={periodKey} companyName={companyName} />
           <CategoryBreakdown period={periodKey} companyName={companyName} />
           <PaymentMethods period={periodKey} companyName={companyName} />
+          <LowStockCard companyName={companyName} />
           <DeadStock companyName={companyName} />
           <PrazoCard companyName={companyName} />
         </div>
