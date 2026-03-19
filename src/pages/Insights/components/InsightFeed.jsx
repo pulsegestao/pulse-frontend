@@ -18,13 +18,19 @@ const TABS = [
 ];
 
 const TYPE_OPTIONS = [
-  { value: "",                 label: "Todos os tipos"   },
-  { value: "sales_drop",       label: "Queda de vendas"  },
-  { value: "sales_spike",      label: "Pico de vendas"   },
-  { value: "dead_stock",       label: "Estoque parado"   },
-  { value: "trending",         label: "Em alta"          },
-  { value: "low_stock",        label: "Estoque baixo"    },
-  { value: "abnormal_revenue", label: "Receita anormal"  },
+  { value: "",                       label: "Todos os tipos"      },
+  { value: "sales_drop",             label: "Queda de vendas"     },
+  { value: "sales_spike",            label: "Pico de vendas"      },
+  { value: "dead_stock",             label: "Estoque parado"      },
+  { value: "trending",               label: "Em alta"             },
+  { value: "low_stock",              label: "Estoque baixo"       },
+  { value: "abnormal_revenue",       label: "Receita anormal"     },
+  { value: "promo_high_performance", label: "Promo em destaque"   },
+  { value: "promo_low_adoption",     label: "Promo sem adesão"    },
+  { value: "promo_stock_risk",       label: "Risco de estoque"    },
+  { value: "promo_suggestion",       label: "Sugestão de promo"   },
+  { value: "period_comparison",      label: "Comparativo semanal" },
+  { value: "margin_compression",     label: "Margem comprimida"   },
 ];
 
 const InsightFeed = ({ onInsightRead }) => {

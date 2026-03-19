@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { TrendingDown, TrendingUp, PackageX, Zap, AlertTriangle, DollarSign, Activity, Check } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { TrendingDown, TrendingUp, PackageX, Zap, AlertTriangle, DollarSign, Activity, Check, Star, Users, AlertOctagon, Lightbulb, ArrowRight, CalendarRange, PieChart } from "lucide-react";
 import C from "../../../theme/colors";
 import { markInsightRead } from "../../../services/api";
 import { friendlyError } from "../../../utils/errorMessage";
@@ -11,7 +12,13 @@ const TYPE_CONFIG = {
   dead_stock:       { label: "Estoque parado",   Icon: PackageX,      color: "#EA580C", bg: C.orangePale },
   trending:         { label: "Em alta",           Icon: Zap,           color: "#16A34A", bg: C.greenPale  },
   low_stock:        { label: "Estoque baixo",     Icon: AlertTriangle, color: "#D97706", bg: C.amberPale  },
-  abnormal_revenue: { label: "Receita anormal",   Icon: DollarSign,    color: "#7C3AED", bg: C.purplePale },
+  abnormal_revenue:         { label: "Receita anormal",      Icon: DollarSign,    color: "#7C3AED", bg: C.purplePale },
+  promo_high_performance:   { label: "Promo em destaque",    Icon: Star,          color: "#16A34A", bg: C.greenPale  },
+  promo_low_adoption:       { label: "Promo sem adesão",     Icon: Users,         color: "#EA580C", bg: C.orangePale },
+  promo_stock_risk:         { label: "Risco de estoque",     Icon: AlertOctagon,  color: "#DC2626", bg: C.redPale    },
+  promo_suggestion:         { label: "Sugestão de promo",    Icon: Lightbulb,     color: C.blue,    bg: C.bluePale   },
+  period_comparison:        { label: "Comparativo semanal", Icon: CalendarRange, color: "#7C3AED", bg: C.purplePale },
+  margin_compression:       { label: "Margem comprimida",   Icon: PieChart,      color: "#EA580C", bg: C.orangePale },
 };
 
 const SEV_CONFIG = {
@@ -52,6 +59,7 @@ const Badge = ({ label, color, bg, small }) => (
 
 const InsightCard = ({ insight, onRead }) => {
   const toast = useToast();
+  const navigate = useNavigate();
   const [marking, setMarking] = useState(false);
   const [isRead, setIsRead] = useState(insight.read);
 
@@ -122,26 +130,46 @@ const InsightCard = ({ insight, onRead }) => {
           <Badge label={typeConf.label} color={typeConf.color} bg={typeConf.bg} small />
           <span style={{ fontSize: 11, color: C.mid }}>{formatDate(insight.created_at)}</span>
         </div>
-        {!isRead && (
-          <button
-            onClick={handleRead}
-            disabled={marking}
-            style={{
-              display: "flex", alignItems: "center", gap: 5,
-              padding: "4px 10px", borderRadius: 7,
-              border: `1px solid ${C.border}`,
-              background: "transparent",
-              color: C.mid, fontSize: 11, fontWeight: 600,
-              cursor: marking ? "not-allowed" : "pointer",
-              fontFamily: "inherit",
-            }}
-            onMouseEnter={e => { if (!marking) { e.currentTarget.style.background = C.bluePale; e.currentTarget.style.color = C.blue; e.currentTarget.style.borderColor = C.blue + "44"; } }}
-            onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = C.mid; e.currentTarget.style.borderColor = C.border; }}
-          >
-            <Check size={11} strokeWidth={2.5} />
-            {marking ? "Marcando..." : "Marcar como lido"}
-          </button>
-        )}
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          {insight.action_link && insight.action_text && (
+            <button
+              onClick={() => navigate(insight.action_link)}
+              style={{
+                display: "flex", alignItems: "center", gap: 4,
+                padding: "4px 10px", borderRadius: 7,
+                border: "none",
+                background: C.bluePale,
+                color: C.blue, fontSize: 11, fontWeight: 600,
+                cursor: "pointer", fontFamily: "inherit",
+              }}
+              onMouseEnter={e => { e.currentTarget.style.background = C.blue; e.currentTarget.style.color = "white"; }}
+              onMouseLeave={e => { e.currentTarget.style.background = C.bluePale; e.currentTarget.style.color = C.blue; }}
+            >
+              {insight.action_text}
+              <ArrowRight size={11} strokeWidth={2.5} />
+            </button>
+          )}
+          {!isRead && (
+            <button
+              onClick={handleRead}
+              disabled={marking}
+              style={{
+                display: "flex", alignItems: "center", gap: 5,
+                padding: "4px 10px", borderRadius: 7,
+                border: `1px solid ${C.border}`,
+                background: "transparent",
+                color: C.mid, fontSize: 11, fontWeight: 600,
+                cursor: marking ? "not-allowed" : "pointer",
+                fontFamily: "inherit",
+              }}
+              onMouseEnter={e => { if (!marking) { e.currentTarget.style.background = C.bluePale; e.currentTarget.style.color = C.blue; e.currentTarget.style.borderColor = C.blue + "44"; } }}
+              onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = C.mid; e.currentTarget.style.borderColor = C.border; }}
+            >
+              <Check size={11} strokeWidth={2.5} />
+              {marking ? "Marcando..." : "Marcar como lido"}
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );
