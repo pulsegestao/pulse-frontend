@@ -16,7 +16,7 @@ const TAB_MANUAL = "manual";
 
 export default function EstoqueEntradaPage() {
   const navigate = useNavigate();
-  const [tab, setTab] = useState(TAB_NFE);
+  const [tab, setTab] = useState(TAB_MANUAL);
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [defaultMinStock, setDefaultMinStock] = useState(0);
@@ -106,7 +106,7 @@ export default function EstoqueEntradaPage() {
               Entrada de Estoque
             </h1>
             <p style={{ fontSize: 13, color: C.mid, margin: 0 }}>
-              Registre a entrada de produtos via NF-e XML ou manualmente
+              Registre a entrada de produtos manualmente ou via NF-e XML
             </p>
           </div>
         </div>
@@ -124,8 +124,8 @@ export default function EstoqueEntradaPage() {
             padding: "0 24px",
           }}>
             {[
-              { id: TAB_NFE, label: "Via NF-e XML", icon: <FileText size={15} strokeWidth={2} /> },
               { id: TAB_MANUAL, label: "Entrada Manual", icon: <PenLine size={15} strokeWidth={2} /> },
+              { id: TAB_NFE, label: "Via NF-e XML", icon: <FileText size={15} strokeWidth={2} /> },
             ].map((t) => (
               <button key={t.id} onClick={() => { setTab(t.id); handleReset(); }} style={{
                 display: "flex", alignItems: "center", gap: 7,
