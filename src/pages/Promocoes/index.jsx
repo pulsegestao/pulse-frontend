@@ -13,7 +13,7 @@ import { useToast } from "../../hooks/useToast";
 import { friendlyError } from "../../utils/errorMessage";
 import {
   getPromotions, createPromotion, updatePromotion, deletePromotion, getInsights,
-  getActivePromotions, getProducts, getCategories,
+  getActivePromotions, getProducts, getCategories, getPromotionStats,
 } from "../../services/api";
 
 const STATUS_LABELS = {
@@ -343,6 +343,25 @@ const StatCard = ({ icon: Icon, label, value, color, bg }) => (
 
 const PromoCard = ({ promo, onEdit, onDelete, deleting }) => {
   const statusColor = STATUS_COLORS[promo.status] || C.mid;
+  const [stats, setStats] = useState(null);
+  const [statsLoading, setStatsLoading] = useState(false);
+  const [statsOpen, setStatsOpen] = useState(false);
+
+  const loadStats = async () => {
+    if (stats) { setStatsOpen(v => !v); return; }
+    setStatsLoading(true);
+    setStatsOpen(true);
+    try {
+      const data = await getPromotionStats(promo.id);
+      setStats(data);
+    } catch {
+      setStats(null);
+      setStatsOpen(false);
+    } finally {
+      setStatsLoading(false);
+    }
+  };
+
   return (
     <div style={{
       background: C.surface, borderRadius: 14, padding: "18px 20px",
@@ -384,7 +403,41 @@ const PromoCard = ({ promo, onEdit, onDelete, deleting }) => {
                 <ShoppingCart size={12} strokeWidth={2} /> {promo.current_uses} usos
               </span>
             )}
+            {promo.current_uses > 0 && (
+              <button
+                onClick={loadStats}
+                style={{
+                  display: "flex", alignItems: "center", gap: 4,
+                  fontSize: 11, fontWeight: 600, color: C.blue,
+                  background: "none", border: "none", cursor: "pointer",
+                  padding: 0, fontFamily: "inherit",
+                }}
+              >
+                <TrendingUp size={11} strokeWidth={2} />
+                {statsLoading ? "carregando..." : statsOpen ? "ocultar impacto" : "ver impacto"}
+              </button>
+            )}
           </div>
+          {statsOpen && stats && (
+            <div style={{
+              marginTop: 10, display: "flex", gap: 16, flexWrap: "wrap",
+              padding: "8px 12px", borderRadius: 8,
+              background: C.bluePale, border: `1px solid ${C.blue}22`,
+            }}>
+              <span style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12, color: C.graphite, fontWeight: 600 }}>
+                <DollarSign size={12} color={C.green} strokeWidth={2} />
+                Receita gerada: <strong style={{ color: C.green }}>R$ {stats.revenue_generated.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>
+              </span>
+              <span style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12, color: C.graphite, fontWeight: 600 }}>
+                <Tag size={12} color="#EF4444" strokeWidth={2} />
+                Desconto total: <strong style={{ color: "#EF4444" }}>R$ {stats.total_discount.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>
+              </span>
+              <span style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12, color: C.mid }}>
+                <ShoppingCart size={12} strokeWidth={2} />
+                {stats.sales_count} {stats.sales_count === 1 ? "venda" : "vendas"}
+              </span>
+            </div>
+          )}
         </div>
         <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
           <button

@@ -345,6 +345,10 @@ export function deletePromotion(id) {
   });
 }
 
+export function getPromotionStats(id) {
+  return authRequest(`/api/v1/promotions/${id}/stats`);
+}
+
 export function getCategories() {
   return authRequest("/api/v1/categories");
 }
