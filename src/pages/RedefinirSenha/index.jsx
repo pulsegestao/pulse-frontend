@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
 import C from "../../theme/colors";
 import { resetPassword } from "../../services/api";
+import { friendlyError } from "../../utils/errorMessage";
 
 const inputStyle = (hasError) => ({
   width: "100%",
@@ -63,7 +64,7 @@ export default function RedefinirSenhaPage() {
       await resetPassword(token, password);
       setSuccess(true);
     } catch (err) {
-      setApiError(err.message);
+      setApiError(friendlyError(err.message));
     } finally {
       setLoading(false);
     }

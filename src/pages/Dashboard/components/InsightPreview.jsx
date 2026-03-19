@@ -6,6 +6,7 @@ import { getInsights, markInsightRead } from "../../../services/api";
 import { friendlyError } from "../../../utils/errorMessage";
 import { useToast } from "../../../hooks/useToast";
 import WidgetError from "../../../components/WidgetError";
+import { isSafeLink } from "../../../utils/safeNavigate";
 
 const TYPE_CONFIG = {
   sales_drop:             { label: "Queda de vendas",     Icon: TrendingDown,  color: "#DC2626", bg: C.redPale    },
@@ -106,7 +107,7 @@ const MiniInsightCard = ({ insight, onRead }) => {
             {typeConf.label}
           </span>
 
-          {insight.action_link && insight.action_text && (
+          {isSafeLink(insight.action_link) && insight.action_text && (
             <button
               onClick={(e) => { e.stopPropagation(); navigate(insight.action_link); }}
               style={{

@@ -8,6 +8,7 @@ export function saveToken(token, remember) {
   } else {
     sessionStorage.setItem(TOKEN_KEY, token);
     localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(PROFILE_CACHE_KEY);
   }
 }
 

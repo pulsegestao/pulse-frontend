@@ -5,6 +5,7 @@ import C from "../../../theme/colors";
 import { markInsightRead } from "../../../services/api";
 import { friendlyError } from "../../../utils/errorMessage";
 import { useToast } from "../../../hooks/useToast";
+import { isSafeLink } from "../../../utils/safeNavigate";
 
 const TYPE_CONFIG = {
   sales_drop:       { label: "Queda de vendas",  Icon: TrendingDown,  color: "#DC2626", bg: C.redPale    },
@@ -131,7 +132,7 @@ const InsightCard = ({ insight, onRead }) => {
           <span style={{ fontSize: 11, color: C.mid }}>{formatDate(insight.created_at)}</span>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          {insight.action_link && insight.action_text && (
+          {isSafeLink(insight.action_link) && insight.action_text && (
             <button
               onClick={() => navigate(insight.action_link)}
               style={{

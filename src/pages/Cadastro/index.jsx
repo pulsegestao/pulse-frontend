@@ -4,6 +4,7 @@ import C from "../../theme/colors";
 import StepOne from "./steps/StepOne";
 import StepTwo from "./steps/StepTwo";
 import { registerUser } from "../../services/api";
+import { friendlyError } from "../../utils/errorMessage";
 
 const INITIAL = {
   nome: "", email: "", senha: "", confirmarSenha: "", cpf: "",
@@ -121,7 +122,7 @@ const CadastroPage = () => {
       );
       setEmailSent(true);
     } catch (err) {
-      setApiError(err.message);
+      setApiError(friendlyError(err.message));
     } finally {
       setLoading(false);
     }
