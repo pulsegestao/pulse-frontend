@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import {
   Tag, Plus, Loader2, PackageX, Pencil, Trash2, Calendar, Zap,
   ArrowLeft, TrendingUp, DollarSign, ShoppingCart, Activity,
-  Search, X, Package,
+  Search, X, Package, Copy, ChevronRight,
 } from "lucide-react";
 import C from "../../theme/colors";
 import DashboardHeader from "../Dashboard/components/DashboardHeader";
@@ -74,6 +74,7 @@ const PromocoesPage = () => {
   const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState({ open: false, editing: null });
   const [deleting, setDeleting] = useState(null);
+  const [cloning, setCloning] = useState(null);
   const [insights, setInsights] = useState([]);
   const [insightsLoading, setInsightsLoading] = useState(true);
   const [stats, setStats] = useState({ active: 0, totalDiscount: 0, totalUses: 0 });
@@ -117,6 +118,28 @@ const PromocoesPage = () => {
       }
     })();
   }, [promotions.length]);
+
+  const handleClone = async (promo) => {
+    setCloning(promo.id);
+    try {
+      await createPromotion({
+        name: `Cópia de ${promo.name}`,
+        description: promo.description,
+        rules: promo.rules,
+        action: promo.action,
+        start_date: promo.start_date,
+        end_date: promo.end_date,
+        max_uses: promo.max_uses,
+        max_uses_per_customer: promo.max_uses_per_customer,
+      });
+      toast.success("Promoção duplicada com sucesso.");
+      load();
+    } catch (e) {
+      toast.error(friendlyError(e.message));
+    } finally {
+      setCloning(null);
+    }
+  };
 
   const handleDelete = async (id) => {
     setDeleting(id);
@@ -247,7 +270,9 @@ const PromocoesPage = () => {
                     key={promo.id}
                     promo={promo}
                     onEdit={() => setModal({ open: true, editing: promo })}
+                    onClone={() => handleClone(promo)}
                     onDelete={() => handleDelete(promo.id)}
+                    cloning={cloning === promo.id}
                     deleting={deleting === promo.id}
                   />
                 ))}
@@ -275,19 +300,71 @@ const PromocoesPage = () => {
               </p>
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                {insights.map(ins => (
-                  <div key={ins.id} style={{
-                    padding: "12px 14px", borderRadius: 10,
-                    border: `1px solid ${C.border}`, background: C.pageBg,
-                  }}>
-                    <p style={{ fontSize: 13, fontWeight: 700, color: C.graphite, margin: "0 0 4px", lineHeight: 1.3 }}>
-                      {ins.title}
-                    </p>
-                    <p style={{ fontSize: 12, color: C.mid, margin: 0, lineHeight: 1.4 }}>
-                      {ins.message}
-                    </p>
-                  </div>
-                ))}
+                {insights.map(ins => {
+                  const promoID = ins.metadata?.promotion_id;
+                  const linkedPromo = promoID ? promotions.find(p => p.id === promoID) : null;
+                  const severityColor = ins.severity === "high" ? "#EF4444" : ins.severity === "medium" ? "#F59E0B" : C.blue;
+                  return (
+                    <div key={ins.id} style={{
+                      padding: "12px 14px", borderRadius: 10,
+                      borderLeft: `3px solid ${severityColor}`,
+                      border: `1px solid ${C.border}`,
+                      borderLeftWidth: 3,
+                      background: C.pageBg,
+                    }}>
+                      <p style={{ fontSize: 13, fontWeight: 700, color: C.graphite, margin: "0 0 3px", lineHeight: 1.3 }}>
+                        {ins.title}
+                      </p>
+                      <p style={{ fontSize: 12, color: C.mid, margin: "0 0 8px", lineHeight: 1.4 }}>
+                        {ins.message}
+                      </p>
+                      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                        {(ins.type === "promo_low_adoption" || ins.type === "promo_high_performance") && linkedPromo && (
+                          <button
+                            onClick={() => setModal({ open: true, editing: linkedPromo })}
+                            style={{
+                              display: "flex", alignItems: "center", gap: 4,
+                              fontSize: 11, fontWeight: 700, color: C.blue,
+                              background: C.bluePale, border: "none",
+                              borderRadius: 6, padding: "4px 10px",
+                              cursor: "pointer", fontFamily: "inherit",
+                            }}
+                          >
+                            <Pencil size={10} strokeWidth={2} /> Editar promoção
+                          </button>
+                        )}
+                        {ins.type === "promo_stock_risk" && (
+                          <button
+                            onClick={() => navigate("/gerir-estoque")}
+                            style={{
+                              display: "flex", alignItems: "center", gap: 4,
+                              fontSize: 11, fontWeight: 700, color: "#F59E0B",
+                              background: "#FEF3C7", border: "none",
+                              borderRadius: 6, padding: "4px 10px",
+                              cursor: "pointer", fontFamily: "inherit",
+                            }}
+                          >
+                            <Package size={10} strokeWidth={2} /> Ver estoque
+                          </button>
+                        )}
+                        {ins.type === "promo_suggestion" && (
+                          <button
+                            onClick={() => setModal({ open: true, editing: null })}
+                            style={{
+                              display: "flex", alignItems: "center", gap: 4,
+                              fontSize: 11, fontWeight: 700, color: C.green,
+                              background: C.greenPale, border: "none",
+                              borderRadius: 6, padding: "4px 10px",
+                              cursor: "pointer", fontFamily: "inherit",
+                            }}
+                          >
+                            <Plus size={10} strokeWidth={2} /> Criar promoção
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>
@@ -341,7 +418,7 @@ const StatCard = ({ icon: Icon, label, value, color, bg }) => (
   </div>
 );
 
-const PromoCard = ({ promo, onEdit, onDelete, deleting }) => {
+const PromoCard = ({ promo, onEdit, onClone, onDelete, cloning, deleting }) => {
   const statusColor = STATUS_COLORS[promo.status] || C.mid;
   const [stats, setStats] = useState(null);
   const [statsLoading, setStatsLoading] = useState(false);
@@ -442,6 +519,7 @@ const PromoCard = ({ promo, onEdit, onDelete, deleting }) => {
         <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
           <button
             onClick={onEdit}
+            title="Editar"
             style={{
               width: 32, height: 32, borderRadius: 8,
               border: `1px solid ${C.border}`, background: C.surface,
@@ -451,6 +529,24 @@ const PromoCard = ({ promo, onEdit, onDelete, deleting }) => {
             onMouseLeave={e => e.currentTarget.style.background = C.surface}
           >
             <Pencil size={14} color={C.blue} strokeWidth={2} />
+          </button>
+          <button
+            onClick={onClone}
+            disabled={cloning}
+            title="Duplicar promoção"
+            style={{
+              width: 32, height: 32, borderRadius: 8,
+              border: `1px solid ${C.border}`, background: C.surface,
+              cursor: cloning ? "not-allowed" : "pointer",
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}
+            onMouseEnter={e => { if (!cloning) e.currentTarget.style.background = C.gray; }}
+            onMouseLeave={e => e.currentTarget.style.background = C.surface}
+          >
+            {cloning
+              ? <Loader2 size={14} color={C.mid} style={{ animation: "spin 1s linear infinite" }} />
+              : <Copy size={14} color={C.mid} strokeWidth={2} />
+            }
           </button>
           <button
             onClick={onDelete}
