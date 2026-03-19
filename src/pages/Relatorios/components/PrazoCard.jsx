@@ -55,7 +55,7 @@ const PrazoCard = ({ companyName }) => {
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           {!loading && !error && sales.length > 0 && (
             <button
-              onClick={() => generateReport(companyName, null, [buildSection.prazo(data)], reportFileName("recebiveis", null))}
+              onClick={async () => generateReport(companyName, null, [buildSection.prazo(data)], reportFileName("recebiveis", null))}
               title="Exportar seção"
               style={{
                 background: "none", border: "none", cursor: "pointer", padding: 6,

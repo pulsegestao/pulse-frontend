@@ -1,8 +1,8 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
-const BLUE = [37, 99, 235];
-const BLUE_LIGHT = [239, 246, 255];
+const TEAL = [15, 118, 110];
+const TEAL_PALE = [240, 253, 250];
 const GRAY_LIGHT = [248, 249, 251];
 const TEXT_DARK = [30, 41, 59];
 const TEXT_MID = [100, 116, 139];
@@ -22,19 +22,43 @@ const PERIOD_MAP = { week: "Semanal", month: "Mensal", year: "Anual" };
 const fmt = (n) =>
   (n || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
-function addHeader(doc, companyName, periodLabel) {
+const FONT = "helvetica";
+
+function drawLogo(doc, x, y) {
+  doc.setDrawColor(...WHITE);
+  doc.setLineWidth(0.7);
+  doc.setLineCap("round");
+  doc.setLineJoin("round");
+  doc.lines(
+    [
+      [1.325, 0],
+      [1, -2.65],
+      [1.35, 5.3],
+      [1, -2.65],
+      [1.325, 0],
+    ],
+    x,
+    y,
+    [1, 1],
+    "S",
+  );
+}
+
+function addHeader(doc, companyName, periodLabel, fontName) {
   const w = doc.internal.pageSize.getWidth();
-  doc.setFillColor(...BLUE);
+  doc.setFillColor(...TEAL);
   doc.rect(0, 0, w, 30, "F");
 
-  doc.setFont("helvetica", "bold");
+  drawLogo(doc, 14, 12);
+
+  doc.setFont(fontName, "bold");
   doc.setFontSize(14);
   doc.setTextColor(...WHITE);
-  doc.text("PULSE GESTÃO", 14, 13);
+  doc.text("PULSE GESTÃO", 23, 13);
 
   doc.setFontSize(10);
-  doc.setFont("helvetica", "normal");
-  doc.text(companyName || "", 14, 21);
+  doc.setFont(fontName, "normal");
+  doc.text(companyName || "", 23, 21);
 
   const now = new Date();
   const dateStr = now.toLocaleDateString("pt-BR");
@@ -45,7 +69,7 @@ function addHeader(doc, companyName, periodLabel) {
   return 40;
 }
 
-function addFooter(doc) {
+function addFooter(doc, fontName) {
   const pages = doc.internal.getNumberOfPages();
   const w = doc.internal.pageSize.getWidth();
   const h = doc.internal.pageSize.getHeight();
@@ -55,15 +79,15 @@ function addFooter(doc) {
     doc.line(14, h - 14, w - 14, h - 14);
     doc.setFontSize(8);
     doc.setTextColor(...TEXT_MID);
-    doc.setFont("helvetica", "normal");
+    doc.setFont(fontName, "normal");
     doc.text("Pulse Gestão", 14, h - 8);
     doc.text(`Página ${i} de ${pages}`, w - 14, h - 8, { align: "right" });
   }
 }
 
-function addSectionTitle(doc, title, y, subtitle) {
+function addSectionTitle(doc, title, y, subtitle, fontName) {
   const w = doc.internal.pageSize.getWidth();
-  doc.setFont("helvetica", "bold");
+  doc.setFont(fontName, "bold");
   doc.setFontSize(12);
   doc.setTextColor(...TEXT_DARK);
   doc.text(title, 14, y);
@@ -71,7 +95,7 @@ function addSectionTitle(doc, title, y, subtitle) {
   doc.line(14, y + 2, w - 14, y + 2);
   let nextY = y + 8;
   if (subtitle) {
-    doc.setFont("helvetica", "normal");
+    doc.setFont(fontName, "normal");
     doc.setFontSize(9);
     doc.setTextColor(...TEXT_MID);
     doc.text(subtitle, 14, nextY);
@@ -79,32 +103,6 @@ function addSectionTitle(doc, title, y, subtitle) {
   }
   return nextY;
 }
-
-const TABLE_STYLES = {
-  theme: "grid",
-  styles: {
-    fontSize: 9,
-    cellPadding: 3,
-    lineColor: BORDER,
-    lineWidth: 0.25,
-    textColor: TEXT_DARK,
-    font: "helvetica",
-  },
-  headStyles: {
-    fillColor: BLUE_LIGHT,
-    textColor: TEXT_DARK,
-    fontStyle: "bold",
-    fontSize: 9,
-  },
-  footStyles: {
-    fillColor: [248, 250, 252],
-    textColor: TEXT_DARK,
-    fontStyle: "bold",
-    fontSize: 9,
-  },
-  alternateRowStyles: { fillColor: GRAY_LIGHT },
-  margin: { left: 14, right: 14 },
-};
 
 export const buildSection = {
   products(data) {
@@ -195,8 +193,36 @@ export const buildSection = {
 export function generateReport(companyName, periodKey, sections, fileName) {
   const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
   const label = PERIOD_MAP[periodKey] || periodKey || "";
-  let y = addHeader(doc, companyName, `Relatório ${label}`);
+  const fontName = FONT;
+
+  let y = addHeader(doc, companyName, `Relatório ${label}`, fontName);
   const pageH = doc.internal.pageSize.getHeight();
+
+  const tableStyles = {
+    theme: "grid",
+    styles: {
+      fontSize: 9,
+      cellPadding: 3,
+      lineColor: BORDER,
+      lineWidth: 0.25,
+      textColor: TEXT_DARK,
+      font: fontName,
+    },
+    headStyles: {
+      fillColor: TEAL_PALE,
+      textColor: TEXT_DARK,
+      fontStyle: "bold",
+      fontSize: 9,
+    },
+    footStyles: {
+      fillColor: [248, 250, 252],
+      textColor: TEXT_DARK,
+      fontStyle: "bold",
+      fontSize: 9,
+    },
+    alternateRowStyles: { fillColor: GRAY_LIGHT },
+    margin: { left: 14, right: 14 },
+  };
 
   sections.forEach((section, idx) => {
     if (!section.body || section.body.length === 0) return;
@@ -207,10 +233,10 @@ export function generateReport(companyName, periodKey, sections, fileName) {
     }
     if (idx > 0) y += 6;
 
-    y = addSectionTitle(doc, section.title, y, section.subtitle);
+    y = addSectionTitle(doc, section.title, y, section.subtitle, fontName);
 
     autoTable(doc, {
-      ...TABLE_STYLES,
+      ...tableStyles,
       startY: y,
       head: section.head,
       body: section.body,
@@ -221,7 +247,7 @@ export function generateReport(companyName, periodKey, sections, fileName) {
     y = doc.lastAutoTable.finalY + 4;
   });
 
-  addFooter(doc);
+  addFooter(doc, fontName);
   doc.save(fileName);
 }
 

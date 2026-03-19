@@ -55,7 +55,7 @@ const CategoryBreakdown = ({ period, companyName }) => {
         </div>
         {!loading && items.length > 0 && (
           <button
-            onClick={() => generateReport(companyName, period, [buildSection.categories(items)], reportFileName("categorias", period))}
+            onClick={async () => generateReport(companyName, period, [buildSection.categories(items)], reportFileName("categorias", period))}
             title="Exportar seção"
             style={{
               background: "none", border: "none", cursor: "pointer", padding: 6,

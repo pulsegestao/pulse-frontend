@@ -47,7 +47,7 @@ const DeadStock = ({ companyName }) => {
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           {!loading && !error && data.length > 0 && (
             <button
-              onClick={() => generateReport(companyName, null, [buildSection.deadStock(data)], reportFileName("estoque-parado", null))}
+              onClick={async () => generateReport(companyName, null, [buildSection.deadStock(data)], reportFileName("estoque-parado", null))}
               title="Exportar seção"
               style={{
                 background: "none", border: "none", cursor: "pointer", padding: 6,

@@ -60,7 +60,7 @@ const ProductReport = ({ period, companyName }) => {
         </div>
         {!loading && data.length > 0 && (
           <button
-            onClick={() => generateReport(companyName, period, [buildSection.products(data)], reportFileName("produtos", period))}
+            onClick={async () => generateReport(companyName, period, [buildSection.products(data)], reportFileName("produtos", period))}
             title="Exportar seção"
             style={{
               background: "none", border: "none", cursor: "pointer", padding: 6,

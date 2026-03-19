@@ -74,7 +74,7 @@ const PaymentMethods = ({ period, companyName }) => {
         </div>
         {!loading && data.length > 0 && (
           <button
-            onClick={() => generateReport(companyName, period, [buildSection.payments(data)], reportFileName("pagamentos", period))}
+            onClick={async () => generateReport(companyName, period, [buildSection.payments(data)], reportFileName("pagamentos", period))}
             title="Exportar seção"
             style={{
               background: "none", border: "none", cursor: "pointer", padding: 6,
