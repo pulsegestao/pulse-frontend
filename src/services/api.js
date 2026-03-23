@@ -359,3 +359,24 @@ export function evaluateCart(input) {
     body: JSON.stringify(input),
   });
 }
+
+export function getPlans() {
+  return request("/api/v1/plans");
+}
+
+export function getBillingInfo() {
+  return authRequest("/api/v1/billing");
+}
+
+export function createSubscription(input) {
+  return authRequest("/api/v1/billing/subscribe", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+export function cancelSubscription() {
+  return authRequest("/api/v1/billing/cancel", {
+    method: "POST",
+  });
+}

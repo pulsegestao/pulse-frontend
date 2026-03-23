@@ -18,8 +18,10 @@ import InsightsPage from "./pages/Insights";
 import VendasPrazoPage from "./pages/VendasPrazo";
 import NotificacoesPage from "./pages/Notificacoes";
 import PromocoesPage from "./pages/Promocoes";
+import PlanosPage from "./pages/Planos";
 import ErrorBoundary from "./components/ErrorBoundary";
 import ToastContainer from "./components/Toast";
+import SubscriptionBanner from "./components/SubscriptionBanner";
 
 function SessionGuard({ children }) {
   const navigate = useNavigate();
@@ -45,6 +47,7 @@ function AuthShell({ children }) {
   return (
     <div data-theme={dark ? "dark" : "light"}>
       <ToastContainer />
+      <SubscriptionBanner />
       {children}
     </div>
   );
@@ -73,6 +76,7 @@ export default function App() {
           <Route path="/notificacoes" element={<AuthShell><ErrorBoundary><NotificacoesPage /></ErrorBoundary></AuthShell>} />
           <Route path="/relatorios/prazo" element={<AuthShell><ErrorBoundary><VendasPrazoPage /></ErrorBoundary></AuthShell>} />
           <Route path="/promocoes" element={<AuthShell><ErrorBoundary><PromocoesPage /></ErrorBoundary></AuthShell>} />
+          <Route path="/planos" element={<AuthShell><ErrorBoundary><PlanosPage /></ErrorBoundary></AuthShell>} />
         </Routes>
       </SessionGuard>
     </BrowserRouter>

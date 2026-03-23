@@ -80,7 +80,7 @@ const Pricing = () => {
                 ))}
               </div>
 
-              <a href="#" style={{
+              <a href="/cadastro" style={{
                 display: "block", textAlign: "center",
                 background: "white", color: C.blue,
                 padding: "16px", borderRadius: 14,

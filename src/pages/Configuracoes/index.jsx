@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
-import { User, Building2, Users, SlidersHorizontal, Shield, Plug, ArrowLeft } from "lucide-react";
+import { User, Building2, Users, SlidersHorizontal, Shield, Plug, CreditCard, ArrowLeft } from "lucide-react";
 import C from "../../theme/colors";
 import DashboardHeader from "../Dashboard/components/DashboardHeader";
 import { getProfile, isAuthenticated } from "../../hooks/useAuth";
@@ -10,6 +10,7 @@ import EquipeTab from "./tabs/EquipeTab";
 import PreferenciasTab from "./tabs/PreferenciasTab";
 import SegurancaTab from "./tabs/SegurancaTab";
 import IntegracoesTab from "./tabs/IntegracoesTab";
+import PlanoTab from "./tabs/PlanoTab";
 import QuickActionsBar from "../../components/layout/QuickActionsBar";
 
 const ALL_TABS = [
@@ -19,6 +20,7 @@ const ALL_TABS = [
   { id: "preferencias", label: "Preferências",   icon: SlidersHorizontal, roles: ["owner", "manager", "employee"] },
   { id: "integracoes",  label: "Integrações",    icon: Plug,              roles: ["owner", "manager"] },
   { id: "seguranca",    label: "Segurança",      icon: Shield,            roles: ["owner", "manager", "employee"] },
+  { id: "plano",        label: "Plano",          icon: CreditCard,        roles: ["owner"] },
 ];
 
 const TAB_COMPONENTS = {
@@ -28,6 +30,7 @@ const TAB_COMPONENTS = {
   preferencias: PreferenciasTab,
   integracoes:  IntegracoesTab,
   seguranca:    SegurancaTab,
+  plano:        PlanoTab,
 };
 
 const ConfiguracoesPage = () => {
