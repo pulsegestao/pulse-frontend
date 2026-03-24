@@ -380,3 +380,44 @@ export function cancelSubscription() {
     method: "POST",
   });
 }
+
+export function inviteMember(input) {
+  return authRequest("/api/v1/companies/me/invites", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+export function getPendingInvites() {
+  return authRequest("/api/v1/companies/me/invites");
+}
+
+export function cancelInvite(id) {
+  return authRequest(`/api/v1/companies/me/invites/${id}`, { method: "DELETE" });
+}
+
+export function removeMember(userId) {
+  return authRequest(`/api/v1/companies/me/members/${userId}`, { method: "DELETE" });
+}
+
+export function changeMemberRole(userId, role) {
+  return authRequest(`/api/v1/companies/me/members/${userId}/role`, {
+    method: "PATCH",
+    body: JSON.stringify({ role }),
+  });
+}
+
+export function getAuditLog(limit = 50, offset = 0) {
+  return authRequest(`/api/v1/companies/me/audit-log?limit=${limit}&offset=${offset}`);
+}
+
+export function getInviteInfo(token) {
+  return request(`/api/v1/auth/invite-info?token=${token}`);
+}
+
+export function acceptInvite(input) {
+  return request("/api/v1/auth/accept-invite", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}

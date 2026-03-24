@@ -4,6 +4,7 @@ import {
   Search, X, Plus, Minus, Trash2, ShoppingCart,
   QrCode, CreditCard, Banknote, Wallet, Check, Package, LogOut,
   Loader2, AlertCircle, Smartphone, Clock, UserPlus, Tag,
+  Menu, PackageSearch, PackagePlus, Bell, Settings,
 } from "lucide-react";
 import C from "../../theme/colors";
 import { isAuthenticated, getProfile } from "../../hooks/useAuth";
@@ -134,49 +135,123 @@ const PRAZO_METHOD = { id: "prazo", label: "A Prazo", icon: Clock, color: "#B453
 
 // ── PDV Header (52px) ──────────────────────────────────────────────────────────
 
-const PDVHeader = ({ companyName, userName, onExit }) => (
-  <header style={{
-    position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
-    height: 52,
-    background: C.surface, borderBottom: `1px solid ${C.border}`,
-    boxShadow: "0 1px 8px rgba(0,0,0,0.05)",
-    display: "flex", alignItems: "center",
-    padding: "0 24px", justifyContent: "space-between",
-  }}>
-    <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-      <div style={{
-        width: 28, height: 28, borderRadius: 8,
-        background: `linear-gradient(135deg, ${C.blue}, ${C.blueLight})`,
-        display: "flex", alignItems: "center", justifyContent: "center",
-      }}>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-          <path d="M3 12h4l3-8 4 16 3-8h4" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
+const EMPLOYEE_MENU = [
+  { label: "Gerir estoque",      icon: PackageSearch, path: "/gerir-estoque" },
+  { label: "Entrada de estoque", icon: PackagePlus,   path: "/estoque/entrada" },
+  { label: "Notificações",       icon: Bell,          path: "/notificacoes" },
+  { label: "Configurações",      icon: Settings,      path: "/configuracoes" },
+];
+
+const PDVHeader = ({ companyName, userName, onExit, role, onNavigate }) => {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef(null);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const handler = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) setMenuOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [menuOpen]);
+
+  return (
+    <header style={{
+      position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
+      height: 52,
+      background: C.surface, borderBottom: `1px solid ${C.border}`,
+      boxShadow: "0 1px 8px rgba(0,0,0,0.05)",
+      display: "flex", alignItems: "center",
+      padding: "0 24px", justifyContent: "space-between",
+    }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        <div style={{
+          width: 28, height: 28, borderRadius: 8,
+          background: `linear-gradient(135deg, ${C.blue}, ${C.blueLight})`,
+          display: "flex", alignItems: "center", justifyContent: "center",
+        }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+            <path d="M3 12h4l3-8 4 16 3-8h4" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </div>
+        <div style={{ width: 1, height: 18, background: C.border }} />
+        <span style={{ fontSize: 13, fontWeight: 700, color: C.graphite }}>Caixa</span>
+        {companyName && <span style={{ fontSize: 12, color: C.mid }}>· {companyName}</span>}
       </div>
-      <div style={{ width: 1, height: 18, background: C.border }} />
-      <span style={{ fontSize: 13, fontWeight: 700, color: C.graphite }}>Caixa</span>
-      {companyName && <span style={{ fontSize: 12, color: C.mid }}>· {companyName}</span>}
-    </div>
-    <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-      {userName && <span style={{ fontSize: 12, color: C.mid }}>{userName}</span>}
-      <button
-        onClick={onExit}
-        style={{
-          display: "flex", alignItems: "center", gap: 6,
-          padding: "6px 14px", borderRadius: 8,
-          background: "transparent", border: `1.5px solid ${C.border}`,
-          fontSize: 12, fontWeight: 700, color: C.mid,
-          cursor: "pointer", fontFamily: "inherit", transition: "all 0.15s",
-        }}
-        onMouseEnter={e => { e.currentTarget.style.background = C.gray; e.currentTarget.style.color = C.graphite; }}
-        onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = C.mid; }}
-      >
-        <LogOut size={12} strokeWidth={2} />
-        Sair do caixa
-      </button>
-    </div>
-  </header>
-);
+      <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+        {userName && <span style={{ fontSize: 12, color: C.mid }}>{userName}</span>}
+
+        {role === "employee" ? (
+          <div style={{ position: "relative" }} ref={menuRef}>
+            <button
+              onClick={() => setMenuOpen(o => !o)}
+              style={{
+                display: "flex", alignItems: "center", gap: 6,
+                padding: "6px 14px", borderRadius: 8,
+                background: menuOpen ? C.gray : "transparent",
+                border: `1.5px solid ${C.border}`,
+                fontSize: 12, fontWeight: 700, color: C.mid,
+                cursor: "pointer", fontFamily: "inherit", transition: "all 0.15s",
+              }}
+              onMouseEnter={e => { e.currentTarget.style.background = C.gray; e.currentTarget.style.color = C.graphite; }}
+              onMouseLeave={e => { if (!menuOpen) { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = C.mid; } }}
+            >
+              <Menu size={12} strokeWidth={2} />
+              Menu
+            </button>
+            {menuOpen && (
+              <div style={{
+                position: "absolute", right: 0, top: "calc(100% + 6px)",
+                background: C.surface, border: `1px solid ${C.border}`,
+                borderRadius: 12, boxShadow: "0 8px 24px rgba(0,0,0,0.1)",
+                minWidth: 200, overflow: "hidden", zIndex: 200,
+              }}>
+                {EMPLOYEE_MENU.map(item => {
+                  const Icon = item.icon;
+                  return (
+                    <button
+                      key={item.path}
+                      onClick={() => { setMenuOpen(false); onNavigate(item.path); }}
+                      style={{
+                        display: "flex", alignItems: "center", gap: 10,
+                        width: "100%", padding: "11px 16px",
+                        border: "none", background: "transparent",
+                        color: C.graphite, fontSize: 13, fontWeight: 500,
+                        cursor: "pointer", fontFamily: "inherit", textAlign: "left",
+                        transition: "background 0.1s",
+                      }}
+                      onMouseEnter={e => { e.currentTarget.style.background = C.gray; }}
+                      onMouseLeave={e => { e.currentTarget.style.background = "transparent"; }}
+                    >
+                      <Icon size={15} color={C.mid} strokeWidth={2} />
+                      {item.label}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        ) : (
+          <button
+            onClick={onExit}
+            style={{
+              display: "flex", alignItems: "center", gap: 6,
+              padding: "6px 14px", borderRadius: 8,
+              background: "transparent", border: `1.5px solid ${C.border}`,
+              fontSize: 12, fontWeight: 700, color: C.mid,
+              cursor: "pointer", fontFamily: "inherit", transition: "all 0.15s",
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = C.gray; e.currentTarget.style.color = C.graphite; }}
+            onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = C.mid; }}
+          >
+            <LogOut size={12} strokeWidth={2} />
+            Sair do caixa
+          </button>
+        )}
+      </div>
+    </header>
+  );
+};
 
 // ── Sub-components ─────────────────────────────────────────────────────────────
 
@@ -1077,7 +1152,9 @@ const PDVPage = () => {
       <PDVHeader
         companyName={profile?.companyName || ""}
         userName={profile?.userName || ""}
+        role={profile?.role || ""}
         onExit={() => navigate("/dashboard")}
+        onNavigate={(path) => navigate(path)}
       />
 
       <div style={{ display: "flex", height: "calc(100vh - 52px)", marginTop: 52 }}>

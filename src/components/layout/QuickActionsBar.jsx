@@ -1,19 +1,22 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { LayoutDashboard, ShoppingCart, Package, BarChart2, Activity, Tag } from "lucide-react";
 import C from "../../theme/colors";
+import { getProfile } from "../../hooks/useAuth";
 
 const ITEMS = [
-  { label: "Dashboard",          Icon: LayoutDashboard, href: "/dashboard"       },
-  { label: "Registrar venda",    Icon: ShoppingCart,    href: "/pdv"             },
-  { label: "Gerir estoque",      Icon: Package,         href: "/gerir-estoque"   },
-  { label: "Relatórios",         Icon: BarChart2,       href: "/relatorios"      },
-  { label: "Promoções",          Icon: Tag,             href: "/promocoes"       },
-  { label: "Pulso",              Icon: Activity,        href: "/insights"        },
+  { label: "Dashboard",       Icon: LayoutDashboard, href: "/dashboard",     roles: ["owner", "manager"] },
+  { label: "Registrar venda", Icon: ShoppingCart,    href: "/pdv",           roles: ["owner", "manager", "employee"] },
+  { label: "Gerir estoque",   Icon: Package,         href: "/gerir-estoque", roles: ["owner", "manager", "employee"] },
+  { label: "Relatórios",      Icon: BarChart2,       href: "/relatorios",    roles: ["owner", "manager"] },
+  { label: "Promoções",       Icon: Tag,             href: "/promocoes",     roles: ["owner", "manager"] },
+  { label: "Pulso",           Icon: Activity,        href: "/insights",      roles: ["owner", "manager"] },
 ];
 
 const QuickActionsBar = () => {
   const { pathname } = useLocation();
   const navigate = useNavigate();
+  const role = getProfile()?.role ?? "";
+  const visibleItems = ITEMS.filter(item => item.roles.includes(role));
 
   return (
     <div style={{
@@ -37,7 +40,7 @@ const QuickActionsBar = () => {
         alignItems: "center",
         gap: 2,
       }}>
-        {ITEMS.map(({ label, Icon, href }) => {
+        {visibleItems.map(({ label, Icon, href }) => {
           const active = pathname === href;
           return (
             <button

@@ -19,9 +19,11 @@ import VendasPrazoPage from "./pages/VendasPrazo";
 import NotificacoesPage from "./pages/Notificacoes";
 import PromocoesPage from "./pages/Promocoes";
 import PlanosPage from "./pages/Planos";
+import ConvitePage from "./pages/Convite";
 import ErrorBoundary from "./components/ErrorBoundary";
 import ToastContainer from "./components/Toast";
 import SubscriptionBanner from "./components/SubscriptionBanner";
+import RoleGuard from "./components/RoleGuard";
 
 function SessionGuard({ children }) {
   const navigate = useNavigate();
@@ -65,18 +67,19 @@ export default function App() {
           <Route path="/verify-email" element={<VerifyEmailPage />} />
           <Route path="/esqueci-senha" element={<EsqueciSenhaPage />} />
           <Route path="/redefinir-senha" element={<RedefinirSenhaPage />} />
-          <Route path="/dashboard" element={<AuthShell><ErrorBoundary><DashboardPage /></ErrorBoundary></AuthShell>} />
+          <Route path="/convite" element={<ConvitePage />} />
+          <Route path="/dashboard" element={<AuthShell><ErrorBoundary><RoleGuard allowedRoles={["owner","manager"]}><DashboardPage /></RoleGuard></ErrorBoundary></AuthShell>} />
           <Route path="/estoque/entrada" element={<AuthShell><ErrorBoundary><EstoqueEntradaPage /></ErrorBoundary></AuthShell>} />
           <Route path="/gerir-estoque" element={<AuthShell><ErrorBoundary><GerirEstoquePage /></ErrorBoundary></AuthShell>} />
           <Route path="/sessao-expirada" element={<AuthShell><ErrorBoundary><SessionExpiredPage /></ErrorBoundary></AuthShell>} />
           <Route path="/configuracoes" element={<AuthShell><ErrorBoundary><ConfiguracoesPage /></ErrorBoundary></AuthShell>} />
           <Route path="/pdv" element={<AuthShell><ErrorBoundary><PDVPage /></ErrorBoundary></AuthShell>} />
-          <Route path="/relatorios" element={<AuthShell><ErrorBoundary><RelatoriosPage /></ErrorBoundary></AuthShell>} />
-          <Route path="/insights" element={<AuthShell><ErrorBoundary><InsightsPage /></ErrorBoundary></AuthShell>} />
+          <Route path="/relatorios" element={<AuthShell><ErrorBoundary><RoleGuard allowedRoles={["owner","manager"]}><RelatoriosPage /></RoleGuard></ErrorBoundary></AuthShell>} />
+          <Route path="/insights" element={<AuthShell><ErrorBoundary><RoleGuard allowedRoles={["owner","manager"]}><InsightsPage /></RoleGuard></ErrorBoundary></AuthShell>} />
           <Route path="/notificacoes" element={<AuthShell><ErrorBoundary><NotificacoesPage /></ErrorBoundary></AuthShell>} />
-          <Route path="/relatorios/prazo" element={<AuthShell><ErrorBoundary><VendasPrazoPage /></ErrorBoundary></AuthShell>} />
-          <Route path="/promocoes" element={<AuthShell><ErrorBoundary><PromocoesPage /></ErrorBoundary></AuthShell>} />
-          <Route path="/planos" element={<AuthShell><ErrorBoundary><PlanosPage /></ErrorBoundary></AuthShell>} />
+          <Route path="/relatorios/prazo" element={<AuthShell><ErrorBoundary><RoleGuard allowedRoles={["owner","manager"]}><VendasPrazoPage /></RoleGuard></ErrorBoundary></AuthShell>} />
+          <Route path="/promocoes" element={<AuthShell><ErrorBoundary><RoleGuard allowedRoles={["owner","manager"]}><PromocoesPage /></RoleGuard></ErrorBoundary></AuthShell>} />
+          <Route path="/planos" element={<AuthShell><ErrorBoundary><RoleGuard allowedRoles={["owner"]}><PlanosPage /></RoleGuard></ErrorBoundary></AuthShell>} />
         </Routes>
       </SessionGuard>
     </BrowserRouter>

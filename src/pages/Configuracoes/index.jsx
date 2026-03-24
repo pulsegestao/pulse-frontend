@@ -18,7 +18,7 @@ const ALL_TABS = [
   { id: "empresa",      label: "Empresa",        icon: Building2,         roles: ["owner", "manager"] },
   { id: "equipe",       label: "Equipe",         icon: Users,             roles: ["owner", "manager"] },
   { id: "preferencias", label: "Preferências",   icon: SlidersHorizontal, roles: ["owner", "manager", "employee"] },
-  { id: "integracoes",  label: "Integrações",    icon: Plug,              roles: ["owner", "manager"] },
+  { id: "integracoes",  label: "Integrações",    icon: Plug,              roles: ["owner"] },
   { id: "seguranca",    label: "Segurança",      icon: Shield,            roles: ["owner", "manager", "employee"] },
   { id: "plano",        label: "Plano",          icon: CreditCard,        roles: ["owner"] },
 ];
