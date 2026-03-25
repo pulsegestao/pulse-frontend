@@ -445,7 +445,7 @@ const GerirEstoquePage = () => {
         ) : error ? (
           <WidgetError message={error} onRetry={fetchProducts} />
         ) : (
-          <ProductTable products={filtered} categories={categories} onAction={(type, product) => setModal({ type, product })} />
+          <ProductTable products={filtered} categories={categories} suppliers={suppliers} onAction={(type, product) => setModal({ type, product })} />
         )}
       </main>
 

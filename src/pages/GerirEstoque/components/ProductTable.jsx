@@ -58,7 +58,11 @@ const marginColor = (pct) => {
   return "#DC2626";
 };
 
-const ProductTable = ({ products, categories, onAction }) => {
+const ProductTable = ({ products, categories, suppliers, onAction }) => {
+  const supplierName = (supplierID) => {
+    if (!supplierID || !suppliers?.length) return null;
+    return suppliers.find(s => s.id === supplierID)?.name || null;
+  };
   const categoryName = (ncmCode) => {
     if (!ncmCode || !categories?.length) return null;
     const prefix = ncmCode.length >= 2 ? ncmCode.substring(0, 2) : ncmCode;
@@ -85,11 +89,12 @@ const ProductTable = ({ products, categories, onAction }) => {
       overflow: "hidden",
     }}>
       <div style={{ overflowX: "auto" }}>
-        <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 820 }}>
+        <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 920 }}>
           <thead>
             <tr>
               <TH>Produto</TH>
               <TH>Categoria</TH>
+              <TH>Fornecedor</TH>
               <TH align="center">Estoque Atual</TH>
               <TH align="center">Mínimo</TH>
               <TH align="center">Status</TH>
@@ -105,6 +110,7 @@ const ProductTable = ({ products, categories, onAction }) => {
               const cost = p.cost_price ?? 0;
               const sale = p.sale_price ?? 0;
               const margin = sale > 0 ? ((sale - cost) / sale) * 100 : null;
+              const supName = supplierName(p.supplier_id);
               return (
                 <tr
                   key={p.id}
@@ -122,6 +128,23 @@ const ProductTable = ({ products, categories, onAction }) => {
                     }}>
                       {categoryName(p.ncm_code) ?? "Sem categoria"}
                     </span>
+                  </td>
+                  <td style={{ padding: "14px 16px" }}>
+                    {supName ? (
+                      <span style={{
+                        fontSize: 12, fontWeight: 600, color: C.blue,
+                        background: C.bluePale, borderRadius: 6, padding: "3px 9px",
+                      }}>
+                        {supName}
+                      </span>
+                    ) : (
+                      <span style={{
+                        fontSize: 12, fontWeight: 600, color: "#D97706",
+                        background: "#FEF3C7", borderRadius: 6, padding: "3px 9px",
+                      }}>
+                        Sem fornecedor
+                      </span>
+                    )}
                   </td>
                   <td style={{ padding: "14px 16px", textAlign: "center" }}>
                     <p style={{
