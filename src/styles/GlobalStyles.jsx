@@ -99,6 +99,32 @@ const GlobalStyles = () => (
       0% { transform: translateX(0); }
       100% { transform: translateX(-50%); }
     }
+
+    /* Landing — Solution steps */
+    .solution-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 32px;
+      padding: 32px 0;
+    }
+    .solution-step-badge { display: flex; }
+
+    /* Landing — CTABanner inner */
+    .cta-banner-inner { padding: 60px 48px; }
+
+    /* Landing — Pricing card */
+    .pricing-card-inner { padding: 40px 40px 36px; }
+
+    @media (max-width: 640px) {
+      .solution-step {
+        flex-direction: column;
+        gap: 14px;
+        padding: 24px 0;
+      }
+      .solution-step-badge { display: none; }
+      .cta-banner-inner { padding: 36px 24px; }
+      .pricing-card-inner { padding: 28px 20px 24px; }
+    }
   `}</style>
 );
 
