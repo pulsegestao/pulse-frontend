@@ -527,10 +527,10 @@ const PaymentModal = ({ method, total, selectedCustomer, onClose, onSuccess }) =
     }
   };
 
-  const handleSendToMachine = async () => {
+  const handleSendToMachine = async (paymentType = "credit_card") => {
     setCardState("processing");
     try {
-      const result = await createPaymentIntent({ amount: entryAmount, description: "Venda PDV" });
+      const result = await createPaymentIntent({ amount: entryAmount, description: "Venda PDV", payment_type: paymentType });
       setIntentId(result.intent_id);
       pollingRef.current = setInterval(async () => {
         try {
@@ -870,36 +870,112 @@ const PaymentModal = ({ method, total, selectedCustomer, onClose, onSuccess }) =
             {/* ── PIX ── */}
             {currentEntry?.methodId === "pix" && (
               <div style={{ marginBottom: 20 }}>
-                <div style={{ background: C.gray, borderRadius: 12, padding: "20px", textAlign: "center", marginBottom: 14 }}>
-                  <QrCode size={64} color={C.mid} strokeWidth={1.5} style={{ display: "block", margin: "0 auto 10px" }} />
-                  {pixKey ? (
-                    <>
-                      <p style={{ fontSize: 12, fontWeight: 600, color: C.mid, margin: "0 0 6px" }}>Chave PIX</p>
-                      <p style={{ fontSize: 14, fontWeight: 800, color: C.graphite, margin: 0, fontFamily: "monospace" }}>
-                        {pixKey}
-                      </p>
-                    </>
-                  ) : (
-                    <>
-                      <p style={{ fontSize: 13, fontWeight: 600, color: C.graphite, margin: "0 0 4px" }}>QR Code (simulado)</p>
-                      <p style={{ fontSize: 12, color: C.mid, margin: 0 }}>Configure sua chave PIX em Configurações → Integrações</p>
-                    </>
-                  )}
-                </div>
-                <button
-                  onClick={() => confirmCurrentEntry(0)}
-                  style={{
-                    width: "100%", padding: "12px", borderRadius: 10, border: "none",
-                    background: C.green, color: "white",
-                    fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit",
-                    display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-                  }}
-                  onMouseEnter={e => e.currentTarget.style.opacity = "0.88"}
-                  onMouseLeave={e => e.currentTarget.style.opacity = "1"}
-                >
-                  <Check size={15} strokeWidth={2.5} />
-                  Confirmar recebimento
-                </button>
+                {mpIntegration ? (
+                  <>
+                    {cardState === "idle" && (
+                      <div style={{ background: C.gray, borderRadius: 12, padding: "20px", textAlign: "center", marginBottom: 14 }}>
+                        <QrCode size={48} color={C.mid} strokeWidth={1.5} style={{ display: "block", margin: "0 auto 10px" }} />
+                        <p style={{ fontSize: 13, fontWeight: 600, color: C.graphite, margin: "0 0 4px" }}>QR Code será exibido na maquininha</p>
+                        <p style={{ fontSize: 12, color: C.mid, margin: 0 }}>Device: {mpIntegration.device_id}</p>
+                      </div>
+                    )}
+                    {cardState === "processing" && (
+                      <div style={{ background: C.greenPale, borderRadius: 12, padding: "20px", textAlign: "center", marginBottom: 14 }}>
+                        <Loader2 size={40} color={C.green} strokeWidth={2} style={{ animation: "spin 1s linear infinite", display: "block", margin: "0 auto 10px" }} />
+                        <p style={{ fontSize: 13, fontWeight: 600, color: C.graphite, margin: "0 0 4px" }}>Aguardando leitura do QR Code...</p>
+                        <p style={{ fontSize: 12, color: C.mid, margin: 0 }}>O cliente deve escanear o QR na maquininha</p>
+                      </div>
+                    )}
+                    {cardState === "approved" && (
+                      <div style={{ background: C.greenPale, borderRadius: 12, padding: "20px", textAlign: "center", marginBottom: 14, border: `1px solid ${C.green}33` }}>
+                        <Check size={40} color={C.green} strokeWidth={2.5} style={{ display: "block", margin: "0 auto 10px" }} />
+                        <p style={{ fontSize: 14, fontWeight: 800, color: C.green, margin: 0 }}>PIX recebido!</p>
+                      </div>
+                    )}
+                    {cardState === "denied" && (
+                      <div style={{ background: C.redPale, borderRadius: 12, padding: "20px", textAlign: "center", marginBottom: 14, border: "1px solid #EF444433" }}>
+                        <AlertCircle size={40} color="#EF4444" strokeWidth={2} style={{ display: "block", margin: "0 auto 10px" }} />
+                        <p style={{ fontSize: 14, fontWeight: 800, color: "#EF4444", margin: "0 0 4px" }}>Pagamento não confirmado</p>
+                        <p style={{ fontSize: 12, color: C.mid, margin: 0 }}>Tente novamente ou confirme manualmente</p>
+                      </div>
+                    )}
+                    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                      {cardState === "idle" && (
+                        <button
+                          onClick={() => handleSendToMachine("pix")}
+                          style={{
+                            width: "100%", padding: "12px", borderRadius: 10, border: "none",
+                            background: C.green, color: "white",
+                            fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit",
+                            display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                          }}
+                          onMouseEnter={e => e.currentTarget.style.opacity = "0.88"}
+                          onMouseLeave={e => e.currentTarget.style.opacity = "1"}
+                        >
+                          <Smartphone size={15} strokeWidth={2} />
+                          Enviar para maquininha
+                        </button>
+                      )}
+                      {cardState === "processing" && (
+                        <button onClick={handleCancelMachine} style={{ width: "100%", padding: "10px", borderRadius: 10, border: `1.5px solid ${C.border}`, background: "transparent", fontSize: 13, fontWeight: 600, color: C.mid, cursor: "pointer", fontFamily: "inherit" }}>
+                          Cancelar
+                        </button>
+                      )}
+                      {cardState === "approved" && (
+                        <button
+                          onClick={() => confirmCurrentEntry(0, intentId)}
+                          style={{ width: "100%", padding: "12px", borderRadius: 10, border: "none", background: C.green, color: "white", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}
+                          onMouseEnter={e => e.currentTarget.style.opacity = "0.88"}
+                          onMouseLeave={e => e.currentTarget.style.opacity = "1"}
+                        >
+                          <Check size={15} strokeWidth={2.5} />
+                          Confirmar
+                        </button>
+                      )}
+                      {(cardState === "idle" || cardState === "denied") && (
+                        <button
+                          onClick={() => confirmCurrentEntry(0)}
+                          style={{ width: "100%", padding: "10px", borderRadius: 10, border: `1.5px solid ${C.border}`, background: "transparent", fontSize: 13, fontWeight: 600, color: C.mid, cursor: "pointer", fontFamily: "inherit" }}
+                          onMouseEnter={e => e.currentTarget.style.background = C.gray}
+                          onMouseLeave={e => e.currentTarget.style.background = "transparent"}
+                        >
+                          Confirmar manualmente (recebido)
+                        </button>
+                      )}
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div style={{ background: C.gray, borderRadius: 12, padding: "20px", textAlign: "center", marginBottom: 14 }}>
+                      <QrCode size={64} color={C.mid} strokeWidth={1.5} style={{ display: "block", margin: "0 auto 10px" }} />
+                      {pixKey ? (
+                        <>
+                          <p style={{ fontSize: 12, fontWeight: 600, color: C.mid, margin: "0 0 6px" }}>Chave PIX</p>
+                          <p style={{ fontSize: 14, fontWeight: 800, color: C.graphite, margin: 0, fontFamily: "monospace" }}>{pixKey}</p>
+                        </>
+                      ) : (
+                        <>
+                          <p style={{ fontSize: 13, fontWeight: 600, color: C.graphite, margin: "0 0 4px" }}>QR Code (simulado)</p>
+                          <p style={{ fontSize: 12, color: C.mid, margin: 0 }}>Configure sua chave PIX em Configurações → Integrações</p>
+                        </>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => confirmCurrentEntry(0)}
+                      style={{
+                        width: "100%", padding: "12px", borderRadius: 10, border: "none",
+                        background: C.green, color: "white",
+                        fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit",
+                        display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                      }}
+                      onMouseEnter={e => e.currentTarget.style.opacity = "0.88"}
+                      onMouseLeave={e => e.currentTarget.style.opacity = "1"}
+                    >
+                      <Check size={15} strokeWidth={2.5} />
+                      Confirmar recebimento
+                    </button>
+                  </>
+                )}
               </div>
             )}
 

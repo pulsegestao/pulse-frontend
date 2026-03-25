@@ -154,16 +154,25 @@ const EditModal = ({ product, categories, onClose, onSuccess }) => {
 
 const AddStockModal = ({ product, onClose, onSuccess }) => {
   const [quantity, setQuantity] = useState("");
+  const [unitCost, setUnitCost] = useState(String(product.cost_price || ""));
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
+  const currentQty = product.inventory?.quantity ?? 0;
+  const currentCost = product.cost_price || 0;
+  const qty = parseInt(quantity) || 0;
+  const cost = parseFloat(unitCost) || 0;
+  const showAvg = cost !== currentCost && currentQty > 0 && qty > 0;
+  const avgCost = showAvg
+    ? ((currentQty * currentCost + qty * cost) / (currentQty + qty)).toFixed(2).replace(".", ",")
+    : null;
+
   const handleSubmit = async () => {
-    const qty = parseInt(quantity);
     if (!qty || qty < 1) { setError("Quantidade deve ser pelo menos 1."); return; }
     setSaving(true);
     setError("");
     try {
-      await updateStock(product.id, { type: "in", quantity: qty, reason: "Adição manual" });
+      await updateStock(product.id, { type: "in", quantity: qty, reason: "Adição manual", unit_cost: cost });
       onSuccess();
     } catch (e) {
       setError(friendlyError(e.message) || "Erro ao adicionar estoque.");
@@ -178,18 +187,46 @@ const AddStockModal = ({ product, onClose, onSuccess }) => {
       <div style={{ padding: "20px 24px" }}>
         <p style={{ fontSize: 14, fontWeight: 700, color: C.graphite, margin: "0 0 4px" }}>{product.name}</p>
         <p style={{ fontSize: 13, color: C.mid, margin: "0 0 20px" }}>
-          Estoque atual: <strong style={{ color: C.graphite }}>{product.inventory?.quantity ?? 0}</strong> {product.unit}
+          Estoque atual: <strong style={{ color: C.graphite }}>{currentQty}</strong> {product.unit}
+          {currentCost > 0 && (
+            <span style={{ marginLeft: 8 }}>
+              · Custo atual: <strong style={{ color: C.graphite }}>
+                R${currentCost.toFixed(2).replace(".", ",")}
+              </strong>
+            </span>
+          )}
         </p>
-        <div style={{ marginBottom: 16 }}>
-          <FieldLabel>Quantidade a adicionar</FieldLabel>
-          <input
-            type="number" min="1" value={quantity} autoFocus
-            onChange={e => setQuantity(e.target.value)}
-            onKeyDown={e => e.key === "Enter" && handleSubmit()}
-            style={inputSt}
-            placeholder="Ex: 24"
-          />
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }}>
+          <div>
+            <FieldLabel>Quantidade a adicionar</FieldLabel>
+            <input
+              type="number" min="1" value={quantity} autoFocus
+              onChange={e => setQuantity(e.target.value)}
+              onKeyDown={e => e.key === "Enter" && handleSubmit()}
+              style={inputSt}
+              placeholder="Ex: 24"
+            />
+          </div>
+          <div>
+            <FieldLabel>Preço de custo (R$)</FieldLabel>
+            <input
+              type="number" min="0" step="0.01" value={unitCost}
+              onChange={e => setUnitCost(e.target.value)}
+              onKeyDown={e => e.key === "Enter" && handleSubmit()}
+              style={inputSt}
+              placeholder="0,00"
+            />
+          </div>
         </div>
+        {avgCost && (
+          <div style={{
+            display: "flex", alignItems: "center", justifyContent: "space-between",
+            background: C.bluePale, borderRadius: 8, padding: "10px 14px", marginBottom: 16,
+          }}>
+            <span style={{ fontSize: 12, color: C.blue, fontWeight: 600 }}>Novo custo médio</span>
+            <span style={{ fontSize: 14, fontWeight: 800, color: C.blue }}>R${avgCost}</span>
+          </div>
+        )}
         {error && <p style={{ fontSize: 12, color: "#EF4444", marginBottom: 12 }}>{error}</p>}
         <div style={{ display: "flex", gap: 10 }}>
           <button onClick={onClose} style={{ flex: 1, padding: "10px", borderRadius: 8, border: `1.5px solid ${C.border}`, background: "transparent", fontSize: 13, fontWeight: 600, color: C.graphite, cursor: "pointer", fontFamily: "inherit" }}>

@@ -173,8 +173,8 @@ const SalesChart = () => {
                 <circle cx={x} cy={y} r={isHovered ? 6 : 4} strokeWidth="2.5" style={{ stroke: C.blue, fill: isHovered ? C.blue : C.surface, transition: "r 0.15s" }} />
                 {isHovered && (
                   <g>
-                    <rect x={x - 44} y={y - 34} width="88" height="24" rx="6" style={{ fill: C.graphite }} />
-                    <text x={x} y={y - 18} textAnchor="middle" dominantBaseline="middle" fontSize="11" fontWeight="700" fill="white" fontFamily="Plus Jakarta Sans, sans-serif">
+                    <rect x={x - 44} y={y - 34} width="88" height="24" rx="6" fill="#1F2937" />
+                    <text x={x} y={y - 18} textAnchor="middle" dominantBaseline="middle" fontSize="11" fontWeight="700" fill="#F9FAFB" fontFamily="Plus Jakarta Sans, sans-serif">
                       {fmtBRL(d.value)}
                     </text>
                   </g>
