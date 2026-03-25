@@ -20,6 +20,9 @@ import NotificacoesPage from "./pages/Notificacoes";
 import PromocoesPage from "./pages/Promocoes";
 import PlanosPage from "./pages/Planos";
 import ConvitePage from "./pages/Convite";
+import ReposicaoPage from "./pages/Reposicao";
+import NovoPedidoPage from "./pages/Reposicao/NovoPedido";
+import ConfirmarRecebimentoPage from "./pages/Reposicao/ConfirmarRecebimento";
 import ErrorBoundary from "./components/ErrorBoundary";
 import ToastContainer from "./components/Toast";
 import SubscriptionBanner from "./components/SubscriptionBanner";
@@ -80,6 +83,9 @@ export default function App() {
           <Route path="/relatorios/prazo" element={<AuthShell><ErrorBoundary><RoleGuard allowedRoles={["owner","manager"]}><VendasPrazoPage /></RoleGuard></ErrorBoundary></AuthShell>} />
           <Route path="/promocoes" element={<AuthShell><ErrorBoundary><RoleGuard allowedRoles={["owner","manager"]}><PromocoesPage /></RoleGuard></ErrorBoundary></AuthShell>} />
           <Route path="/planos" element={<AuthShell><ErrorBoundary><RoleGuard allowedRoles={["owner"]}><PlanosPage /></RoleGuard></ErrorBoundary></AuthShell>} />
+          <Route path="/reposicao" element={<AuthShell><ErrorBoundary><RoleGuard allowedRoles={["owner","manager"]}><ReposicaoPage /></RoleGuard></ErrorBoundary></AuthShell>} />
+          <Route path="/reposicao/novo" element={<AuthShell><ErrorBoundary><RoleGuard allowedRoles={["owner","manager"]}><NovoPedidoPage /></RoleGuard></ErrorBoundary></AuthShell>} />
+          <Route path="/reposicao/:id" element={<AuthShell><ErrorBoundary><RoleGuard allowedRoles={["owner","manager"]}><ConfirmarRecebimentoPage /></RoleGuard></ErrorBoundary></AuthShell>} />
         </Routes>
       </SessionGuard>
     </BrowserRouter>

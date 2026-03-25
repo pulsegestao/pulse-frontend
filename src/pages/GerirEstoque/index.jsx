@@ -8,7 +8,7 @@ import DashboardHeader from "../Dashboard/components/DashboardHeader";
 import MetricCards from "./components/MetricCards";
 import ProductTable from "./components/ProductTable";
 import { isAuthenticated } from "../../hooks/useAuth";
-import { getProducts, updateProduct, updateStock, getNCMCategories } from "../../services/api";
+import { getProducts, updateProduct, updateStock, getNCMCategories, getSuppliers } from "../../services/api";
 import QuickActionsBar from "../../components/layout/QuickActionsBar";
 
 const UNITS = ["UN", "KG", "L", "CX", "PCT", "DZ", "M", "G"];
@@ -58,7 +58,7 @@ const FieldLabel = ({ children }) => (
   </label>
 );
 
-const EditModal = ({ product, categories, onClose, onSuccess }) => {
+const EditModal = ({ product, categories, suppliers, onClose, onSuccess }) => {
   const [form, setForm] = useState({
     name: product.name || "",
     unit: product.unit || "UN",
@@ -67,6 +67,7 @@ const EditModal = ({ product, categories, onClose, onSuccess }) => {
     barcode: product.barcode || "",
     min_quantity: product.inventory?.min_quantity ?? 0,
     ncm_code: product.ncm_code || "",
+    supplier_id: product.supplier_id || "",
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -84,6 +85,7 @@ const EditModal = ({ product, categories, onClose, onSuccess }) => {
         barcode: form.barcode.trim(),
         min_quantity: parseInt(form.min_quantity) || 0,
         ncm_code: form.ncm_code,
+        supplier_id: form.supplier_id || null,
       });
       onSuccess();
     } catch (e) {
@@ -137,6 +139,15 @@ const EditModal = ({ product, categories, onClose, onSuccess }) => {
               ))}
             </select>
           </div>
+        </div>
+        <div style={{ marginBottom: 16 }}>
+          <FieldLabel>Fornecedor</FieldLabel>
+          <select value={form.supplier_id} onChange={e => setForm(f => ({ ...f, supplier_id: e.target.value }))} style={{ ...inputSt, cursor: "pointer", appearance: "none" }}>
+            <option value="">Sem fornecedor</option>
+            {(suppliers || []).map(s => (
+              <option key={s.id} value={s.id}>{s.name}</option>
+            ))}
+          </select>
         </div>
         {error && <p style={{ fontSize: 12, color: "#EF4444", marginBottom: 12 }}>{error}</p>}
         <div style={{ display: "flex", gap: 10 }}>
@@ -300,6 +311,7 @@ const GerirEstoquePage = () => {
   const [search, setSearch] = useState("");
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [suppliers, setSuppliers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [modal, setModal] = useState({ type: null, product: null });
@@ -317,6 +329,7 @@ const GerirEstoquePage = () => {
     if (!isAuthenticated()) { navigate("/", { replace: true }); return; }
     fetchProducts();
     getNCMCategories().then(setCategories).catch(() => {});
+    getSuppliers().then(data => setSuppliers(data || [])).catch(() => {});
   }, []);
 
   const closeModal = () => setModal({ type: null, product: null });
@@ -357,30 +370,44 @@ const GerirEstoquePage = () => {
             </div>
           </div>
 
-          <button
-            onClick={() => navigate("/estoque/entrada")}
-            style={{
-              display: "flex", alignItems: "center", gap: 8,
-              padding: "11px 20px",
-              background: `linear-gradient(135deg, ${C.blue}, ${C.blueLight})`,
-              color: "white", border: "none", borderRadius: 12,
-              fontSize: 14, fontWeight: 700, cursor: "pointer",
-              boxShadow: `0 4px 14px ${C.blue}33`,
-              fontFamily: "inherit", transition: "transform 0.15s, box-shadow 0.15s",
-              flexShrink: 0,
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.transform = "translateY(-1px)";
-              e.currentTarget.style.boxShadow = `0 8px 20px ${C.blue}44`;
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.transform = "none";
-              e.currentTarget.style.boxShadow = `0 4px 14px ${C.blue}33`;
-            }}
-          >
-            <Plus size={16} strokeWidth={2.5} />
-            Adicionar ao estoque
-          </button>
+          <div style={{ display: "flex", gap: 10, flexShrink: 0 }}>
+            <button
+              onClick={() => navigate("/reposicao")}
+              style={{
+                display: "flex", alignItems: "center", gap: 8,
+                padding: "11px 18px",
+                background: C.surface, color: C.graphite,
+                border: `1.5px solid ${C.border}`, borderRadius: 12,
+                fontSize: 14, fontWeight: 600, cursor: "pointer",
+                fontFamily: "inherit",
+              }}
+            >
+              Reposição
+            </button>
+            <button
+              onClick={() => navigate("/estoque/entrada")}
+              style={{
+                display: "flex", alignItems: "center", gap: 8,
+                padding: "11px 20px",
+                background: `linear-gradient(135deg, ${C.blue}, ${C.blueLight})`,
+                color: "white", border: "none", borderRadius: 12,
+                fontSize: 14, fontWeight: 700, cursor: "pointer",
+                boxShadow: `0 4px 14px ${C.blue}33`,
+                fontFamily: "inherit", transition: "transform 0.15s, box-shadow 0.15s",
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.transform = "translateY(-1px)";
+                e.currentTarget.style.boxShadow = `0 8px 20px ${C.blue}44`;
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.transform = "none";
+                e.currentTarget.style.boxShadow = `0 4px 14px ${C.blue}33`;
+              }}
+            >
+              <Plus size={16} strokeWidth={2.5} />
+              Adicionar ao estoque
+            </button>
+          </div>
         </div>
 
         {/* Metric cards */}
@@ -423,7 +450,7 @@ const GerirEstoquePage = () => {
       </main>
 
       {/* Modais */}
-      {modal.type === "edit"   && <EditModal      product={modal.product} categories={categories} onClose={closeModal} onSuccess={handleSuccess} />}
+      {modal.type === "edit"   && <EditModal      product={modal.product} categories={categories} suppliers={suppliers} onClose={closeModal} onSuccess={handleSuccess} />}
       {modal.type === "add"    && <AddStockModal  product={modal.product} onClose={closeModal} onSuccess={handleSuccess} />}
       {modal.type === "adjust" && <AdjustStockModal product={modal.product} onClose={closeModal} onSuccess={handleSuccess} />}
 

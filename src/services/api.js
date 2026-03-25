@@ -421,3 +421,51 @@ export function acceptInvite(input) {
     body: JSON.stringify(input),
   });
 }
+
+export function getSuppliers() {
+  return authRequest("/api/v1/suppliers/");
+}
+
+export function createSupplier(input) {
+  return authRequest("/api/v1/suppliers/", { method: "POST", body: JSON.stringify(input) });
+}
+
+export function updateSupplier(id, input) {
+  return authRequest(`/api/v1/suppliers/${id}`, { method: "PUT", body: JSON.stringify(input) });
+}
+
+export function deleteSupplier(id) {
+  return authRequest(`/api/v1/suppliers/${id}`, { method: "DELETE" });
+}
+
+export function getPurchaseOrders(limit = 20, offset = 0) {
+  return authRequest(`/api/v1/purchase-orders/?limit=${limit}&offset=${offset}`);
+}
+
+export function createPurchaseOrder(input) {
+  return authRequest("/api/v1/purchase-orders/", { method: "POST", body: JSON.stringify(input) });
+}
+
+export function updatePurchaseOrder(id, input) {
+  return authRequest(`/api/v1/purchase-orders/${id}`, { method: "PUT", body: JSON.stringify(input) });
+}
+
+export function suggestPurchaseOrder() {
+  return authRequest("/api/v1/purchase-orders/suggest");
+}
+
+export function sendPurchaseOrder(id) {
+  return authRequest(`/api/v1/purchase-orders/${id}/send`, { method: "POST" });
+}
+
+export function confirmPurchaseOrderReceipt(id, items) {
+  return authRequest(`/api/v1/purchase-orders/${id}/receipt`, { method: "POST", body: JSON.stringify(items) });
+}
+
+export function cancelPurchaseOrder(id) {
+  return authRequest(`/api/v1/purchase-orders/${id}`, { method: "DELETE" });
+}
+
+export function getPurchaseOrder(id) {
+  return authRequest(`/api/v1/purchase-orders/${id}`);
+}

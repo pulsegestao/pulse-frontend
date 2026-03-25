@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
-import { User, Building2, Users, SlidersHorizontal, Shield, Plug, CreditCard, ArrowLeft } from "lucide-react";
+import { User, Building2, Users, SlidersHorizontal, Shield, Plug, CreditCard, ArrowLeft, Truck } from "lucide-react";
 import C from "../../theme/colors";
 import DashboardHeader from "../Dashboard/components/DashboardHeader";
 import { getProfile, isAuthenticated } from "../../hooks/useAuth";
@@ -11,6 +11,7 @@ import PreferenciasTab from "./tabs/PreferenciasTab";
 import SegurancaTab from "./tabs/SegurancaTab";
 import IntegracoesTab from "./tabs/IntegracoesTab";
 import PlanoTab from "./tabs/PlanoTab";
+import FornecedoresTab from "./tabs/FornecedoresTab";
 import QuickActionsBar from "../../components/layout/QuickActionsBar";
 
 const ALL_TABS = [
@@ -18,6 +19,7 @@ const ALL_TABS = [
   { id: "empresa",      label: "Empresa",        icon: Building2,         roles: ["owner", "manager"] },
   { id: "equipe",       label: "Equipe",         icon: Users,             roles: ["owner", "manager"] },
   { id: "preferencias", label: "Preferências",   icon: SlidersHorizontal, roles: ["owner", "manager", "employee"] },
+  { id: "fornecedores", label: "Fornecedores",   icon: Truck,             roles: ["owner", "manager"] },
   { id: "integracoes",  label: "Integrações",    icon: Plug,              roles: ["owner"] },
   { id: "seguranca",    label: "Segurança",      icon: Shield,            roles: ["owner", "manager", "employee"] },
   { id: "plano",        label: "Plano",          icon: CreditCard,        roles: ["owner"] },
@@ -28,6 +30,7 @@ const TAB_COMPONENTS = {
   empresa:      EmpresaTab,
   equipe:       EquipeTab,
   preferencias: PreferenciasTab,
+  fornecedores: FornecedoresTab,
   integracoes:  IntegracoesTab,
   seguranca:    SegurancaTab,
   plano:        PlanoTab,
