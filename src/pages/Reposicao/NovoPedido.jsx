@@ -9,7 +9,7 @@ import { friendlyError } from "../../utils/errorMessage";
 import { useToast } from "../../hooks/useToast";
 import {
   getProducts, getSuppliers, suggestPurchaseOrder, createPurchaseOrder,
-  sendPurchaseOrder, createSupplier,
+  sendPurchaseOrder, createSupplier, updateProduct,
 } from "../../services/api";
 
 const inputSt = {
@@ -35,6 +35,7 @@ const LinkSupplierModal = ({ suppliers, productName, onLink, onCreated, onClose 
       const sup = await createSupplier(form);
       onCreated(sup);
       onLink(sup.id);
+      onClose();
     } catch (e) {
       toast.error(friendlyError(e.message));
     } finally {
@@ -169,6 +170,27 @@ const NovoPedidoPage = () => {
 
   const removeItem = (id) => setItems(prev => prev.filter(i => i.product_id !== id));
   const updateItem = (id, field, value) => setItems(prev => prev.map(i => i.product_id === id ? { ...i, [field]: value } : i));
+
+  const handleLinkSupplier = async (productId, supId) => {
+    updateItem(productId, "supplier_id", supId);
+    const product = products.find(p => p.id === productId);
+    if (!product) return;
+    try {
+      await updateProduct(productId, {
+        name: product.name,
+        unit: product.unit,
+        sale_price: product.sale_price || 0,
+        cost_price: product.cost_price || 0,
+        barcode: product.barcode || "",
+        min_quantity: product.inventory?.min_quantity || 0,
+        ncm_code: product.ncm_code || "",
+        supplier_id: supId,
+      });
+      setProducts(prev => prev.map(p => p.id === productId ? { ...p, supplier_id: supId } : p));
+    } catch {
+      toast.warning("Vínculo salvo no pedido, mas não foi possível atualizar o cadastro do produto.");
+    }
+  };
 
   const handleSuggest = async () => {
     setSuggesting(true);
@@ -507,7 +529,7 @@ const NovoPedidoPage = () => {
         <LinkSupplierModal
           suppliers={suppliers}
           productName={linkModal.product_name}
-          onLink={(supId) => updateItem(linkModal.product_id, "supplier_id", supId)}
+          onLink={(supId) => handleLinkSupplier(linkModal.product_id, supId)}
           onCreated={(newSup) => setSuppliers(prev => [...prev, newSup])}
           onClose={() => setLinkModal(null)}
         />
