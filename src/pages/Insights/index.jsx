@@ -7,7 +7,6 @@ import QuickActionsBar from "../../components/layout/QuickActionsBar";
 import InsightsSummary from "./components/InsightsSummary";
 import InsightFeed from "./components/InsightFeed";
 import VelocityRanking from "./components/VelocityRanking";
-import CategoryBreakdown from "./components/CategoryBreakdown";
 import { isAuthenticated } from "../../hooks/useAuth";
 import { markAllInsightsRead } from "../../services/api";
 import { useToast } from "../../hooks/useToast";
@@ -110,7 +109,6 @@ const InsightsPage = () => {
           {/* Sidebar */}
           <div>
             <VelocityRanking />
-            <CategoryBreakdown />
           </div>
         </div>
       </main>

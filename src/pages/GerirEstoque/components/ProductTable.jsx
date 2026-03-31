@@ -50,7 +50,19 @@ const TH = ({ children, align = "left" }) => (
   </th>
 );
 
-const ProductTable = ({ products, categories, onAction }) => {
+const fmt = (v) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+
+const marginColor = (pct) => {
+  if (pct >= 40) return C.green;
+  if (pct >= 20) return "#D97706";
+  return "#DC2626";
+};
+
+const ProductTable = ({ products, categories, suppliers, onAction }) => {
+  const supplierName = (supplierID) => {
+    if (!supplierID || !suppliers?.length) return null;
+    return suppliers.find(s => s.id === supplierID)?.name || null;
+  };
   const categoryName = (ncmCode) => {
     if (!ncmCode || !categories?.length) return null;
     const prefix = ncmCode.length >= 2 ? ncmCode.substring(0, 2) : ncmCode;
@@ -77,21 +89,28 @@ const ProductTable = ({ products, categories, onAction }) => {
       overflow: "hidden",
     }}>
       <div style={{ overflowX: "auto" }}>
-        <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 680 }}>
+        <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 920 }}>
           <thead>
             <tr>
               <TH>Produto</TH>
               <TH>Categoria</TH>
+              <TH>Fornecedor</TH>
               <TH align="center">Estoque Atual</TH>
               <TH align="center">Mínimo</TH>
               <TH align="center">Status</TH>
+              <TH align="right">Custo Médio</TH>
               <TH align="right">Preço de Venda</TH>
+              <TH align="right">Margem</TH>
               <TH align="center">Ações</TH>
             </tr>
           </thead>
           <tbody>
             {products.map((p, i) => {
               const status = getStatus(p);
+              const cost = p.cost_price ?? 0;
+              const sale = p.sale_price ?? 0;
+              const margin = sale > 0 ? ((sale - cost) / sale) * 100 : null;
+              const supName = supplierName(p.supplier_id);
               return (
                 <tr
                   key={p.id}
@@ -109,6 +128,23 @@ const ProductTable = ({ products, categories, onAction }) => {
                     }}>
                       {categoryName(p.ncm_code) ?? "Sem categoria"}
                     </span>
+                  </td>
+                  <td style={{ padding: "14px 16px" }}>
+                    {supName ? (
+                      <span style={{
+                        fontSize: 12, fontWeight: 600, color: C.blue,
+                        background: C.bluePale, borderRadius: 6, padding: "3px 9px",
+                      }}>
+                        {supName}
+                      </span>
+                    ) : (
+                      <span style={{
+                        fontSize: 12, fontWeight: 600, color: "#D97706",
+                        background: "#FEF3C7", borderRadius: 6, padding: "3px 9px",
+                      }}>
+                        Sem fornecedor
+                      </span>
+                    )}
                   </td>
                   <td style={{ padding: "14px 16px", textAlign: "center" }}>
                     <p style={{
@@ -135,9 +171,28 @@ const ProductTable = ({ products, categories, onAction }) => {
                     </span>
                   </td>
                   <td style={{ padding: "14px 16px", textAlign: "right" }}>
-                    <p style={{ fontSize: 14, fontWeight: 700, color: C.graphite, margin: 0 }}>
-                      {(p.sale_price ?? 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+                    <p style={{ fontSize: 14, color: cost > 0 ? C.graphite : C.mid, margin: 0 }}>
+                      {cost > 0 ? fmt(cost) : "—"}
                     </p>
+                  </td>
+                  <td style={{ padding: "14px 16px", textAlign: "right" }}>
+                    <p style={{ fontSize: 14, fontWeight: 700, color: C.graphite, margin: 0 }}>
+                      {fmt(sale)}
+                    </p>
+                  </td>
+                  <td style={{ padding: "14px 16px", textAlign: "right" }}>
+                    {margin !== null && cost > 0 ? (
+                      <span style={{
+                        fontSize: 12, fontWeight: 700,
+                        color: marginColor(margin),
+                        background: marginColor(margin) + "18",
+                        borderRadius: 6, padding: "3px 8px",
+                      }}>
+                        {margin.toFixed(1)}%
+                      </span>
+                    ) : (
+                      <p style={{ fontSize: 13, color: C.mid, margin: 0 }}>—</p>
+                    )}
                   </td>
                   <td style={{ padding: "14px 16px" }}>
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>

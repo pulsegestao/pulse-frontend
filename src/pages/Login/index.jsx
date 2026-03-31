@@ -4,6 +4,7 @@ import { Eye, EyeOff } from "lucide-react";
 import C from "../../theme/colors";
 import { loginUser } from "../../services/api";
 import { saveToken, isAuthenticated } from "../../hooks/useAuth";
+import { friendlyError } from "../../utils/errorMessage";
 
 const inputStyle = (hasError) => ({
   width: "100%",
@@ -76,7 +77,7 @@ export default function LoginPage() {
       saveToken(data.token, rememberMe);
       navigate("/dashboard", { replace: true });
     } catch (err) {
-      setApiError(err.message);
+      setApiError(friendlyError(err.message));
     } finally {
       setLoading(false);
     }

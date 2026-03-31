@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
-import { Loader2, PackageX } from "lucide-react";
+import { Loader2, PackageX, Download } from "lucide-react";
 import C from "../../../theme/colors";
 import { getDeadStock } from "../../../services/api";
 import { friendlyError } from "../../../utils/errorMessage";
 import WidgetError from "../../../components/WidgetError";
+import { generateReport, buildSection, reportFileName } from "../../../utils/exportPDF";
 
-const DeadStock = () => {
+const DeadStock = ({ companyName }) => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -43,14 +44,31 @@ const DeadStock = () => {
             <p style={{ fontSize: 16, fontWeight: 800, color: C.graphite, margin: 0 }}>Estoque parado</p>
           </div>
         </div>
-        {!loading && !error && data.length > 0 && (
-          <span style={{
-            fontSize: 12, fontWeight: 700,
-            color: "#D97706", background: C.amberPale,
-            padding: "4px 10px", borderRadius: 8,
-            flexShrink: 0,
-          }}>{data.length} produto{data.length !== 1 ? "s" : ""}</span>
-        )}
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          {!loading && !error && data.length > 0 && (
+            <button
+              onClick={async () => generateReport(companyName, null, [buildSection.deadStock(data)], reportFileName("estoque-parado", null))}
+              title="Exportar seção"
+              style={{
+                background: "none", border: "none", cursor: "pointer", padding: 6,
+                borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center",
+                color: C.mid, transition: "color 0.15s",
+              }}
+              onMouseEnter={e => e.currentTarget.style.color = C.blue}
+              onMouseLeave={e => e.currentTarget.style.color = C.mid}
+            >
+              <Download size={16} strokeWidth={2} />
+            </button>
+          )}
+          {!loading && !error && data.length > 0 && (
+            <span style={{
+              fontSize: 12, fontWeight: 700,
+              color: "#D97706", background: C.amberPale,
+              padding: "4px 10px", borderRadius: 8,
+              flexShrink: 0,
+            }}>{data.length} produto{data.length !== 1 ? "s" : ""}</span>
+          )}
+        </div>
       </div>
 
       {loading ? (

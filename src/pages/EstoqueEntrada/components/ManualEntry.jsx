@@ -61,6 +61,8 @@ const ManualEntry = ({ products, categories, onProductCreated, defaultMinStock =
       name: product.name,
       quantity: 1,
       unit_cost: product.cost_price || 0,
+      current_qty: product.inventory?.quantity || 0,
+      current_cost: product.cost_price || 0,
       isNew: false,
     }]);
   };
@@ -150,6 +152,7 @@ const ManualEntry = ({ products, categories, onProductCreated, defaultMinStock =
           type: "in",
           quantity: Number(item.quantity),
           reason: "Entrada manual",
+          unit_cost: item.unit_cost || 0,
         });
       }
       setSuccess(true);
@@ -441,18 +444,44 @@ const ManualEntry = ({ products, categories, onProductCreated, defaultMinStock =
                 </span>
               ) : (
                 <>
-                  <label style={{ fontSize: 12, color: C.mid }}>Qtd</label>
+                  <label style={{ fontSize: 12, color: C.mid, flexShrink: 0 }}>Qtd</label>
                   <input
                     type="number"
                     min="1"
                     value={item.quantity}
                     onChange={(e) => updateItem(idx, "quantity", Number(e.target.value))}
                     style={{
-                      width: 64, padding: "6px 8px", borderRadius: 6,
+                      width: 56, padding: "6px 8px", borderRadius: 6,
                       border: `1px solid ${C.border}`, fontSize: 13,
                       textAlign: "center", color: C.graphite,
                     }}
                   />
+                  <label style={{ fontSize: 12, color: C.mid, flexShrink: 0 }}>Custo R$</label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={item.unit_cost}
+                    onChange={(e) => updateItem(idx, "unit_cost", parseFloat(e.target.value) || 0)}
+                    style={{
+                      width: 72, padding: "6px 8px", borderRadius: 6,
+                      border: `1px solid ${C.border}`, fontSize: 13,
+                      textAlign: "center", color: C.graphite,
+                    }}
+                  />
+                  {item.unit_cost !== item.current_cost && item.current_qty > 0 && (() => {
+                    const avg = (item.current_qty * item.current_cost + item.quantity * item.unit_cost) /
+                                (item.current_qty + item.quantity);
+                    return (
+                      <span style={{
+                        fontSize: 10, fontWeight: 700, color: C.blue,
+                        background: C.bluePale, borderRadius: 6,
+                        padding: "3px 7px", flexShrink: 0, whiteSpace: "nowrap",
+                      }}>
+                        Médio: R${avg.toFixed(2).replace(".", ",")}
+                      </span>
+                    );
+                  })()}
                 </>
               )}
               <button onClick={() => removeItem(idx)} style={{

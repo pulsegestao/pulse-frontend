@@ -4,6 +4,7 @@ import {
   Search, X, Plus, Minus, Trash2, ShoppingCart,
   QrCode, CreditCard, Banknote, Wallet, Check, Package, LogOut,
   Loader2, AlertCircle, Smartphone, Clock, UserPlus, Tag,
+  Menu, PackageSearch, PackagePlus, Bell, Settings,
 } from "lucide-react";
 import C from "../../theme/colors";
 import { isAuthenticated, getProfile } from "../../hooks/useAuth";
@@ -24,11 +25,19 @@ import {
 const fmt = (n) => `R$ ${n.toFixed(2).replace(".", ",")}`;
 
 const getProductPromo = (product, promos) => {
+  const now = new Date();
+  const day = now.getDay();
+  const time = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
   for (const promo of promos) {
     let matches = true;
     for (const rule of promo.rules || []) {
       if (rule.type === "product" && !(rule.product_ids || []).includes(product.id)) { matches = false; break; }
       if (rule.type === "category" && (!product.category_id || !(rule.category_ids || []).includes(product.category_id))) { matches = false; break; }
+      if (rule.type === "schedule") {
+        if (!(rule.days_of_week || []).includes(day)) { matches = false; break; }
+        if (rule.time_start && time < rule.time_start) { matches = false; break; }
+        if (rule.time_end && time > rule.time_end) { matches = false; break; }
+      }
     }
     if (!matches) continue;
     if (promo.max_uses > 0 && promo.current_uses >= promo.max_uses) continue;
@@ -53,6 +62,7 @@ const evaluateCartPromos = (cartItems, promos) => {
   const result = {};
   for (const item of cartItems) {
     let bestDiscount = 0, bestPromo = null, bestLabel = "", bestEffective = item.price;
+    let pendingHint = null;
     for (const promo of promos) {
       let ok = true;
       for (const r of promo.rules || []) {
@@ -81,6 +91,10 @@ const evaluateCartPromos = (cartItems, promos) => {
           break;
         case "buy_x_pay_y": {
           const bx = a.buy_x || 3, py = a.pay_y || 2;
+          if (item.qty < bx) {
+            if (!pendingHint) pendingHint = { label: `Leve ${bx} Pague ${py}`, needsMore: bx - item.qty };
+            continue;
+          }
           const paid = Math.floor(item.qty / bx) * py + (item.qty % bx);
           eff = (item.price * paid) / item.qty;
           lbl = `Leve ${bx} Pague ${py}`;
@@ -96,6 +110,8 @@ const evaluateCartPromos = (cartItems, promos) => {
     }
     if (bestPromo) {
       result[item.id] = { promoName: bestPromo.name, label: bestLabel, originalPrice: item.price, effectivePrice: bestEffective, discountTotal: bestDiscount };
+    } else if (pendingHint) {
+      result[item.id] = { ...pendingHint, originalPrice: item.price, effectivePrice: item.price, discountTotal: 0 };
     }
   }
   return result;
@@ -119,49 +135,123 @@ const PRAZO_METHOD = { id: "prazo", label: "A Prazo", icon: Clock, color: "#B453
 
 // ── PDV Header (52px) ──────────────────────────────────────────────────────────
 
-const PDVHeader = ({ companyName, userName, onExit }) => (
-  <header style={{
-    position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
-    height: 52,
-    background: C.surface, borderBottom: `1px solid ${C.border}`,
-    boxShadow: "0 1px 8px rgba(0,0,0,0.05)",
-    display: "flex", alignItems: "center",
-    padding: "0 24px", justifyContent: "space-between",
-  }}>
-    <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-      <div style={{
-        width: 28, height: 28, borderRadius: 8,
-        background: `linear-gradient(135deg, ${C.blue}, ${C.blueLight})`,
-        display: "flex", alignItems: "center", justifyContent: "center",
-      }}>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-          <path d="M3 12h4l3-8 4 16 3-8h4" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
+const EMPLOYEE_MENU = [
+  { label: "Gerir estoque",      icon: PackageSearch, path: "/gerir-estoque" },
+  { label: "Entrada de estoque", icon: PackagePlus,   path: "/estoque/entrada" },
+  { label: "Notificações",       icon: Bell,          path: "/notificacoes" },
+  { label: "Configurações",      icon: Settings,      path: "/configuracoes" },
+];
+
+const PDVHeader = ({ companyName, userName, onExit, role, onNavigate }) => {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef(null);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const handler = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) setMenuOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [menuOpen]);
+
+  return (
+    <header style={{
+      position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
+      height: 52,
+      background: C.surface, borderBottom: `1px solid ${C.border}`,
+      boxShadow: "0 1px 8px rgba(0,0,0,0.05)",
+      display: "flex", alignItems: "center",
+      padding: "0 24px", justifyContent: "space-between",
+    }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        <div style={{
+          width: 28, height: 28, borderRadius: 8,
+          background: `linear-gradient(135deg, ${C.blue}, ${C.blueLight})`,
+          display: "flex", alignItems: "center", justifyContent: "center",
+        }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+            <path d="M3 12h4l3-8 4 16 3-8h4" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </div>
+        <div style={{ width: 1, height: 18, background: C.border }} />
+        <span style={{ fontSize: 13, fontWeight: 700, color: C.graphite }}>Caixa</span>
+        {companyName && <span style={{ fontSize: 12, color: C.mid }}>· {companyName}</span>}
       </div>
-      <div style={{ width: 1, height: 18, background: C.border }} />
-      <span style={{ fontSize: 13, fontWeight: 700, color: C.graphite }}>Caixa</span>
-      {companyName && <span style={{ fontSize: 12, color: C.mid }}>· {companyName}</span>}
-    </div>
-    <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-      {userName && <span style={{ fontSize: 12, color: C.mid }}>{userName}</span>}
-      <button
-        onClick={onExit}
-        style={{
-          display: "flex", alignItems: "center", gap: 6,
-          padding: "6px 14px", borderRadius: 8,
-          background: "transparent", border: `1.5px solid ${C.border}`,
-          fontSize: 12, fontWeight: 700, color: C.mid,
-          cursor: "pointer", fontFamily: "inherit", transition: "all 0.15s",
-        }}
-        onMouseEnter={e => { e.currentTarget.style.background = C.gray; e.currentTarget.style.color = C.graphite; }}
-        onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = C.mid; }}
-      >
-        <LogOut size={12} strokeWidth={2} />
-        Sair do caixa
-      </button>
-    </div>
-  </header>
-);
+      <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+        {userName && <span style={{ fontSize: 12, color: C.mid }}>{userName}</span>}
+
+        {role === "employee" ? (
+          <div style={{ position: "relative" }} ref={menuRef}>
+            <button
+              onClick={() => setMenuOpen(o => !o)}
+              style={{
+                display: "flex", alignItems: "center", gap: 6,
+                padding: "6px 14px", borderRadius: 8,
+                background: menuOpen ? C.gray : "transparent",
+                border: `1.5px solid ${C.border}`,
+                fontSize: 12, fontWeight: 700, color: C.mid,
+                cursor: "pointer", fontFamily: "inherit", transition: "all 0.15s",
+              }}
+              onMouseEnter={e => { e.currentTarget.style.background = C.gray; e.currentTarget.style.color = C.graphite; }}
+              onMouseLeave={e => { if (!menuOpen) { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = C.mid; } }}
+            >
+              <Menu size={12} strokeWidth={2} />
+              Menu
+            </button>
+            {menuOpen && (
+              <div style={{
+                position: "absolute", right: 0, top: "calc(100% + 6px)",
+                background: C.surface, border: `1px solid ${C.border}`,
+                borderRadius: 12, boxShadow: "0 8px 24px rgba(0,0,0,0.1)",
+                minWidth: 200, overflow: "hidden", zIndex: 200,
+              }}>
+                {EMPLOYEE_MENU.map(item => {
+                  const Icon = item.icon;
+                  return (
+                    <button
+                      key={item.path}
+                      onClick={() => { setMenuOpen(false); onNavigate(item.path); }}
+                      style={{
+                        display: "flex", alignItems: "center", gap: 10,
+                        width: "100%", padding: "11px 16px",
+                        border: "none", background: "transparent",
+                        color: C.graphite, fontSize: 13, fontWeight: 500,
+                        cursor: "pointer", fontFamily: "inherit", textAlign: "left",
+                        transition: "background 0.1s",
+                      }}
+                      onMouseEnter={e => { e.currentTarget.style.background = C.gray; }}
+                      onMouseLeave={e => { e.currentTarget.style.background = "transparent"; }}
+                    >
+                      <Icon size={15} color={C.mid} strokeWidth={2} />
+                      {item.label}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        ) : (
+          <button
+            onClick={onExit}
+            style={{
+              display: "flex", alignItems: "center", gap: 6,
+              padding: "6px 14px", borderRadius: 8,
+              background: "transparent", border: `1.5px solid ${C.border}`,
+              fontSize: 12, fontWeight: 700, color: C.mid,
+              cursor: "pointer", fontFamily: "inherit", transition: "all 0.15s",
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = C.gray; e.currentTarget.style.color = C.graphite; }}
+            onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = C.mid; }}
+          >
+            <LogOut size={12} strokeWidth={2} />
+            Sair do caixa
+          </button>
+        )}
+      </div>
+    </header>
+  );
+};
 
 // ── Sub-components ─────────────────────────────────────────────────────────────
 
@@ -259,7 +349,18 @@ const CartItem = ({ item, onUpdateQty, onRemove, promo }) => (
       <p style={{ fontSize: 13, fontWeight: 600, color: C.graphite, margin: "0 0 2px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
         {item.name}
       </p>
-      {promo ? (
+      {promo && promo.needsMore > 0 ? (
+        <>
+          <p style={{ fontSize: 12, color: C.mid, margin: 0 }}>
+            {fmt(item.price)} × {item.qty} ={" "}
+            <span style={{ color: C.green, fontWeight: 700 }}>{fmt(item.price * item.qty)}</span>
+          </p>
+          <p style={{ fontSize: 10, fontWeight: 700, color: "#D97706", margin: "2px 0 0", display: "flex", alignItems: "center", gap: 3 }}>
+            <Tag size={9} strokeWidth={2.5} />
+            {promo.label} · adicione +{promo.needsMore} para ativar
+          </p>
+        </>
+      ) : promo ? (
         <>
           <p style={{ fontSize: 12, color: C.mid, margin: 0 }}>
             <span style={{ textDecoration: "line-through" }}>{fmt(item.price)}</span>
@@ -426,10 +527,10 @@ const PaymentModal = ({ method, total, selectedCustomer, onClose, onSuccess }) =
     }
   };
 
-  const handleSendToMachine = async () => {
+  const handleSendToMachine = async (paymentType = "credit_card") => {
     setCardState("processing");
     try {
-      const result = await createPaymentIntent({ amount: entryAmount, description: "Venda PDV" });
+      const result = await createPaymentIntent({ amount: entryAmount, description: "Venda PDV", payment_type: paymentType });
       setIntentId(result.intent_id);
       pollingRef.current = setInterval(async () => {
         try {
@@ -769,36 +870,112 @@ const PaymentModal = ({ method, total, selectedCustomer, onClose, onSuccess }) =
             {/* ── PIX ── */}
             {currentEntry?.methodId === "pix" && (
               <div style={{ marginBottom: 20 }}>
-                <div style={{ background: C.gray, borderRadius: 12, padding: "20px", textAlign: "center", marginBottom: 14 }}>
-                  <QrCode size={64} color={C.mid} strokeWidth={1.5} style={{ display: "block", margin: "0 auto 10px" }} />
-                  {pixKey ? (
-                    <>
-                      <p style={{ fontSize: 12, fontWeight: 600, color: C.mid, margin: "0 0 6px" }}>Chave PIX</p>
-                      <p style={{ fontSize: 14, fontWeight: 800, color: C.graphite, margin: 0, fontFamily: "monospace" }}>
-                        {pixKey}
-                      </p>
-                    </>
-                  ) : (
-                    <>
-                      <p style={{ fontSize: 13, fontWeight: 600, color: C.graphite, margin: "0 0 4px" }}>QR Code (simulado)</p>
-                      <p style={{ fontSize: 12, color: C.mid, margin: 0 }}>Configure sua chave PIX em Configurações → Integrações</p>
-                    </>
-                  )}
-                </div>
-                <button
-                  onClick={() => confirmCurrentEntry(0)}
-                  style={{
-                    width: "100%", padding: "12px", borderRadius: 10, border: "none",
-                    background: C.green, color: "white",
-                    fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit",
-                    display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-                  }}
-                  onMouseEnter={e => e.currentTarget.style.opacity = "0.88"}
-                  onMouseLeave={e => e.currentTarget.style.opacity = "1"}
-                >
-                  <Check size={15} strokeWidth={2.5} />
-                  Confirmar recebimento
-                </button>
+                {mpIntegration ? (
+                  <>
+                    {cardState === "idle" && (
+                      <div style={{ background: C.gray, borderRadius: 12, padding: "20px", textAlign: "center", marginBottom: 14 }}>
+                        <QrCode size={48} color={C.mid} strokeWidth={1.5} style={{ display: "block", margin: "0 auto 10px" }} />
+                        <p style={{ fontSize: 13, fontWeight: 600, color: C.graphite, margin: "0 0 4px" }}>QR Code será exibido na maquininha</p>
+                        <p style={{ fontSize: 12, color: C.mid, margin: 0 }}>Device: {mpIntegration.device_id}</p>
+                      </div>
+                    )}
+                    {cardState === "processing" && (
+                      <div style={{ background: C.greenPale, borderRadius: 12, padding: "20px", textAlign: "center", marginBottom: 14 }}>
+                        <Loader2 size={40} color={C.green} strokeWidth={2} style={{ animation: "spin 1s linear infinite", display: "block", margin: "0 auto 10px" }} />
+                        <p style={{ fontSize: 13, fontWeight: 600, color: C.graphite, margin: "0 0 4px" }}>Aguardando leitura do QR Code...</p>
+                        <p style={{ fontSize: 12, color: C.mid, margin: 0 }}>O cliente deve escanear o QR na maquininha</p>
+                      </div>
+                    )}
+                    {cardState === "approved" && (
+                      <div style={{ background: C.greenPale, borderRadius: 12, padding: "20px", textAlign: "center", marginBottom: 14, border: `1px solid ${C.green}33` }}>
+                        <Check size={40} color={C.green} strokeWidth={2.5} style={{ display: "block", margin: "0 auto 10px" }} />
+                        <p style={{ fontSize: 14, fontWeight: 800, color: C.green, margin: 0 }}>PIX recebido!</p>
+                      </div>
+                    )}
+                    {cardState === "denied" && (
+                      <div style={{ background: C.redPale, borderRadius: 12, padding: "20px", textAlign: "center", marginBottom: 14, border: "1px solid #EF444433" }}>
+                        <AlertCircle size={40} color="#EF4444" strokeWidth={2} style={{ display: "block", margin: "0 auto 10px" }} />
+                        <p style={{ fontSize: 14, fontWeight: 800, color: "#EF4444", margin: "0 0 4px" }}>Pagamento não confirmado</p>
+                        <p style={{ fontSize: 12, color: C.mid, margin: 0 }}>Tente novamente ou confirme manualmente</p>
+                      </div>
+                    )}
+                    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                      {cardState === "idle" && (
+                        <button
+                          onClick={() => handleSendToMachine("pix")}
+                          style={{
+                            width: "100%", padding: "12px", borderRadius: 10, border: "none",
+                            background: C.green, color: "white",
+                            fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit",
+                            display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                          }}
+                          onMouseEnter={e => e.currentTarget.style.opacity = "0.88"}
+                          onMouseLeave={e => e.currentTarget.style.opacity = "1"}
+                        >
+                          <Smartphone size={15} strokeWidth={2} />
+                          Enviar para maquininha
+                        </button>
+                      )}
+                      {cardState === "processing" && (
+                        <button onClick={handleCancelMachine} style={{ width: "100%", padding: "10px", borderRadius: 10, border: `1.5px solid ${C.border}`, background: "transparent", fontSize: 13, fontWeight: 600, color: C.mid, cursor: "pointer", fontFamily: "inherit" }}>
+                          Cancelar
+                        </button>
+                      )}
+                      {cardState === "approved" && (
+                        <button
+                          onClick={() => confirmCurrentEntry(0, intentId)}
+                          style={{ width: "100%", padding: "12px", borderRadius: 10, border: "none", background: C.green, color: "white", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}
+                          onMouseEnter={e => e.currentTarget.style.opacity = "0.88"}
+                          onMouseLeave={e => e.currentTarget.style.opacity = "1"}
+                        >
+                          <Check size={15} strokeWidth={2.5} />
+                          Confirmar
+                        </button>
+                      )}
+                      {(cardState === "idle" || cardState === "denied") && (
+                        <button
+                          onClick={() => confirmCurrentEntry(0)}
+                          style={{ width: "100%", padding: "10px", borderRadius: 10, border: `1.5px solid ${C.border}`, background: "transparent", fontSize: 13, fontWeight: 600, color: C.mid, cursor: "pointer", fontFamily: "inherit" }}
+                          onMouseEnter={e => e.currentTarget.style.background = C.gray}
+                          onMouseLeave={e => e.currentTarget.style.background = "transparent"}
+                        >
+                          Confirmar manualmente (recebido)
+                        </button>
+                      )}
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div style={{ background: C.gray, borderRadius: 12, padding: "20px", textAlign: "center", marginBottom: 14 }}>
+                      <QrCode size={64} color={C.mid} strokeWidth={1.5} style={{ display: "block", margin: "0 auto 10px" }} />
+                      {pixKey ? (
+                        <>
+                          <p style={{ fontSize: 12, fontWeight: 600, color: C.mid, margin: "0 0 6px" }}>Chave PIX</p>
+                          <p style={{ fontSize: 14, fontWeight: 800, color: C.graphite, margin: 0, fontFamily: "monospace" }}>{pixKey}</p>
+                        </>
+                      ) : (
+                        <>
+                          <p style={{ fontSize: 13, fontWeight: 600, color: C.graphite, margin: "0 0 4px" }}>QR Code (simulado)</p>
+                          <p style={{ fontSize: 12, color: C.mid, margin: 0 }}>Configure sua chave PIX em Configurações → Integrações</p>
+                        </>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => confirmCurrentEntry(0)}
+                      style={{
+                        width: "100%", padding: "12px", borderRadius: 10, border: "none",
+                        background: C.green, color: "white",
+                        fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit",
+                        display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                      }}
+                      onMouseEnter={e => e.currentTarget.style.opacity = "0.88"}
+                      onMouseLeave={e => e.currentTarget.style.opacity = "1"}
+                    >
+                      <Check size={15} strokeWidth={2.5} />
+                      Confirmar recebimento
+                    </button>
+                  </>
+                )}
               </div>
             )}
 
@@ -1051,7 +1228,9 @@ const PDVPage = () => {
       <PDVHeader
         companyName={profile?.companyName || ""}
         userName={profile?.userName || ""}
+        role={profile?.role || ""}
         onExit={() => navigate("/dashboard")}
+        onNavigate={(path) => navigate(path)}
       />
 
       <div style={{ display: "flex", height: "calc(100vh - 52px)", marginTop: 52 }}>

@@ -1,18 +1,31 @@
 import { useEffect, useState } from "react";
-import { DollarSign, ShoppingCart, Package, AlertTriangle } from "lucide-react";
+import { DollarSign, ShoppingCart, TrendingUp, AlertTriangle, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import C from "../../../theme/colors";
 import { getDashboardSummary } from "../../../services/api";
-
-const deltaColor = (positive) => {
-  if (positive === true) return C.green;
-  if (positive === false) return "#D97706";
-  return C.mid;
-};
 
 const fmtBRL = (n) =>
   `R$ ${Number(n || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-const MetricCard = ({ label, value, unit, delta, positive, icon: Icon, iconColor, iconBg }) => (
+const calcDelta = (today, yesterday) => {
+  if (yesterday == null || today == null) return null;
+  if (yesterday === 0) return today > 0 ? { pct: 100, up: true } : null;
+  const pct = ((today - yesterday) / yesterday) * 100;
+  return { pct: Math.abs(Math.round(pct)), up: pct >= 0 };
+};
+
+const DeltaBadge = ({ delta }) => {
+  if (!delta) return <span style={{ fontSize: 12, fontWeight: 600, color: C.mid }}>sem dados de ontem</span>;
+  const color = delta.up ? C.green : "#DC2626";
+  const Icon = delta.up ? ArrowUpRight : ArrowDownRight;
+  return (
+    <span style={{ display: "inline-flex", alignItems: "center", gap: 3, fontSize: 12, fontWeight: 700, color }}>
+      <Icon size={13} strokeWidth={2.5} />
+      {delta.pct}% vs ontem
+    </span>
+  );
+};
+
+const MetricCard = ({ label, value, unit, delta, deltaObj, icon: Icon, iconColor, iconBg }) => (
   <div style={{
     background: C.surface,
     borderRadius: 16,
@@ -43,9 +56,11 @@ const MetricCard = ({ label, value, unit, delta, positive, icon: Icon, iconColor
           <span style={{ fontSize: 13, fontWeight: 600, color: C.mid }}>{unit}</span>
         )}
       </div>
-      <p style={{ fontSize: 12, fontWeight: 600, color: deltaColor(positive), margin: "6px 0 0" }}>
-        {delta}
-      </p>
+      <div style={{ marginTop: 6 }}>
+        {deltaObj !== undefined ? <DeltaBadge delta={deltaObj} /> : (
+          <span style={{ fontSize: 12, fontWeight: 600, color: C.mid }}>{delta}</span>
+        )}
+      </div>
     </div>
   </div>
 );
@@ -59,17 +74,29 @@ const MetricsCards = () => {
       .catch(() => setSummary(null));
   }, []);
 
-  const salesTotal    = summary != null ? fmtBRL(summary.sales_today ?? 0)       : "–";
-  const salesCount    = summary != null ? String(summary.sales_count_today ?? 0) : "–";
-  const productsTotal = summary != null ? (summary.products_total ?? 0)          : null;
-  const lowStockCount = summary != null ? (summary.low_stock_count ?? 0)         : null;
+  const salesTotal    = summary != null ? fmtBRL(summary.sales_today ?? 0) : "\u2013";
+  const salesCount    = summary != null ? String(summary.sales_count_today ?? 0) : "\u2013";
+  const lowStockCount = summary != null ? (summary.low_stock_count ?? 0) : null;
+
+  const salesToday      = summary?.sales_today ?? 0;
+  const salesCountToday = summary?.sales_count_today ?? 0;
+  const salesYesterday      = summary?.sales_yesterday;
+  const salesCountYesterday = summary?.sales_count_yesterday;
+
+  const avgTicket = summary != null && salesCountToday > 0
+    ? fmtBRL(salesToday / salesCountToday)
+    : summary != null ? "R$ 0,00" : "\u2013";
+
+  const grossProfit = summary != null ? fmtBRL(summary.gross_profit_today ?? 0) : "\u2013";
+
+  const revDelta   = summary != null ? calcDelta(salesToday, salesYesterday) : null;
+  const countDelta = summary != null ? calcDelta(salesCountToday, salesCountYesterday) : null;
 
   const metrics = [
     {
       label: "Faturamento hoje",
       value: salesTotal,
-      delta: "total em vendas hoje",
-      positive: summary != null && summary.sales_today > 0 ? true : null,
+      deltaObj: revDelta,
       icon: DollarSign,
       iconColor: C.blue,
       iconBg: C.bluePale,
@@ -77,37 +104,41 @@ const MetricsCards = () => {
     {
       label: "Vendas hoje",
       value: salesCount,
-      unit: summary?.sales_count_today === 1 ? "venda" : "vendas",
-      delta: "realizadas hoje",
-      positive: summary != null && summary.sales_count_today > 0 ? true : null,
+      unit: salesCountToday === 1 ? "venda" : "vendas",
+      deltaObj: countDelta,
       icon: ShoppingCart,
       iconColor: C.blue,
       iconBg: C.bluePale,
     },
     {
-      label: "Itens em estoque",
-      value: productsTotal !== null ? String(productsTotal) : "–",
-      unit: productsTotal === 1 ? "produto" : "produtos",
-      delta: "cadastrados",
-      positive: null,
-      icon: Package,
-      iconColor: C.blueLight,
+      label: "Ticket medio",
+      value: avgTicket,
+      delta: "por venda",
+      icon: TrendingUp,
+      iconColor: C.blue,
       iconBg: C.bluePale,
     },
     {
-      label: "Atenção ao estoque",
-      value: lowStockCount !== null ? String(lowStockCount) : "–",
+      label: "Lucro bruto",
+      value: grossProfit,
+      delta: "hoje",
+      icon: DollarSign,
+      iconColor: C.green,
+      iconBg: C.greenPale,
+    },
+    {
+      label: "Estoque baixo",
+      value: lowStockCount !== null ? String(lowStockCount) : "\u2013",
       unit: lowStockCount === 1 ? "produto" : "produtos",
-      delta: "abaixo do mínimo",
-      positive: lowStockCount === 0 ? null : (lowStockCount > 0 ? false : null),
+      delta: "abaixo do minimo",
       icon: AlertTriangle,
-      iconColor: C.blue,
-      iconBg: C.bluePale,
+      iconColor: lowStockCount > 0 ? "#D97706" : C.blue,
+      iconBg: lowStockCount > 0 ? C.amberPale : C.bluePale,
     },
   ];
 
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16 }} className="metrics-grid">
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 16 }} className="metrics-grid">
       {metrics.map(m => <MetricCard key={m.label} {...m} />)}
     </div>
   );

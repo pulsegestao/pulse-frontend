@@ -6,10 +6,10 @@ const CTABanner = () => {
 
   return (
     <section style={{ padding: "80px 24px", background: C.gray }} ref={ref}>
-      <div className={`fade-up ${visible ? "visible" : ""}`} style={{
+      <div className={`fade-up ${visible ? "visible" : ""} cta-banner-inner`} style={{
         maxWidth: 880, margin: "0 auto",
         background: `linear-gradient(135deg, ${C.graphite}, #374151)`,
-        borderRadius: 24, padding: "60px 48px",
+        borderRadius: 24,
         textAlign: "center", position: "relative", overflow: "hidden",
       }}>
         <div style={{ position: "absolute", top: -60, right: -60, width: 250, height: 250, borderRadius: "50%", background: `${C.blue}20` }} />

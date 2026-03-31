@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { CheckCircle, AlertCircle, Plus } from "lucide-react";
 import C from "../../../theme/colors";
 
@@ -10,6 +10,10 @@ const NFePreviewTable = ({ preview, products, categories, onItemsChange, default
   const [newProducts, setNewProducts] = useState({});
   const [modes, setModes] = useState({});
   const [ignored, setIgnored] = useState({});
+
+  useEffect(() => {
+    onItemsChange(buildItems({}, {}, {}, {}, preview.items || []));
+  }, []);
 
   const setMode = (idx, mode) => {
     const next = { ...modes, [idx]: mode };

@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import C from "../../theme/colors";
 import DashboardHeader from "./components/DashboardHeader";
@@ -6,9 +6,10 @@ import MetricsCards from "./components/MetricsCards";
 import SalesChart from "./components/SalesChart";
 import LowStockTable from "./components/LowStockTable";
 import TopProducts from "./components/TopProducts";
-import QuickActions from "./components/QuickActions";
+import InsightPreview from "./components/InsightPreview";
 import { isAuthenticated, getProfile } from "../../hooks/useAuth";
 import QuickActionsBar from "../../components/layout/QuickActionsBar";
+import { countUnreadInsights } from "../../services/api";
 
 const getGreeting = () => {
   const h = new Date().getHours();
@@ -26,10 +27,14 @@ const formatDate = () => {
 
 const DashboardPage = () => {
   const navigate = useNavigate();
-  const firstName = getProfile()?.userName?.split(" ")[0] || "você";
+  const firstName = getProfile()?.userName?.split(" ")[0] || "voce";
+  const [unreadCount, setUnreadCount] = useState(null);
 
   useEffect(() => {
     if (!isAuthenticated()) navigate("/", { replace: true });
+    countUnreadInsights()
+      .then(data => setUnreadCount(data.count ?? 0))
+      .catch(() => {});
   }, []);
 
   return (
@@ -50,7 +55,19 @@ const DashboardPage = () => {
         }}>
           {getGreeting()}, {firstName}
         </h1>
-        <p style={{ fontSize: 14, color: C.mid, margin: 0 }}>{formatDate()}</p>
+        <p style={{ fontSize: 14, color: C.mid, margin: 0, display: "flex", alignItems: "center", gap: 8 }}>
+          {formatDate()}
+          {unreadCount > 0 && (
+            <span style={{
+              display: "inline-flex", alignItems: "center", gap: 4,
+              padding: "2px 10px", borderRadius: 100,
+              background: C.bluePale, color: C.blue,
+              fontSize: 12, fontWeight: 700,
+            }}>
+              {unreadCount} {unreadCount === 1 ? "alerta ativo" : "alertas ativos"}
+            </span>
+          )}
+        </p>
       </div>
 
       {/* Metrics */}
@@ -67,7 +84,7 @@ const DashboardPage = () => {
         <LowStockTable />
       </div>
 
-      {/* Top Products + Quick Actions */}
+      {/* Top Products + Insights */}
       <div style={{
         display: "grid",
         gridTemplateColumns: "1fr 1fr",
@@ -75,13 +92,14 @@ const DashboardPage = () => {
         marginTop: 20,
       }} className="dash-row-3">
         <TopProducts />
-        <QuickActions />
+        <InsightPreview />
       </div>
     </main>
 
     <style>{`
       @media (max-width: 1024px) {
         .dash-row-2, .dash-row-3 { grid-template-columns: 1fr !important; }
+        .metrics-grid { grid-template-columns: repeat(3, 1fr) !important; }
       }
       @media (max-width: 768px) {
         .metrics-grid { grid-template-columns: repeat(2, 1fr) !important; }

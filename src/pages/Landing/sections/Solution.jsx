@@ -30,10 +30,8 @@ const Solution = () => {
 
         <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
           {steps.map((s, i) => (
-            <div key={i} className={`fade-up d${i + 1} ${visible ? "visible" : ""}`}
+            <div key={i} className={`fade-up d${i + 1} ${visible ? "visible" : ""} solution-step`}
               style={{
-                display: "flex", alignItems: "flex-start", gap: 32,
-                padding: "32px 0",
                 borderBottom: i < steps.length - 1 ? `1px solid ${C.border}` : "none",
               }}>
               <div style={{
@@ -48,9 +46,9 @@ const Solution = () => {
                 <h3 style={{ fontSize: 20, fontWeight: 700, color: C.graphite, marginBottom: 8 }}>{s.title}</h3>
                 <p style={{ fontSize: 16, color: C.mid, lineHeight: 1.65 }}>{s.desc}</p>
               </div>
-              <div style={{
+              <div className="solution-step-badge" style={{
                 flex: 1, height: 56, background: C.gray, borderRadius: 12, maxWidth: 400,
-                display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                alignItems: "center", justifyContent: "center", gap: 8,
                 color: C.mid, fontSize: 13, border: `1px solid ${C.border}`,
               }}>
                 {s.badgeIcon}

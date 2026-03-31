@@ -108,9 +108,16 @@ const TopProducts = () => {
                       <span style={{ fontSize: 13, fontWeight: 600, color: C.graphite, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                         {p.product_name}
                       </span>
-                      <span style={{ fontSize: 12, fontWeight: 700, color: C.mid, flexShrink: 0, marginLeft: 8 }}>
-                        {p.quantity} un.
-                      </span>
+                      <div style={{ display: "flex", alignItems: "baseline", gap: 8, flexShrink: 0, marginLeft: 8 }}>
+                        <span style={{ fontSize: 12, fontWeight: 700, color: C.mid }}>
+                          {p.quantity} un.
+                        </span>
+                        {p.revenue > 0 && (
+                          <span style={{ fontSize: 11, fontWeight: 600, color: C.blue }}>
+                            R$ {Number(p.revenue).toLocaleString("pt-BR", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                          </span>
+                        )}
+                      </div>
                     </div>
                     <div style={{ height: 5, background: C.border, borderRadius: 4 }}>
                       <div style={{

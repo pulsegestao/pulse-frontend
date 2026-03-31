@@ -217,6 +217,10 @@ export function getTopProducts(period = "week") {
   return authRequest(`/api/v1/dashboard/top-products?period=${period}`);
 }
 
+export function getReportSummary(period = "month") {
+  return authRequest(`/api/v1/reports/summary?period=${period}`);
+}
+
 export function getProductReport(period = "month") {
   return authRequest(`/api/v1/reports/products?period=${period}`);
 }
@@ -341,6 +345,10 @@ export function deletePromotion(id) {
   });
 }
 
+export function getPromotionStats(id) {
+  return authRequest(`/api/v1/promotions/${id}/stats`);
+}
+
 export function getCategories() {
   return authRequest("/api/v1/categories");
 }
@@ -350,4 +358,114 @@ export function evaluateCart(input) {
     method: "POST",
     body: JSON.stringify(input),
   });
+}
+
+export function getPlans() {
+  return request("/api/v1/plans");
+}
+
+export function getBillingInfo() {
+  return authRequest("/api/v1/billing");
+}
+
+export function createSubscription(input) {
+  return authRequest("/api/v1/billing/subscribe", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+export function cancelSubscription() {
+  return authRequest("/api/v1/billing/cancel", {
+    method: "POST",
+  });
+}
+
+export function inviteMember(input) {
+  return authRequest("/api/v1/companies/me/invites", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+export function getPendingInvites() {
+  return authRequest("/api/v1/companies/me/invites");
+}
+
+export function cancelInvite(id) {
+  return authRequest(`/api/v1/companies/me/invites/${id}`, { method: "DELETE" });
+}
+
+export function removeMember(userId) {
+  return authRequest(`/api/v1/companies/me/members/${userId}`, { method: "DELETE" });
+}
+
+export function changeMemberRole(userId, role) {
+  return authRequest(`/api/v1/companies/me/members/${userId}/role`, {
+    method: "PATCH",
+    body: JSON.stringify({ role }),
+  });
+}
+
+export function getAuditLog(limit = 50, offset = 0) {
+  return authRequest(`/api/v1/companies/me/audit-log?limit=${limit}&offset=${offset}`);
+}
+
+export function getInviteInfo(token) {
+  return request(`/api/v1/auth/invite-info?token=${token}`);
+}
+
+export function acceptInvite(input) {
+  return request("/api/v1/auth/accept-invite", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+export function getSuppliers() {
+  return authRequest("/api/v1/suppliers/");
+}
+
+export function createSupplier(input) {
+  return authRequest("/api/v1/suppliers/", { method: "POST", body: JSON.stringify(input) });
+}
+
+export function updateSupplier(id, input) {
+  return authRequest(`/api/v1/suppliers/${id}`, { method: "PUT", body: JSON.stringify(input) });
+}
+
+export function deleteSupplier(id) {
+  return authRequest(`/api/v1/suppliers/${id}`, { method: "DELETE" });
+}
+
+export function getPurchaseOrders(limit = 20, offset = 0) {
+  return authRequest(`/api/v1/purchase-orders/?limit=${limit}&offset=${offset}`);
+}
+
+export function createPurchaseOrder(input) {
+  return authRequest("/api/v1/purchase-orders/", { method: "POST", body: JSON.stringify(input) });
+}
+
+export function updatePurchaseOrder(id, input) {
+  return authRequest(`/api/v1/purchase-orders/${id}`, { method: "PUT", body: JSON.stringify(input) });
+}
+
+export function suggestPurchaseOrder() {
+  return authRequest("/api/v1/purchase-orders/suggest");
+}
+
+export function sendPurchaseOrder(id) {
+  return authRequest(`/api/v1/purchase-orders/${id}/send`, { method: "POST" });
+}
+
+export function confirmPurchaseOrderReceipt(id, items) {
+  return authRequest(`/api/v1/purchase-orders/${id}/receipt`, { method: "POST", body: JSON.stringify(items) });
+}
+
+export function cancelPurchaseOrder(id) {
+  return authRequest(`/api/v1/purchase-orders/${id}`, { method: "DELETE" });
+}
+
+export function getPurchaseOrder(id) {
+  return authRequest(`/api/v1/purchase-orders/${id}`);
 }

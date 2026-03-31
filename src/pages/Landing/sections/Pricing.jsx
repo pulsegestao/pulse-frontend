@@ -45,9 +45,9 @@ const Pricing = () => {
         </div>
 
         <div className={`fade-up d1 ${visible ? "visible" : ""}`} style={{ maxWidth: 520, margin: "0 auto" }}>
-          <div style={{
+          <div className="pricing-card-inner" style={{
             background: `linear-gradient(145deg, ${C.blue}, ${C.blueLight})`,
-            borderRadius: 24, padding: "40px 40px 36px",
+            borderRadius: 24,
             boxShadow: `0 24px 60px ${C.blue}33`,
             position: "relative", overflow: "hidden",
           }}>
@@ -80,7 +80,7 @@ const Pricing = () => {
                 ))}
               </div>
 
-              <a href="#" style={{
+              <a href="/cadastro" style={{
                 display: "block", textAlign: "center",
                 background: "white", color: C.blue,
                 padding: "16px", borderRadius: 14,

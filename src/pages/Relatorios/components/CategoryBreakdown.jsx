@@ -1,39 +1,33 @@
 import { useState, useEffect } from "react";
-import { PieChart, Loader2 } from "lucide-react";
+import { PieChart, Loader2, Download } from "lucide-react";
 import C from "../../../theme/colors";
 import { getCategoryBreakdown } from "../../../services/api";
 import WidgetError from "../../../components/WidgetError";
-
-const PERIODS = [
-  { label: "Semana", value: "week"  },
-  { label: "Mês",    value: "month" },
-  { label: "Ano",    value: "year"  },
-];
+import { generateReport, buildSection, reportFileName } from "../../../utils/exportPDF";
 
 const fmt = (n) => n.toLocaleString("pt-BR", { style: "currency", currency: "BRL", minimumFractionDigits: 0 });
 
 const BAR_COLORS = ["#0F766E", "#0D9488", "#16A34A", "#D97706", "#EA580C", "#DC2626", "#0891B2"];
 
-const CategoryBreakdown = () => {
-  const [period, setPeriod]   = useState("month");
+const CategoryBreakdown = ({ period, companyName }) => {
   const [items, setItems]     = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError]     = useState("");
 
-  const load = async (p) => {
+  const load = async () => {
     setLoading(true);
     setError("");
     try {
-      const data = await getCategoryBreakdown(p);
+      const data = await getCategoryBreakdown(period);
       setItems(Array.isArray(data) ? data : []);
-    } catch (err) {
+    } catch {
       setError("Falha ao carregar categorias.");
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => { load(period); }, [period]);
+  useEffect(() => { load(); }, [period]);
 
   const maxRevenue = items.length > 0 ? Math.max(...items.map(i => i.revenue)) : 1;
 
@@ -44,9 +38,7 @@ const CategoryBreakdown = () => {
       border: `1px solid ${C.border}`,
       padding: "22px 24px",
       boxShadow: "0 1px 12px rgba(0,0,0,0.05)",
-      marginTop: 16,
     }}>
-      {/* Header */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <div style={{
@@ -61,33 +53,21 @@ const CategoryBreakdown = () => {
             <p style={{ fontSize: 16, fontWeight: 800, color: C.graphite, margin: 0 }}>Por Categoria</p>
           </div>
         </div>
-
-        {/* Period selector */}
-        <div style={{
-          display: "flex", gap: 2,
-          background: C.gray, borderRadius: 8, padding: 3,
-        }}>
-          {PERIODS.map(p => {
-            const active = p.value === period;
-            return (
-              <button
-                key={p.value}
-                onClick={() => setPeriod(p.value)}
-                style={{
-                  padding: "4px 10px", borderRadius: 6,
-                  border: "none",
-                  background: active ? C.surface : "transparent",
-                  color: active ? C.blue : C.mid,
-                  fontSize: 11, fontWeight: active ? 700 : 500,
-                  cursor: "pointer", fontFamily: "inherit",
-                  boxShadow: active ? "0 1px 4px rgba(0,0,0,0.08)" : "none",
-                }}
-              >
-                {p.label}
-              </button>
-            );
-          })}
-        </div>
+        {!loading && items.length > 0 && (
+          <button
+            onClick={async () => generateReport(companyName, period, [buildSection.categories(items)], reportFileName("categorias", period))}
+            title="Exportar seção"
+            style={{
+              background: "none", border: "none", cursor: "pointer", padding: 6,
+              borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center",
+              color: C.mid, transition: "color 0.15s",
+            }}
+            onMouseEnter={e => e.currentTarget.style.color = C.blue}
+            onMouseLeave={e => e.currentTarget.style.color = C.mid}
+          >
+            <Download size={16} strokeWidth={2} />
+          </button>
+        )}
       </div>
 
       {loading && (
@@ -96,7 +76,7 @@ const CategoryBreakdown = () => {
         </div>
       )}
 
-      {!loading && error && <WidgetError message={error} onRetry={() => load(period)} />}
+      {!loading && error && <WidgetError message={error} onRetry={load} />}
 
       {!loading && !error && items.length === 0 && (
         <p style={{ fontSize: 13, color: C.mid, textAlign: "center", padding: "24px 0" }}>

@@ -8,6 +8,7 @@ export function saveToken(token, remember) {
   } else {
     sessionStorage.setItem(TOKEN_KEY, token);
     localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(PROFILE_CACHE_KEY);
   }
 }
 
@@ -32,6 +33,7 @@ export function getProfile() {
     const payload = JSON.parse(atob(token.split(".")[1]));
     const cache = JSON.parse(localStorage.getItem(PROFILE_CACHE_KEY) || "{}");
     return {
+      userId:      payload.user_id    ?? "",
       userName:    cache.userName    ?? payload.user_name    ?? "",
       companyName: cache.companyName ?? payload.company_name ?? "",
       role:        payload.role ?? "",
