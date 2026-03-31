@@ -2,14 +2,14 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   ArrowLeft, Clock, CheckCircle, RotateCcw, ChevronDown, ChevronUp,
-  Loader2, Banknote, QrCode, CreditCard, X,
+  Loader2, Banknote, QrCode, CreditCard, X, Users,
 } from "lucide-react";
 import C from "../../theme/colors";
 import DashboardHeader from "../Dashboard/components/DashboardHeader";
 import QuickActionsBar from "../../components/layout/QuickActionsBar";
 import WidgetError from "../../components/WidgetError";
 import {
-  getSalesPrazo, receiveSale, returnSale,
+  getSalesPrazo, getSalesPrazoSummary, receiveSale, returnSale,
   getPaymentIntegrations, getCompanySettings,
   createPaymentIntent, getPaymentIntentStatus,
 } from "../../services/api";
@@ -39,6 +39,100 @@ const VIA_LABEL = {
   cash:      "Dinheiro",
   pix:       "PIX",
   credit:    "Cartão",
+};
+
+// ── CustomerSummaryPanel ──────────────────────────────────────────────────────
+
+const fmtDays = (dateStr) => {
+  const days = Math.floor((Date.now() - new Date(dateStr)) / 86400000);
+  if (days === 0) return "hoje";
+  if (days === 1) return "1 dia";
+  return `${days} dias`;
+};
+
+const CustomerSummaryPanel = ({ activeCustomer, onSelectCustomer }) => {
+  const [summary, setSummary] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    getSalesPrazoSummary()
+      .then(data => setSummary(data || []))
+      .catch(() => setSummary([]))
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) return null;
+  if (summary.length === 0) return null;
+
+  const totalGeral = summary.reduce((acc, s) => acc + s.total_pending, 0);
+
+  return (
+    <div style={{
+      background: C.surface,
+      border: `1px solid ${C.border}`,
+      borderRadius: 14,
+      padding: 20,
+      marginBottom: 24,
+    }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <Users size={16} color={C.mid} strokeWidth={2} />
+          <span style={{ fontSize: 13, fontWeight: 700, color: C.graphite }}>Devedores</span>
+          <span style={{
+            fontSize: 11, fontWeight: 700, color: C.mid,
+            background: C.gray, padding: "2px 8px", borderRadius: 6,
+          }}>{summary.length}</span>
+        </div>
+        <span style={{ fontSize: 13, fontWeight: 800, color: "#D97706" }}>
+          {fmt(totalGeral)} total
+        </span>
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        {summary.map((s, i) => {
+          const name = s.customer_name || "Sem nome";
+          const isActive = activeCustomer === name;
+          return (
+            <button
+              key={i}
+              onClick={() => onSelectCustomer(isActive ? null : name)}
+              style={{
+                display: "flex", alignItems: "center", justifyContent: "space-between",
+                padding: "10px 12px", borderRadius: 10,
+                border: `1.5px solid ${isActive ? "#D97706" : C.border}`,
+                background: isActive ? C.amberPale : C.pageBg,
+                cursor: "pointer", fontFamily: "inherit",
+                transition: "all 0.15s",
+              }}
+            >
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 2 }}>
+                <span style={{ fontSize: 13, fontWeight: 700, color: C.graphite }}>{name}</span>
+                <span style={{ fontSize: 11, color: C.mid }}>
+                  {s.sale_count} {s.sale_count === 1 ? "venda" : "vendas"} · há {fmtDays(s.oldest_sale_at)}
+                </span>
+              </div>
+              <span style={{ fontSize: 14, fontWeight: 800, color: "#D97706", flexShrink: 0, marginLeft: 12 }}>
+                {fmt(s.total_pending)}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      {activeCustomer && (
+        <button
+          onClick={() => onSelectCustomer(null)}
+          style={{
+            marginTop: 12, background: "none", border: "none",
+            cursor: "pointer", fontSize: 12, color: C.mid,
+            fontFamily: "inherit", padding: 0,
+          }}
+        >
+          ✕ Limpar filtro
+        </button>
+      )}
+    </div>
+  );
 };
 
 // ── Overlay backdrop ──────────────────────────────────────────────────────────
@@ -639,6 +733,7 @@ const VendasPrazoPage = () => {
   const [sales, setSales] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [activeCustomer, setActiveCustomer] = useState(null);
   const toast = useToast();
 
   if (!isAuthenticated()) {
@@ -655,7 +750,10 @@ const VendasPrazoPage = () => {
       .finally(() => setLoading(false));
   }, []);
 
-  useEffect(() => { load(tab); }, [tab, load]);
+  useEffect(() => {
+    setActiveCustomer(null);
+    load(tab);
+  }, [tab, load]);
 
   const handleReceive = async (id, via) => {
     await receiveSale(id, via);
@@ -667,6 +765,10 @@ const VendasPrazoPage = () => {
     await returnSale(id, rs);
     load(tab);
   };
+
+  const visibleSales = activeCustomer
+    ? sales.filter(s => (s.customer_name || "Sem nome") === activeCustomer)
+    : sales;
 
   return (
     <div style={{ background: C.pageBg, minHeight: "100vh" }}>
@@ -720,6 +822,13 @@ const VendasPrazoPage = () => {
           ))}
         </div>
 
+        {tab === "pending" && !loading && !error && (
+          <CustomerSummaryPanel
+            activeCustomer={activeCustomer}
+            onSelectCustomer={setActiveCustomer}
+          />
+        )}
+
         {loading ? (
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: 200 }}>
             <Loader2 size={28} color={C.mid} strokeWidth={2} style={{ animation: "spin 1s linear infinite" }} />
@@ -727,16 +836,18 @@ const VendasPrazoPage = () => {
           </div>
         ) : error ? (
           <WidgetError message={error} onRetry={() => load(tab)} />
-        ) : sales.length === 0 ? (
+        ) : visibleSales.length === 0 ? (
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: 200, gap: 8 }}>
             <RotateCcw size={32} color={C.border} strokeWidth={1.5} />
             <p style={{ fontSize: 14, fontWeight: 600, color: C.mid, margin: 0 }}>
-              Nenhuma venda {TABS.find(t => t.key === tab)?.label.toLowerCase()}
+              {activeCustomer
+                ? `Nenhuma venda pendente de ${activeCustomer}`
+                : `Nenhuma venda ${TABS.find(t => t.key === tab)?.label.toLowerCase()}`}
             </p>
           </div>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-            {sales.map(s => (
+            {visibleSales.map(s => (
               <SaleCard
                 key={s.id}
                 sale={s}

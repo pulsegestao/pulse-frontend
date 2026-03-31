@@ -298,6 +298,10 @@ export function getSalesPrazo(status = "pending") {
   return authRequest(`/api/v1/sales/prazo?status=${status}`);
 }
 
+export function getSalesPrazoSummary() {
+  return authRequest("/api/v1/sales/prazo/summary");
+}
+
 export function receiveSale(id, receivedVia = "confirmed") {
   return authRequest(`/api/v1/sales/${id}/receive`, {
     method: "POST",
